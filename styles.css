@@ -242,3 +242,14 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
 .card .links-row a:not(.stretched) { position: relative; z-index: 2; }
 .decisions.two { grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 860px) { .decisions.two { grid-template-columns: 1fr; } }
+
+/* Flow diagram + two-up gallery */
+.flow { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; overflow-x: auto; }
+.flow-row { display: flex; align-items: center; gap: 10px; min-width: 760px; }
+.flow .node { flex: 1; border: 1px solid var(--line); background: var(--bg-2); border-radius: 12px; padding: 14px 12px; text-align: center; }
+.flow .node.core { border-color: var(--accent); }
+.flow .node b { display: block; font-size: 15px; }
+.flow .node small { display: block; font: 12px var(--mono); color: var(--muted); margin-top: 4px; }
+.flow .arrow { color: var(--accent); font-size: 20px; }
+.gallery.two-up { grid-template-columns: 1fr 1fr; align-items: start; }
+@media (max-width: 860px) { .gallery.two-up { grid-template-columns: 1fr; } }

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Realtime Leaderboard — Adel Merad</title>
+  <meta name="description" content="Case study: a leaderboard service for any game. REST API with per-game keys, live rankings with Server-Sent Events and PostgreSQL LISTEN/NOTIFY.">
+  <meta property="og:title" content="Realtime Leaderboard — Adel Merad">
+  <meta property="og:description" content="Live rankings for any game: REST API, Server-Sent Events and PostgreSQL LISTEN/NOTIFY.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/leaderboard.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
+      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="Realtime Leaderboard — Adel Merad" data-title-fr="Realtime Leaderboard — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </nav>
+      <div class="toggles">
+        <button id="lang" class="pill" aria-label="Switch language"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="case-hero">
+      <p class="kicker mono"><span class="live"></span>
+        <span lang="en">Side project · 2026</span>
+        <span lang="fr">Projet perso · 2026</span>
+      </p>
+      <h1 class="case-title">Realtime Leaderboard</h1>
+      <p class="lead">
+        <span lang="en">A leaderboard service for any game. Games send scores through a REST API, and everyone watching sees the rankings change live, with no refresh, even across several servers.</span>
+        <span lang="fr">Un service de classement pour n'importe quel jeu. Les jeux envoient leurs scores par une API REST, et tous ceux qui regardent voient le classement bouger en direct, sans recharger, même sur plusieurs serveurs.</span>
+      </p>
+      <dl class="facts">
+        <div><dt><span lang="en">Role</span><span lang="fr">Rôle</span></dt><dd><span lang="en">Solo project: from a front-end prototype (2025) to a full service with a database, an API and tests (2026)</span><span lang="fr">Projet solo : d'un prototype front (2025) à un service complet avec base de données, API et tests (2026)</span></dd></div>
+        <div><dt><span lang="en">Hosting</span><span lang="fr">Hébergement</span></dt><dd><span lang="en">Render (Frankfurt) and Neon PostgreSQL</span><span lang="fr">Render (Francfort) et Neon PostgreSQL</span></dd></div>
+        <div><dt>Stack</dt><dd>Next.js 14 · TypeScript · PostgreSQL 16 · Prisma · Server-Sent Events · Zod · Vitest · Tailwind CSS</dd></div>
+        <div><dt><span lang="en">Links</span><span lang="fr">Liens</span></dt><dd><a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener"><span lang="en">Live demo</span><span lang="fr">Démo en ligne</span> ↗</a> · <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">Code ↗</a> <span class="muted"><span lang="en">(free hosting: up to a minute to wake up)</span><span lang="fr">(hébergement gratuit : jusqu'à une minute pour démarrer)</span></span></dd></div>
+      </dl>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">01</span><span lang="en">The challenge</span><span lang="fr">Le défi</span></h2>
+      <div class="prose">
+        <p><span lang="en">Showing a ranking is easy. Keeping it live for every viewer is not: when a score arrives on one server, viewers connected to another server must see it too, right away, without each browser polling the API every second.</span>
+           <span lang="fr">Afficher un classement, c'est facile. Le garder en direct pour tout le monde, beaucoup moins : quand un score arrive sur un serveur, ceux qui sont connectés à un autre serveur doivent le voir aussi, tout de suite, sans que chaque navigateur interroge l'API toutes les secondes.</span></p>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">02</span><span lang="en">How it stays live</span><span lang="fr">Comment ça reste en direct</span></h2>
+      <figure class="flow" aria-label="Realtime flow">
+        <div class="flow-row">
+          <div class="node"><b><span lang="en">Game</span><span lang="fr">Jeu</span></b><small>POST /scores · API key</small></div>
+          <span class="arrow">→</span>
+          <div class="node"><b><span lang="en">Server A</span><span lang="fr">Serveur A</span></b><small>INSERT + NOTIFY</small></div>
+          <span class="arrow">→</span>
+          <div class="node core"><b>PostgreSQL</b><small>LISTEN / NOTIFY</small></div>
+          <span class="arrow">→</span>
+          <div class="node"><b><span lang="en">Servers A, B…</span><span lang="fr">Serveurs A, B…</span></b><small>LISTEN</small></div>
+          <span class="arrow">→</span>
+          <div class="node"><b><span lang="en">Viewers</span><span lang="fr">Spectateurs</span></b><small>Server-Sent Events</small></div>
+        </div>
+      </figure>
+      <div class="prose" style="margin-top:22px">
+        <p><span lang="en">When a score is saved, the server publishes an event with PostgreSQL NOTIFY. Every server keeps one LISTEN connection and forwards the event to its own browsers over Server-Sent Events. Viewers on different servers stay in sync, with no Redis and no separate WebSocket server. Bursts of scores are grouped (200 ms) into a single ranking refresh per viewer.</span>
+           <span lang="fr">Quand un score est enregistré, le serveur publie un événement avec NOTIFY de PostgreSQL. Chaque serveur garde une connexion LISTEN et transmet l'événement à ses propres navigateurs par Server-Sent Events. Les spectateurs sur des serveurs différents restent synchronisés, sans Redis ni serveur WebSocket à part. Les rafales de scores sont regroupées (200 ms) en une seule mise à jour du classement par spectateur.</span></p>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">03</span><span lang="en">Key decisions</span><span lang="fr">Choix techniques</span></h2>
+      <div class="decisions">
+        <article><h3><span lang="en">Fair ranking rules</span><span lang="fr">Des règles de classement justes</span></h3>
+          <p><span lang="en">Each player's best score per period is computed in SQL (DISTINCT ON). Ties share a rank ("1224" style) and the earliest player comes first. Games can be high-score or lowest-wins (speedruns).</span><span lang="fr">Le meilleur score de chaque joueur sur la période est calculé en SQL (DISTINCT ON). Les ex aequo partagent un rang (style « 1224 ») et le premier arrivé passe devant. Un jeu peut être au meilleur score ou au plus petit temps (speedruns).</span></p></article>
+        <article><h3><span lang="en">Secure API keys</span><span lang="fr">Des clés d'API sûres</span></h3>
+          <p><span lang="en">Each game gets its own key, shown once and stored only as a SHA-256 hash. Keys can be rotated from the admin panel, and comparisons are constant-time.</span><span lang="fr">Chaque jeu a sa propre clé, affichée une seule fois et stockée seulement sous forme de hash SHA-256. Les clés se renouvellent depuis l'admin, et les comparaisons sont en temps constant.</span></p></article>
+        <article><h3><span lang="en">Built to fail well</span><span lang="fr">Prévu pour les pannes</span></h3>
+          <p><span lang="en">Score submission is rate-limited (token bucket, 429 with Retry-After). SSE streams send heartbeats and browsers reconnect on their own; the database listener reconnects with exponential backoff when Neon suspends an idle database.</span><span lang="fr">L'envoi de scores est limité (token bucket, 429 avec Retry-After). Les flux SSE envoient des signaux de vie et les navigateurs se reconnectent seuls ; l'écoute de la base se reconnecte avec un délai croissant quand Neon met une base inactive en veille.</span></p></article>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">04</span><span lang="en">Screens</span><span lang="fr">Écrans</span></h2>
+      <div class="gallery two-up">
+        <figure><img src="assets/projects/leaderboard-live.jpg" width="1280" height="1000" loading="lazy" alt="Live leaderboard of a game"><figcaption><span lang="en">A game's live ranking, with period filters</span><span lang="fr">Le classement en direct d'un jeu, avec les filtres de période</span></figcaption></figure>
+        <figure><img src="assets/projects/leaderboard-admin.jpg" width="1280" height="929" loading="lazy" alt="Admin dashboard"><figcaption><span lang="en">Admin: games, keys and manual scores</span><span lang="fr">Admin : jeux, clés et scores ajoutés à la main</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span></h2>
+      <div class="prose">
+        <ul class="bullets">
+          <li><span lang="en">Realtime without extra infrastructure: PostgreSQL LISTEN/NOTIFY and Server-Sent Events are often enough.</span><span lang="fr">Du temps réel sans infrastructure en plus : LISTEN/NOTIFY de PostgreSQL et les Server-Sent Events suffisent souvent.</span></li>
+          <li><span lang="en">Why some apps cannot run serverless: long-lived connections need a real Node.js server, and poolers do not support LISTEN.</span><span lang="fr">Pourquoi certaines applis ne peuvent pas tourner en serverless : les connexions longues demandent un vrai serveur Node.js, et les poolers ne gèrent pas LISTEN.</span></li>
+          <li><span lang="en">Testing the rules that matter: ranking and ties, period boundaries, key hashing, session expiry and rate limiting are covered by unit tests.</span><span lang="fr">Tester les règles qui comptent : classement et ex aequo, limites des périodes, hash des clés, expiration de session et limitation de débit sont couverts par des tests unitaires.</span></li>
+        </ul>
+        <p class="muted"><span lang="en">Next step: the rate limiter lives in memory, per server; behind a load balancer it should move to a shared store.</span><span lang="fr">Piste d'amélioration : la limitation de débit est en mémoire, par serveur ; derrière un répartiteur de charge, elle devrait passer dans un stockage partagé.</span></p>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener"><span lang="en">Try the demo</span><span lang="fr">Essayer la démo</span> ↗</a>
+        <a class="btn" href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
