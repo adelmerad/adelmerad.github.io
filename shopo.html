@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShopO — Adel Merad</title>
+  <meta name="description" content="Case study: ShopO, a multi-seller electronics marketplace with customer, seller and admin spaces, PayPal payments and a hybrid recommender. Bachelor's final project at USTHB.">
+  <meta property="og:title" content="ShopO — Adel Merad">
+  <meta property="og:description" content="Multi-seller electronics marketplace with PayPal payments and a hybrid recommender (K-Means + cosine similarity).">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/shopo.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
+      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="ShopO — Adel Merad" data-title-fr="ShopO — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </nav>
+      <div class="toggles">
+        <button id="lang" class="pill" aria-label="Switch language"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="case-hero">
+      <p class="kicker mono"><span class="live"></span>
+        <span lang="en">Bachelor's final project · USTHB · defended June 2025</span>
+        <span lang="fr">Projet de fin de Licence · USTHB · soutenu en juin 2025</span>
+      </p>
+      <h1 class="case-title">ShopO</h1>
+      <p class="lead">
+        <span lang="en">A marketplace dedicated to electronics where verified sellers open their own store, customers pay online or on delivery, and a recommender suggests similar products.</span>
+        <span lang="fr">Une marketplace dédiée à l'électronique où des vendeurs vérifiés ouvrent leur boutique, où les clients paient en ligne ou à la livraison, et où un système de recommandation propose des produits similaires.</span>
+      </p>
+      <dl class="facts">
+        <div><dt><span lang="en">Role</span><span lang="fr">Rôle</span></dt><dd><span lang="en">Full-stack developer in a team project: Laravel API, React front end and database design</span><span lang="fr">Développeur full-stack dans un projet d'équipe : API Laravel, front React et conception de la base de données</span></dd></div>
+        <div><dt><span lang="en">Supervisor</span><span lang="fr">Encadrant</span></dt><dd>Mr. Abdelnour HIMRANE, USTHB</dd></div>
+        <div><dt>Stack</dt><dd>Laravel 11 · React 19 · TypeScript · MySQL · Python · Flask · scikit-learn · PayPal · Firebase</dd></div>
+        <div><dt>Code</dt><dd><a href="https://github.com/adelmerad/multi-seller-marketplace" target="_blank" rel="noopener">multi-seller-marketplace ↗</a></dd></div>
+      </dl>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">01</span><span lang="en">The problem</span><span lang="fr">Le problème</span></h2>
+      <div class="prose">
+        <p><span lang="en">Online shopping is growing fast in Algeria, but the main platforms leave real gaps: no integrated online payment, prices not always shown, sellers not verified, or interfaces overloaded with ads. ShopO answers with a clean marketplace for electronics: verified sellers, visible prices, ratings and secure payment.</span>
+           <span lang="fr">Le e-commerce grandit vite en Algérie, mais les grandes plateformes laissent de vrais manques : pas de paiement en ligne intégré, des prix pas toujours affichés, des vendeurs non vérifiés, ou des interfaces chargées de publicités. ShopO y répond avec une marketplace claire pour l'électronique : vendeurs vérifiés, prix visibles, avis et paiement sécurisé.</span></p>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">02</span><span lang="en">Three spaces</span><span lang="fr">Trois espaces</span></h2>
+      <div class="decisions">
+        <article><h3><span lang="en">Customers</span><span lang="fr">Clients</span></h3>
+          <p><span lang="en">Search and filters, product pages with reviews and recommendations, wishlist, cart, checkout with PayPal or cash on delivery. Sign-up is verified by an email code (OTP).</span><span lang="fr">Recherche et filtres, fiches produits avec avis et recommandations, liste d'envies, panier, paiement par PayPal ou à la livraison. L'inscription est vérifiée par un code envoyé par e-mail (OTP).</span></p></article>
+        <article><h3><span lang="en">Sellers</span><span lang="fr">Vendeurs</span></h3>
+          <p><span lang="en">Apply to open a store, add products (each one waits for an admin's approval), and follow orders, revenue, a sales chart and payouts.</span><span lang="fr">Demander à ouvrir une boutique, ajouter des produits (chacun attend la validation d'un admin), et suivre les commandes, le chiffre d'affaires, un graphique des ventes et les versements.</span></p></article>
+        <article><h3><span lang="en">Administrators</span><span lang="fr">Administrateurs</span></h3>
+          <p><span lang="en">Approve sellers and products, manage users, categories, orders and reviews, pay sellers their earnings, and get a push notification when a new product is submitted.</span><span lang="fr">Valider vendeurs et produits, gérer utilisateurs, catégories, commandes et avis, verser leurs gains aux vendeurs, et recevoir une notification quand un nouveau produit est proposé.</span></p></article>
+      </div>
+      <div class="gallery two-up" style="margin-top:22px">
+        <figure><img src="assets/projects/shopo-product.jpg" width="1280" height="901" loading="lazy" alt="Product page with recommended products"><figcaption><span lang="en">Product page with recommended products</span><span lang="fr">Fiche produit avec les produits recommandés</span></figcaption></figure>
+        <figure><img src="assets/projects/shopo.jpg" width="1200" height="750" loading="lazy" alt="Seller dashboard"><figcaption><span lang="en">Seller dashboard</span><span lang="fr">Tableau de bord vendeur</span></figcaption></figure>
+        <figure><img src="assets/projects/shopo-admin.jpg" width="1280" height="849" loading="lazy" alt="Admin dashboard"><figcaption><span lang="en">Admin dashboard</span><span lang="fr">Tableau de bord admin</span></figcaption></figure>
+        <figure><img src="assets/projects/shopo-cart.jpg" width="1280" height="614" loading="lazy" alt="Shopping cart"><figcaption><span lang="en">Cart with stock-aware quantities</span><span lang="fr">Panier qui tient compte du stock</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">03</span><span lang="en">The recommender</span><span lang="fr">Le système de recommandation</span></h2>
+      <div class="prose">
+        <p><span lang="en">A hybrid recommender written in Python and served as a Flask microservice. The Laravel API calls it and returns the results to the front end. The approaches were first explored in Jupyter notebooks on public Kaggle datasets.</span>
+           <span lang="fr">Un système de recommandation hybride écrit en Python et servi comme microservice Flask. L'API Laravel l'appelle et renvoie les résultats au front. Les approches ont d'abord été explorées dans des notebooks Jupyter sur des jeux de données publics Kaggle.</span></p>
+      </div>
+      <div class="decisions" style="margin-top:22px">
+        <article><h3><span lang="en">Popularity</span><span lang="fr">Popularité</span></h3>
+          <p><span lang="en">For new users with no history: the best-rated products that have enough ratings.</span><span lang="fr">Pour les nouveaux utilisateurs sans historique : les produits les mieux notés qui ont assez d'avis.</span></p></article>
+        <article><h3><span lang="en">Content-based</span><span lang="fr">Basé sur le contenu</span></h3>
+          <p><span lang="en">Descriptions and categories turned into word vectors and compared with cosine similarity, to show similar products.</span><span lang="fr">Descriptions et catégories transformées en vecteurs de mots et comparées par similarité cosinus, pour afficher des produits similaires.</span></p></article>
+        <article><h3><span lang="en">Collaborative</span><span lang="fr">Collaboratif</span></h3>
+          <p><span lang="en">Users grouped with K-Means on their ratings; the number of groups is chosen with the elbow method and updated automatically.</span><span lang="fr">Utilisateurs regroupés avec K-Means selon leurs notes ; le nombre de groupes est choisi par la méthode du coude et mis à jour automatiquement.</span></p></article>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">04</span><span lang="en">Architecture and design</span><span lang="fr">Architecture et conception</span></h2>
+      <div class="case-split">
+        <ul class="parts">
+          <li><h3>React + TypeScript</h3><p><span lang="en">Single-page app with Tailwind CSS and shadcn/ui.</span><span lang="fr">Application monopage avec Tailwind CSS et shadcn/ui.</span></p></li>
+          <li><h3><span lang="en">Laravel API</span><span lang="fr">API Laravel</span></h3><p><span lang="en">Sanctum tokens, role middleware (client, seller, admin) and policies, over a MySQL database of 15+ tables.</span><span lang="fr">Jetons Sanctum, middleware de rôles (client, vendeur, admin) et policies, sur une base MySQL de plus de 15 tables.</span></p></li>
+          <li><h3><span lang="en">Services</span><span lang="fr">Services</span></h3><p><span lang="en">Flask recommender, PayPal, Firebase Cloud Messaging for push notifications, and SMTP for verification and reset emails.</span><span lang="fr">Recommandation Flask, PayPal, Firebase Cloud Messaging pour les notifications, et SMTP pour les e-mails de vérification et de réinitialisation.</span></p></li>
+        </ul>
+        <figure><img class="case-img" src="assets/projects/shopo-classes.jpg" width="877" height="797" loading="lazy" alt="UML class diagram"><figcaption class="muted" style="font-size:14px;margin-top:8px"><span lang="en">UML class diagram</span><span lang="fr">Diagramme de classes UML</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span></h2>
+      <div class="prose">
+        <ul class="bullets">
+          <li><span lang="en">Designing a multi-role application: who can see and do what, enforced on the server, not only hidden in the interface.</span><span lang="fr">Concevoir une application à plusieurs rôles : qui voit et fait quoi, vérifié côté serveur et pas seulement caché dans l'interface.</span></li>
+          <li><span lang="en">Connecting a web app to a Python machine-learning service, and to real third parties like PayPal and Firebase.</span><span lang="fr">Relier une appli web à un service de machine learning en Python, et à de vrais services tiers comme PayPal et Firebase.</span></li>
+          <li><span lang="en">Running a full project as a team, from UML design to the defense in front of a jury.</span><span lang="fr">Mener un projet complet en équipe, de la conception UML à la soutenance devant un jury.</span></li>
+        </ul>
+        <p class="muted"><span lang="en">Future work: delivery tracking with Algerian carriers, deep-learning recommendations, and a mobile app.</span><span lang="fr">Pistes : suivi des livraisons avec les transporteurs algériens, recommandations par deep learning, et une application mobile.</span></p>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/adelmerad/multi-seller-marketplace" target="_blank" rel="noopener"><span lang="en">Code on GitHub</span><span lang="fr">Code sur GitHub</span> ↗</a>
+        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
