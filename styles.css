@@ -208,7 +208,7 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
 .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 32px; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); }
 .facts dt { font: 500 12px var(--mono); text-transform: uppercase; letter-spacing: .8px; color: var(--accent); }
 .facts dd { margin-top: 4px; font-size: 15.5px; }
-.facts a { color: var(--accent); text-decoration: none; }
+.facts a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 .case-section { padding: 56px 0; border-top: 1px solid var(--line); }
 .prose { max-width: 760px; font-size: 17px; }
 .prose p + p, .prose .bullets + p { margin-top: 16px; }
