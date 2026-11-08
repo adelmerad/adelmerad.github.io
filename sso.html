@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Single Sign-On Platform — Adel Merad</title>
+  <meta name="description" content="Case study: an OAuth2 / OpenID Connect single sign-on platform with PKCE, refresh token rotation, per-application roles, an admin panel and a Backend-for-Frontend client. Internship at Mobilis, summer 2026.">
+  <meta property="og:title" content="Single Sign-On Platform — Adel Merad">
+  <meta property="og:description" content="OAuth2 / OpenID Connect SSO with PKCE, token rotation, per-application roles and a Backend-for-Frontend client.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/sso.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
+      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="Single Sign-On Platform — Adel Merad" data-title-fr="Plateforme d'authentification unique — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </nav>
+      <div class="toggles">
+        <button id="lang" class="pill" aria-label="Switch language"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="case-hero">
+      <p class="kicker mono"><span class="live"></span>
+        <span lang="en">Internship · Mobilis · Summer 2026</span>
+        <span lang="fr">Stage · Mobilis · Été 2026</span>
+      </p>
+      <h1 class="case-title"><span lang="en">Single sign-on platform</span><span lang="fr">Plateforme d'authentification unique</span></h1>
+      <p class="lead">
+        <span lang="en">Sign in once, access every application, each with its own roles. An OAuth2 / OpenID Connect server, an admin panel and a client that never lets a token reach the browser.</span>
+        <span lang="fr">Une seule connexion pour toutes les applications, chacune avec ses propres rôles. Un serveur OAuth2 / OpenID Connect, un panneau d'administration et un client qui ne laisse jamais un token arriver dans le navigateur.</span>
+      </p>
+      <dl class="facts">
+        <div><dt><span lang="en">Team</span><span lang="fr">Équipe</span></dt><dd>Adel Merad &amp; Abdelhadi Deffous</dd></div>
+        <div><dt><span lang="en">Context</span><span lang="fr">Contexte</span></dt><dd><span lang="en">Internship, Development Department, Mobilis</span><span lang="fr">Stage, Direction du développement, Mobilis</span></dd></div>
+        <div><dt>Stack</dt><dd>ASP.NET Core 8 · OpenIddict · ASP.NET Identity · EF Core · SQL Server · React · TypeScript</dd></div>
+        <div><dt>Code</dt><dd><a href="https://github.com/adelmerad/ShopAuth" target="_blank" rel="noopener">ShopAuth ↗</a> · <a href="https://github.com/adelmerad/ShopWebApp" target="_blank" rel="noopener">ShopWebApp ↗</a></dd></div>
+      </dl>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">01</span><span lang="en">The goal</span><span lang="fr">L'objectif</span></h2>
+      <div class="prose">
+        <p><span lang="en">When every internal application manages its own accounts, people end up with one password per app, and disabling someone means going through every app one by one. The goal was a single identity server: users sign in once, applications delegate authentication to it, and administrators manage accounts and roles in one place.</span>
+           <span lang="fr">Quand chaque application interne gère ses propres comptes, chacun finit avec un mot de passe par appli, et désactiver quelqu'un oblige à passer par toutes les applis une par une. L'objectif : un seul serveur d'identité. Les utilisateurs se connectent une fois, les applications lui délèguent l'authentification, et les administrateurs gèrent comptes et rôles au même endroit.</span></p>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">02</span>Architecture</h2>
+      <div class="case-split">
+        <img class="case-img" src="assets/projects/sso-architecture.jpg" width="1200" height="1200" loading="lazy" alt="Architecture: browser, client app (BFF), SSO server, SQL Server and admin panel">
+        <ul class="parts">
+          <li><h3><span lang="en">SSO server</span><span lang="fr">Serveur SSO</span></h3>
+            <p><span lang="en">ASP.NET Core with OpenIddict and ASP.NET Identity. Signs users in and issues the tokens.</span><span lang="fr">ASP.NET Core avec OpenIddict et ASP.NET Identity. Connecte les utilisateurs et émet les tokens.</span></p></li>
+          <li><h3><span lang="en">Admin panel</span><span lang="fr">Panneau d'administration</span></h3>
+            <p><span lang="en">React and TypeScript, served by the SSO server under /admin. Applications, accounts, roles and suspensions.</span><span lang="fr">React et TypeScript, servi par le serveur SSO sous /admin. Applications, comptes, rôles et suspensions.</span></p></li>
+          <li><h3><span lang="en">Client app (BFF)</span><span lang="fr">Application cliente (BFF)</span></h3>
+            <p><span lang="en">A Backend-for-Frontend that runs the OpenID Connect sign-in and keeps the tokens on the server.</span><span lang="fr">Un Backend-for-Frontend qui fait la connexion OpenID Connect et garde les tokens côté serveur.</span></p></li>
+          <li><h3><span lang="en">Front end</span><span lang="fr">Front</span></h3>
+            <p><span lang="en">Handles no token at all: it only calls the BFF, and the browser sends the session cookie.</span><span lang="fr">Ne manipule aucun token : il appelle seulement le BFF, et le navigateur envoie le cookie de session.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">03</span><span lang="en">Key decisions</span><span lang="fr">Choix techniques</span></h2>
+      <div class="decisions">
+        <article>
+          <h3><span lang="en">PKCE for every client</span><span lang="fr">PKCE pour tous les clients</span></h3>
+          <p><span lang="en">Only the Authorization Code flow is enabled, and PKCE is mandatory, so a stolen authorization code is useless without the verifier.</span>
+             <span lang="fr">Seul le flux Authorization Code est activé, et PKCE est obligatoire : un code d'autorisation volé ne sert à rien sans le verifier.</span></p>
+        </article>
+        <article>
+          <h3><span lang="en">No tokens in the browser</span><span lang="fr">Aucun token dans le navigateur</span></h3>
+          <p><span lang="en">The BFF stores the tokens server-side. The browser only holds an HttpOnly cookie with an opaque session id. The id_token is checked against the SSO's JWKS keys: signature, issuer, audience and expiry.</span>
+             <span lang="fr">Le BFF garde les tokens côté serveur. Le navigateur n'a qu'un cookie HttpOnly avec un identifiant de session opaque. L'id_token est vérifié avec les clés JWKS du SSO : signature, émetteur, audience et expiration.</span></p>
+        </article>
+        <article>
+          <h3><span lang="en">Rotation and proactive refresh</span><span lang="fr">Rotation et renouvellement anticipé</span></h3>
+          <p><span lang="en">Refresh tokens are rotated on each use. The BFF renews the access token when it expires in under 60 seconds. An invalid refresh token closes the session; a network or SSO outage does not sign the user out.</span>
+             <span lang="fr">Les refresh tokens changent à chaque utilisation. Le BFF renouvelle l'access token quand il expire dans moins de 60 secondes. Un refresh token invalide ferme la session ; une panne réseau ou du SSO ne déconnecte pas l'utilisateur.</span></p>
+        </article>
+        <article>
+          <h3><span lang="en">Roles per application</span><span lang="fr">Des rôles par application</span></h3>
+          <p><span lang="en">Besides the global Admin role, each application declares its own roles: "Employee" in HR and "Employee" in Stock never interfere. An account with no role in an application is refused at sign-in.</span>
+             <span lang="fr">En plus du rôle global Admin, chaque application déclare ses propres rôles : « Employé » dans les RH et « Employé » dans le stock ne se mélangent jamais. Un compte sans rôle dans une application est refusé à la connexion.</span></p>
+        </article>
+        <article>
+          <h3><span lang="en">Admin safeguards</span><span lang="fr">Garde-fous d'administration</span></h3>
+          <p><span lang="en">The last administrator cannot be removed, an admin cannot lock themselves out, and accounts can be suspended until a date. A disabled or suspended account is checked again before any token is issued.</span>
+             <span lang="fr">Impossible de supprimer le dernier administrateur ou de se bloquer soi-même, et les comptes peuvent être suspendus jusqu'à une date. Un compte désactivé ou suspendu est revérifié avant l'émission de chaque token.</span></p>
+        </article>
+        <article>
+          <h3><span lang="en">Secrets out of the code</span><span lang="fr">Les secrets hors du code</span></h3>
+          <p><span lang="en">Connection strings, client secrets and the first admin password live in .NET user-secrets on each machine, never in the repository.</span>
+             <span lang="fr">Chaînes de connexion, secrets clients et mot de passe du premier admin vivent dans les user-secrets .NET de chaque machine, jamais dans le dépôt.</span></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">04</span><span lang="en">Admin panel</span><span lang="fr">Panneau d'administration</span></h2>
+      <p class="muted note-top"><span lang="en">Screens with demo data.</span><span lang="fr">Écrans avec des données de démonstration.</span></p>
+      <div class="gallery">
+        <figure><img src="assets/projects/sso-apps.jpg" loading="lazy" alt="Registered applications"><figcaption><span lang="en">Applications that delegate sign-in to the server</span><span lang="fr">Les applications qui délèguent leur connexion au serveur</span></figcaption></figure>
+        <figure><img src="assets/projects/sso-roles.jpg" loading="lazy" alt="Global and per-application roles"><figcaption><span lang="en">Global and per-application roles</span><span lang="fr">Rôles globaux et rôles par application</span></figcaption></figure>
+        <figure><img src="assets/projects/sso-accounts.jpg" loading="lazy" alt="Accounts with active, suspended and disabled states"><figcaption><span lang="en">Accounts: active, suspended until a date, or disabled</span><span lang="fr">Comptes : actifs, suspendus jusqu'à une date, ou désactivés</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned, and what's next</span><span lang="fr">Ce que j'ai appris, et la suite</span></h2>
+      <div class="prose">
+        <ul class="bullets">
+          <li><span lang="en">How OAuth2 and OpenID Connect really work, beyond calling a library: authorization codes, PKCE, token lifetimes, signature validation.</span><span lang="fr">Comment OAuth2 et OpenID Connect fonctionnent vraiment, au-delà d'une librairie : codes d'autorisation, PKCE, durée de vie des tokens, validation des signatures.</span></li>
+          <li><span lang="en">Why the BFF pattern is the safer choice for web apps: the browser has nothing worth stealing.</span><span lang="fr">Pourquoi le pattern BFF est le choix le plus sûr pour une appli web : le navigateur n'a rien qui vaille la peine d'être volé.</span></li>
+          <li><span lang="en">Designing for failure: deciding when to close a session and when to keep the user signed in.</span><span lang="fr">Penser aux pannes : décider quand fermer une session et quand garder l'utilisateur connecté.</span></li>
+        </ul>
+        <p class="muted"><span lang="en">Next steps: single logout across all applications at once, and applying role changes without waiting for the next sign-in.</span>
+           <span lang="fr">Pistes d'amélioration : une déconnexion unique sur toutes les applications à la fois, et la prise en compte d'un changement de rôle sans attendre la connexion suivante.</span></p>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/adelmerad/ShopAuth" target="_blank" rel="noopener">ShopAuth <span lang="en">on GitHub</span><span lang="fr">sur GitHub</span> ↗</a>
+        <a class="btn" href="https://github.com/adelmerad/ShopWebApp" target="_blank" rel="noopener">ShopWebApp (BFF) ↗</a>
+        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,4 +1,8 @@
 const root = document.documentElement;
+const titles = {
+  en: document.body.dataset.titleEn || "Adel Merad — Full-Stack Developer",
+  fr: document.body.dataset.titleFr || "Adel Merad — Développeur Full-Stack",
+};
 
 function save(key, value) {
   try { localStorage.setItem(key, value); } catch {}
@@ -9,9 +13,7 @@ document.getElementById("lang").addEventListener("click", () => {
   const next = root.dataset.lang === "fr" ? "en" : "fr";
   root.dataset.lang = next;
   root.lang = next;
-  document.title = next === "fr"
-    ? "Adel Merad — Développeur Full-Stack"
-    : "Adel Merad — Full-Stack Developer";
+  document.title = titles[next];
   save("lang", next);
 });
 
@@ -25,7 +27,7 @@ document.getElementById("theme").addEventListener("click", () => {
   save("theme", next);
 });
 
-if (root.dataset.lang === "fr") document.title = "Adel Merad — Développeur Full-Stack";
+if (root.dataset.lang === "fr") document.title = titles.fr;
 document.getElementById("year").textContent = new Date().getFullYear();
 
 // Fade sections in as they enter the viewport

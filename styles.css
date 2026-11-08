@@ -201,3 +201,36 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
   margin: 0 calc(-1 * var(--pad)) 8px; border-bottom: 1px solid var(--line); background: var(--bg-2);
 }
 @media (max-width: 640px) { .card { --pad: 22px; } }
+
+/* Case study page */
+.case-hero { padding: 72px 0 40px; }
+.case-title { font-size: clamp(40px, 7vw, 80px); letter-spacing: -2px; margin: 16px 0 22px; }
+.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 32px; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); }
+.facts dt { font: 500 12px var(--mono); text-transform: uppercase; letter-spacing: .8px; color: var(--accent); }
+.facts dd { margin-top: 4px; font-size: 15.5px; }
+.facts a { color: var(--accent); text-decoration: none; }
+.case-section { padding: 56px 0; border-top: 1px solid var(--line); }
+.prose { max-width: 760px; font-size: 17px; }
+.prose p + p, .prose .bullets + p { margin-top: 16px; }
+.bullets { list-style: disc; padding-left: 20px; }
+.bullets li { margin-bottom: 8px; }
+.case-split { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; }
+.case-img { width: 100%; height: auto; border-radius: var(--radius); border: 1px solid var(--line); }
+.parts li { padding: 16px 0; border-bottom: 1px solid var(--line); }
+.parts li:first-child { padding-top: 0; }
+.parts h3 { font-size: 18px; }
+.parts p { color: var(--muted); font-size: 15.5px; margin-top: 4px; }
+.decisions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.decisions article { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+.decisions h3 { font-size: 17px; margin-bottom: 8px; }
+.decisions p { color: var(--muted); font-size: 15px; }
+.note-top { margin: -18px 0 20px; font-size: 14px; }
+.gallery { display: grid; gap: 22px; }
+.gallery img { width: 100%; height: auto; display: block; border-radius: var(--radius); border: 1px solid var(--line); }
+.gallery figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+.foot a { color: inherit; text-decoration: none; }
+@media (max-width: 860px) {
+  .case-split, .facts { grid-template-columns: 1fr; }
+  .decisions { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) { .case-title { letter-spacing: -1px; } }
