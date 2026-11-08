@@ -191,3 +191,13 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
 /* Small muted note next to project links */
 .links-row .note { font-size: 13px; font-weight: 400; color: var(--muted); align-self: center; }
 .list small { display: block; font-size: 13px; margin-top: 2px; opacity: .85; }
+
+/* Project screenshots (full-bleed at the top of each card) */
+.card { --pad: 26px; padding: var(--pad); }
+.card.feature { padding-top: 0; overflow: hidden; }
+.shot {
+  display: block; width: calc(100% + 2 * var(--pad)); max-width: none; height: auto;
+  aspect-ratio: 16 / 10; object-fit: cover; object-position: top left;
+  margin: 0 calc(-1 * var(--pad)) 8px; border-bottom: 1px solid var(--line); background: var(--bg-2);
+}
+@media (max-width: 640px) { .card { --pad: 22px; } }
