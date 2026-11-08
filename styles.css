@@ -147,7 +147,7 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
 /* Skills */
 .skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .skills div { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; background: var(--card); }
-.skills h4 { font: 500 12.5px var(--mono); text-transform: uppercase; letter-spacing: .8px; color: var(--accent); margin-bottom: 8px; }
+.skills h3 { font: 500 12.5px var(--mono); text-transform: uppercase; letter-spacing: .8px; color: var(--accent); margin-bottom: 8px; }
 .skills p { font-size: 15.5px; }
 .langs { margin-top: 22px; font-size: 15px; }
 

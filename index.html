@@ -21,7 +21,8 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
     // Apply saved theme/language before paint to avoid a flash
@@ -43,7 +44,7 @@
         <a href="#contact">Contact</a>
       </nav>
       <div class="toggles">
-        <button id="lang" class="pill" aria-label="Switch language"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="lang" class="pill" title="Français / English"><span lang="en">FR</span><span lang="fr">EN</span></button>
         <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
       </div>
     </div>
@@ -295,12 +296,12 @@
         <span lang="en">Skills</span><span lang="fr">Compétences</span>
       </h2>
       <div class="skills">
-        <div><h4>Backend</h4><p>ASP.NET Core · NestJS · Laravel · Node.js · FastAPI · REST</p></div>
-        <div><h4>Frontend &amp; Mobile</h4><p>React · Next.js · TypeScript · Tailwind CSS · React Native</p></div>
-        <div><h4><span lang="en">Databases</span><span lang="fr">Bases de données</span></h4><p>PostgreSQL · MySQL · SQL Server · MongoDB · Redis · Prisma · EF Core</p></div>
-        <div><h4><span lang="en">Security</span><span lang="fr">Sécurité</span></h4><p>OAuth2 · OpenID Connect · PKCE · SSO · CTF</p></div>
-        <div><h4><span lang="en">AI</span><span lang="fr">IA</span></h4><p>RAG · LangChain · <span lang="en">LLM integration</span><span lang="fr">intégration de LLM</span> · scikit-learn</p></div>
-        <div><h4><span lang="en">Tools</span><span lang="fr">Outils</span></h4><p>Git · Docker · Linux · Vercel · Google Earth Engine</p></div>
+        <div><h3 class="skill-h">Backend</h3><p>ASP.NET Core · NestJS · Laravel · Node.js · FastAPI · REST</p></div>
+        <div><h3 class="skill-h">Frontend &amp; Mobile</h3><p>React · Next.js · TypeScript · Tailwind CSS · React Native</p></div>
+        <div><h3 class="skill-h"><span lang="en">Databases</span><span lang="fr">Bases de données</span></h3><p>PostgreSQL · MySQL · SQL Server · MongoDB · Redis · Prisma · EF Core</p></div>
+        <div><h3 class="skill-h"><span lang="en">Security</span><span lang="fr">Sécurité</span></h3><p>OAuth2 · OpenID Connect · PKCE · SSO · CTF</p></div>
+        <div><h3 class="skill-h"><span lang="en">AI</span><span lang="fr">IA</span></h3><p>RAG · LangChain · <span lang="en">LLM integration</span><span lang="fr">intégration de LLM</span> · scikit-learn</p></div>
+        <div><h3 class="skill-h"><span lang="en">Tools</span><span lang="fr">Outils</span></h3><p>Git · Docker · Linux · Vercel · Google Earth Engine</p></div>
       </div>
       <p class="muted langs"><span lang="en">Languages: Arabic (native), French (fluent), English (professional).</span><span lang="fr">Langues : arabe (maternelle), français (courant), anglais (professionnel).</span></p>
     </section>

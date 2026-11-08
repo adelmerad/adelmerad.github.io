@@ -12,7 +12,8 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
   <link rel="stylesheet" href="/styles.css">
   <script>
     try {
@@ -27,7 +28,7 @@
     <div class="wrap nav-inner">
       <a class="logo" href="/">AM<span class="dot">.</span></a>
       <div class="toggles" style="margin-left:auto">
-        <button id="lang" class="pill" aria-label="Switch language"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="lang" class="pill" title="Français / English"><span lang="en">FR</span><span lang="fr">EN</span></button>
         <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
       </div>
     </div>
