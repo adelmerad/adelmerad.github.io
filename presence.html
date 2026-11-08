@@ -46,12 +46,12 @@
       </p>
       <h1 class="case-title"><span lang="en">Attendance &amp; payroll app</span><span lang="fr">Appli de présence et de paie</span></h1>
       <p class="lead">
-        <span lang="en">A small tool with real users: it replaced the paper attendance book and the hand-made payroll of a medical imaging center. Staff attendance is entered each day, and everyone's pay for the month is always up to date.</span>
-        <span lang="fr">Un petit outil avec de vrais utilisateurs : il a remplacé le cahier de présence et le calcul de la paie à la main dans un centre d'imagerie médicale. Les présences sont saisies chaque jour, et la paie du mois de chacun est toujours à jour.</span>
+        <span lang="en">A small internal tool used for real: it replaced the paper attendance book and the hand-made payroll of a medical imaging center. Staff attendance is entered each day, and everyone's pay for the month is always up to date.</span>
+        <span lang="fr">Un petit outil interne utilisé pour de vrai : il a remplacé le cahier de présence et le calcul de la paie à la main dans un centre d'imagerie médicale. Les présences sont saisies chaque jour, et la paie du mois de chacun est toujours à jour.</span>
       </p>
       <dl class="facts">
         <div><dt><span lang="en">Role</span><span lang="fr">Rôle</span></dt><dd><span lang="en">Solo project: needs, design, code, deployment and support</span><span lang="fr">Projet solo : besoins, design, code, déploiement et suivi</span></dd></div>
-        <div><dt><span lang="en">Users</span><span lang="fr">Utilisateurs</span></dt><dd><span lang="en">Several people at the center, from a phone or a computer</span><span lang="fr">Plusieurs personnes du centre, sur téléphone ou ordinateur</span></dd></div>
+        <div><dt><span lang="en">User</span><span lang="fr">Utilisateur</span></dt><dd><span lang="en">The center's administration, on a phone or a computer</span><span lang="fr">L'administration du centre, sur téléphone ou ordinateur</span></dd></div>
         <div><dt>Stack</dt><dd>Next.js 16 · React 19 · TypeScript · Tailwind CSS · Radix UI · Zod · Upstash Redis · Vercel</dd></div>
         <div><dt>Code</dt><dd><a href="https://github.com/adelmerad/gestion-de-presence" target="_blank" rel="noopener">gestion-de-presence ↗</a> · <span class="muted"><span lang="en">the live app is internal and password-protected</span><span lang="fr">l'appli en ligne est interne et protégée</span></span></dd></div>
       </dl>
@@ -86,7 +86,7 @@
         <article><h3><span lang="en">Phone first</span><span lang="fr">D'abord le téléphone</span></h3>
           <p><span lang="en">Tab navigation, bottom sheets for entry and large touch targets. It can be installed on the home screen like an app.</span><span lang="fr">Navigation par onglets, saisie dans des panneaux en bas d'écran et grandes zones tactiles. Elle s'installe sur l'écran d'accueil comme une appli.</span></p></article>
         <article><h3><span lang="en">No lost entries</span><span lang="fr">Aucune saisie perdue</span></h3>
-          <p><span lang="en">In Redis, each employee, each day and each rate is its own hash field. Every write only touches its own data, so two people entering on two phones at the same time never overwrite each other.</span><span lang="fr">Dans Redis, chaque employé, chaque jour et chaque tarif est un champ séparé. Chaque écriture ne touche que sa propre donnée : deux personnes qui saisissent en même temps sur deux téléphones ne s'écrasent jamais.</span></p></article>
+          <p><span lang="en">In Redis, each employee, each day and each rate is its own hash field. Every write only touches its own data, so two devices saving at the same time (a phone and a computer, for example) never overwrite each other.</span><span lang="fr">Dans Redis, chaque employé, chaque jour et chaque tarif est un champ séparé. Chaque écriture ne touche que sa propre donnée : deux appareils qui enregistrent en même temps (un téléphone et un ordinateur, par exemple) ne s'écrasent jamais.</span></p></article>
         <article><h3><span lang="en">Simple, solid access</span><span lang="fr">Un accès simple et solide</span></h3>
           <p><span lang="en">Every page and API route goes through one access check. The HttpOnly, Secure session cookie is derived from the password, so changing the password signs out every device at once. All API inputs are validated with Zod.</span><span lang="fr">Toutes les pages et routes API passent par un seul contrôle d'accès. Le cookie de session (HttpOnly, Secure) est dérivé du mot de passe : changer le mot de passe déconnecte tous les appareils d'un coup. Toutes les entrées de l'API sont validées avec Zod.</span></p></article>
         <article><h3><span lang="en">Free to run</span><span lang="fr">Gratuite à faire tourner</span></h3>
