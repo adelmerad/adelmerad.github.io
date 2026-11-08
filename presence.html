@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attendance &amp; Payroll App — Adel Merad</title>
+  <meta name="description" content="Case study: an attendance and payroll web app in production at a medical imaging center. Next.js, TypeScript, Redis, Vercel.">
+  <meta property="og:title" content="Attendance &amp; Payroll App — Adel Merad">
+  <meta property="og:description" content="Replaces the paper attendance book and manual payroll of a medical imaging center.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/presence.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
+      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="Attendance &amp; Payroll App — Adel Merad" data-title-fr="Appli de présence et de paie — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </nav>
+      <div class="toggles">
+        <button id="lang" class="pill" aria-label="Switch language"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="case-hero">
+      <p class="kicker mono"><span class="live"></span>
+        <span lang="en">In production · CIM Dr MERAD · since October 2026</span>
+        <span lang="fr">En production · CIM Dr MERAD · depuis octobre 2026</span>
+      </p>
+      <h1 class="case-title"><span lang="en">Attendance &amp; payroll app</span><span lang="fr">Appli de présence et de paie</span></h1>
+      <p class="lead">
+        <span lang="en">A small tool with real users: it replaced the paper attendance book and the hand-made payroll of a medical imaging center. Staff attendance is entered each day, and everyone's pay for the month is always up to date.</span>
+        <span lang="fr">Un petit outil avec de vrais utilisateurs : il a remplacé le cahier de présence et le calcul de la paie à la main dans un centre d'imagerie médicale. Les présences sont saisies chaque jour, et la paie du mois de chacun est toujours à jour.</span>
+      </p>
+      <dl class="facts">
+        <div><dt><span lang="en">Role</span><span lang="fr">Rôle</span></dt><dd><span lang="en">Solo project: needs, design, code, deployment and support</span><span lang="fr">Projet solo : besoins, design, code, déploiement et suivi</span></dd></div>
+        <div><dt><span lang="en">Users</span><span lang="fr">Utilisateurs</span></dt><dd><span lang="en">Several people at the center, from a phone or a computer</span><span lang="fr">Plusieurs personnes du centre, sur téléphone ou ordinateur</span></dd></div>
+        <div><dt>Stack</dt><dd>Next.js 16 · React 19 · TypeScript · Tailwind CSS · Radix UI · Zod · Upstash Redis · Vercel</dd></div>
+        <div><dt>Code</dt><dd><a href="https://github.com/adelmerad/gestion-de-presence" target="_blank" rel="noopener">gestion-de-presence ↗</a> · <span class="muted"><span lang="en">the live app is internal and password-protected</span><span lang="fr">l'appli en ligne est interne et protégée</span></span></dd></div>
+      </dl>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">01</span><span lang="en">The problem</span><span lang="fr">Le problème</span></h2>
+      <div class="prose">
+        <p><span lang="en">Attendance was written in a notebook, and pay was calculated by hand at the end of each month. The rules are not simple: some staff are paid per day, the radiographer per exam, receptionists and technicians who also run scans get a bonus per exam, and replacement doctors are paid an amount set for the day. Mistakes were easy and the total was only known at the end of the month.</span>
+           <span lang="fr">Les présences étaient notées dans un cahier, et la paie calculée à la main en fin de mois. Les règles ne sont pas simples : certains sont payés à la journée, le manipulateur à l'acte, les réceptionnistes et techniciens qui font aussi des examens touchent un bonus par examen, et les médecins remplaçants sont payés un montant fixé pour la journée. Les erreurs étaient faciles et le total n'était connu qu'en fin de mois.</span></p>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">02</span><span lang="en">What it does</span><span lang="fr">Ce qu'elle fait</span></h2>
+      <div class="gallery">
+        <figure><img src="assets/projects/presence-devices.jpg" width="1750" height="880" loading="lazy" alt="Monthly calendar with the payroll on desktop and on a phone (demo data)"><figcaption><span lang="en">Monthly calendar and live payroll, on desktop and phone (demo data)</span><span lang="fr">Calendrier du mois et paie en direct, sur ordinateur et sur téléphone (données de démonstration)</span></figcaption></figure>
+      </div>
+      <div class="decisions" style="margin-top:22px">
+        <article><h3><span lang="en">Monthly calendar</span><span lang="fr">Calendrier mensuel</span></h3>
+          <p><span lang="en">Attendance is entered day by day. The weekly rest day is locked, and each day shows who was there and what the day costs.</span><span lang="fr">Les présences se saisissent jour par jour. Le jour de repos est verrouillé, et chaque case montre qui était là et ce que coûte la journée.</span></p></article>
+        <article><h3><span lang="en">Several pay rules</span><span lang="fr">Plusieurs modes de paie</span></h3>
+          <p><span lang="en">Per day by role, per exam, a bonus per exam, a fixed monthly salary, or a free amount for replacements. Rates are set from the interface.</span><span lang="fr">À la journée selon le rôle, à l'acte, avec un bonus par examen, au salaire mensuel fixe, ou au montant libre pour les remplacements. Les tarifs se règlent depuis l'interface.</span></p></article>
+        <article><h3><span lang="en">Live payslip</span><span lang="fr">Fiche de paie en direct</span></h3>
+          <p><span lang="en">Total per employee and grand total for the month, recalculated on every entry. A deactivated employee leaves the calendar but keeps their pay history.</span><span lang="fr">Total par employé et total général du mois, recalculés à chaque saisie. Un employé désactivé disparaît du calendrier mais garde son historique de paie.</span></p></article>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">03</span><span lang="en">Technical choices</span><span lang="fr">Choix techniques</span></h2>
+      <div class="decisions two">
+        <article><h3><span lang="en">Phone first</span><span lang="fr">D'abord le téléphone</span></h3>
+          <p><span lang="en">Tab navigation, bottom sheets for entry and large touch targets. It can be installed on the home screen like an app.</span><span lang="fr">Navigation par onglets, saisie dans des panneaux en bas d'écran et grandes zones tactiles. Elle s'installe sur l'écran d'accueil comme une appli.</span></p></article>
+        <article><h3><span lang="en">No lost entries</span><span lang="fr">Aucune saisie perdue</span></h3>
+          <p><span lang="en">In Redis, each employee, each day and each rate is its own hash field. Every write only touches its own data, so two people entering on two phones at the same time never overwrite each other.</span><span lang="fr">Dans Redis, chaque employé, chaque jour et chaque tarif est un champ séparé. Chaque écriture ne touche que sa propre donnée : deux personnes qui saisissent en même temps sur deux téléphones ne s'écrasent jamais.</span></p></article>
+        <article><h3><span lang="en">Simple, solid access</span><span lang="fr">Un accès simple et solide</span></h3>
+          <p><span lang="en">Every page and API route goes through one access check. The HttpOnly, Secure session cookie is derived from the password, so changing the password signs out every device at once. All API inputs are validated with Zod.</span><span lang="fr">Toutes les pages et routes API passent par un seul contrôle d'accès. Le cookie de session (HttpOnly, Secure) est dérivé du mot de passe : changer le mot de passe déconnecte tous les appareils d'un coup. Toutes les entrées de l'API sont validées avec Zod.</span></p></article>
+        <article><h3><span lang="en">Free to run</span><span lang="fr">Gratuite à faire tourner</span></h3>
+          <p><span lang="en">Vercel and Upstash Redis free tiers, with automatic deployment on every push. In development the app switches to local JSON files, so production data is never touched by mistake.</span><span lang="fr">Offres gratuites de Vercel et d'Upstash Redis, avec déploiement automatique à chaque envoi. En développement, l'appli passe sur des fichiers JSON locaux pour ne jamais toucher aux données réelles par erreur.</span></p></article>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">04</span><span lang="en">Team management</span><span lang="fr">Gestion de l'équipe</span></h2>
+      <div class="gallery">
+        <figure><img src="assets/projects/presence-team.jpg" width="1280" height="800" loading="lazy" alt="Employees page with roles (demo data)"><figcaption><span lang="en">Employees and their roles (demo data)</span><span lang="fr">Les employés et leurs rôles (données de démonstration)</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span></h2>
+      <div class="prose">
+        <ul class="bullets">
+          <li><span lang="en">Turning real, messy business rules into a clear data model and simple screens.</span><span lang="fr">Transformer de vraies règles métier, compliquées, en un modèle de données clair et des écrans simples.</span></li>
+          <li><span lang="en">Thinking about concurrent writes even in a small app, because data loss is not acceptable when it is someone's salary.</span><span lang="fr">Penser aux écritures simultanées même dans une petite appli, parce qu'une perte de données n'est pas acceptable quand il s'agit d'un salaire.</span></li>
+          <li><span lang="en">Supporting an app after launch: new roles and pay rules were added as the center's needs changed.</span><span lang="fr">Faire vivre une appli après sa mise en ligne : de nouveaux rôles et modes de paie ont été ajoutés au fil des besoins du centre.</span></li>
+        </ul>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/adelmerad/gestion-de-presence" target="_blank" rel="noopener"><span lang="en">Code on GitHub</span><span lang="fr">Code sur GitHub</span> ↗</a>
+        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
