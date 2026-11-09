@@ -292,3 +292,5 @@ html:not([data-langs~="ar"]) .ar-only { display: none; }
 html[lang="ar"] body, html[lang="ar"] body * { letter-spacing: 0 !important; }
 html[lang="ar"] body { line-height: 1.75; }
 html[dir="rtl"] .arr { display: inline-block; transform: scaleX(-1); }
+html[dir="rtl"] pre, html[dir="rtl"] code { direction: ltr; unicode-bidi: isolate; }
+html[dir="rtl"] pre { text-align: left; }

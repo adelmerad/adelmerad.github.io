@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" data-langs="en fr ar">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
     // Apply saved theme/language before paint to avoid a flash
@@ -34,13 +34,13 @@
     } catch {}
   </script>
 </head>
-<body class="case" data-title-en="Blog — Adel Merad" data-title-fr="Blog — Adel Merad">
+<body class="case" data-title-en="Blog — Adel Merad" data-title-fr="Blog — Adel Merad" data-title-ar="المدونة — Adel Merad">
   <header class="nav">
     <div class="wrap nav-inner">
       <a class="logo" href="./">AM<span class="dot">.</span></a>
       <nav class="links">
-        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span></a>
-        <a href="./#contact">Contact</a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+        <a href="./#contact"><span lang="en">Contact</span><span lang="fr">Contact</span><span lang="ar">تواصل</span></a>
       </nav>
       <div class="toggles">
         <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
@@ -51,11 +51,11 @@
 
   <main class="wrap">
     <section class="case-hero">
-      <p class="kicker mono"><span class="live"></span>Blog</p>
-      <h1 class="case-title"><span lang="en">Notes from the work</span><span lang="fr">Notes de travail</span></h1>
+      <p class="kicker mono"><span class="live"></span><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></p>
+      <h1 class="case-title"><span lang="en">Notes from the work</span><span lang="fr">Notes de travail</span><span lang="ar">ملاحظات من العمل</span></h1>
       <p class="lead">
         <span lang="en">Short articles about problems I ran into while building real projects, and how I solved them.</span>
-        <span lang="fr">De courts articles sur les problèmes rencontrés en construisant de vrais projets, et comment je les ai résolus.</span>
+        <span lang="fr">De courts articles sur les problèmes rencontrés en construisant de vrais projets, et comment je les ai résolus.</span><span lang="ar">مقالات قصيرة عن مشكلات واجهتها أثناء بناء مشاريع حقيقية، وكيف حللتها.</span>
       </p>
     </section>
 
@@ -63,26 +63,26 @@
       <ul class="posts">
         <li>
           <a class="post-card" href="blog-presence.html">
-            <span class="mono muted"><span lang="en">November 2026 · 6 min read · Product</span><span lang="fr">Novembre 2026 · 6 min de lecture · Produit</span></span>
-            <h2><span lang="en">I replaced a paper attendance book with a web app</span><span lang="fr">J'ai remplacé un cahier de présence par une appli web</span></h2>
-            <p><span lang="en">A small tool for one real user at a medical imaging center, and what it taught me about data models, care and shipping.</span><span lang="fr">Un petit outil pour un seul vrai utilisateur dans un centre d'imagerie médicale, et ce qu'il m'a appris sur les modèles de données, le soin et la mise en ligne.</span></p>
-            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span> →</span>
+            <span class="mono muted"><span lang="en">November 2026 · 6 min read · Product</span><span lang="fr">Novembre 2026 · 6 min de lecture · Produit</span><span lang="ar">نوفمبر 2026 · 6 دقائق قراءة · منتج</span></span>
+            <h2><span lang="en">I replaced a paper attendance book with a web app</span><span lang="fr">J'ai remplacé un cahier de présence par une appli web</span><span lang="ar">عوّضت دفتر الحضور بتطبيق ويب</span></h2>
+            <p><span lang="en">A small tool for one real user at a medical imaging center, and what it taught me about data models, care and shipping.</span><span lang="fr">Un petit outil pour un seul vrai utilisateur dans un centre d'imagerie médicale, et ce qu'il m'a appris sur les modèles de données, le soin et la mise en ligne.</span><span lang="ar">أداة صغيرة لمستخدم حقيقي واحد في مركز للتصوير الطبي، وما علّمتني إياه عن نماذج البيانات، والإتقان، والنشر.</span></p>
+            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span><span lang="ar">اقرأ المقال</span> <span class="arr">→</span></span>
           </a>
         </li>
         <li>
           <a class="post-card" href="blog-realtime.html">
-            <span class="mono muted"><span lang="en">November 2026 · 8 min read · Backend</span><span lang="fr">Novembre 2026 · 8 min de lecture · Backend</span></span>
-            <h2><span lang="en">Realtime without WebSockets: PostgreSQL LISTEN/NOTIFY and Server-Sent Events</span><span lang="fr">Du temps réel sans WebSocket : LISTEN/NOTIFY de PostgreSQL et les Server-Sent Events</span></h2>
-            <p><span lang="en">Live rankings kept in sync across several servers with nothing more than the database, and the production pitfalls along the way.</span><span lang="fr">Des classements en direct synchronisés sur plusieurs serveurs avec rien de plus que la base de données, et les pièges rencontrés en production.</span></p>
-            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span> →</span>
+            <span class="mono muted"><span lang="en">November 2026 · 8 min read · Backend</span><span lang="fr">Novembre 2026 · 8 min de lecture · Backend</span><span lang="ar">نوفمبر 2026 · 8 دقائق قراءة · Backend</span></span>
+            <h2><span lang="en">Realtime without WebSockets: PostgreSQL LISTEN/NOTIFY and Server-Sent Events</span><span lang="fr">Du temps réel sans WebSocket : LISTEN/NOTIFY de PostgreSQL et les Server-Sent Events</span><span lang="ar">الوقت الحقيقي دون WebSocket: LISTEN/NOTIFY في PostgreSQL و Server-Sent Events</span></h2>
+            <p><span lang="en">Live rankings kept in sync across several servers with nothing more than the database, and the production pitfalls along the way.</span><span lang="fr">Des classements en direct synchronisés sur plusieurs serveurs avec rien de plus que la base de données, et les pièges rencontrés en production.</span><span lang="ar">ترتيب مباشر متزامن عبر عدة خوادم بقاعدة البيانات وحدها، والفخاخ التي صادفتها في بيئة الإنتاج.</span></p>
+            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span><span lang="ar">اقرأ المقال</span> <span class="arr">→</span></span>
           </a>
         </li>
         <li>
           <a class="post-card" href="blog-sso-bff.html">
-            <span class="mono muted"><span lang="en">November 2026 · 8 min read · Security</span><span lang="fr">Novembre 2026 · 8 min de lecture · Sécurité</span></span>
-            <h2><span lang="en">A single sign-on where the browser never sees a token</span><span lang="fr">Un SSO où le navigateur ne voit jamais un token</span></h2>
-            <p><span lang="en">PKCE, the Backend-for-Frontend pattern, and the race condition hidden in refresh token rotation, from my internship at Mobilis.</span><span lang="fr">PKCE, le pattern Backend-for-Frontend, et la situation de concurrence cachée dans la rotation des refresh tokens, tirés de mon stage chez Mobilis.</span></p>
-            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span> →</span>
+            <span class="mono muted"><span lang="en">November 2026 · 8 min read · Security</span><span lang="fr">Novembre 2026 · 8 min de lecture · Sécurité</span><span lang="ar">نوفمبر 2026 · 8 دقائق قراءة · الأمن</span></span>
+            <h2><span lang="en">A single sign-on where the browser never sees a token</span><span lang="fr">Un SSO où le navigateur ne voit jamais un token</span><span lang="ar">دخول موحَّد لا يرى فيه المتصفح أي رمز</span></h2>
+            <p><span lang="en">PKCE, the Backend-for-Frontend pattern, and the race condition hidden in refresh token rotation, from my internship at Mobilis.</span><span lang="fr">PKCE, le pattern Backend-for-Frontend, et la situation de concurrence cachée dans la rotation des refresh tokens, tirés de mon stage chez Mobilis.</span><span lang="ar">PKCE، ونمط Backend-for-Frontend، ومشكلة التزامن المخفية في تدوير رموز التحديث، من تربصي في موبيليس.</span></p>
+            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span><span lang="ar">اقرأ المقال</span> <span class="arr">→</span></span>
           </a>
         </li>
       </ul>

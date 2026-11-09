@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" data-langs="en fr ar">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
     // Apply saved theme/language before paint to avoid a flash
@@ -34,13 +34,13 @@
     } catch {}
   </script>
 </head>
-<body class="case" data-title-en="A single sign-on where the browser never sees a token — Adel Merad" data-title-fr="Un SSO où le navigateur ne voit jamais un token — Adel Merad">
+<body class="case" data-title-en="A single sign-on where the browser never sees a token — Adel Merad" data-title-fr="Un SSO où le navigateur ne voit jamais un token — Adel Merad" data-title-ar="دخول موحَّد لا يرى فيه المتصفح أي رمز — Adel Merad">
   <header class="nav">
     <div class="wrap nav-inner">
       <a class="logo" href="./">AM<span class="dot">.</span></a>
       <nav class="links">
-        <a href="blog.html">Blog</a>
-        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span></a>
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
       </nav>
       <div class="toggles">
         <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
@@ -54,43 +54,43 @@
       <header class="post-head">
         <p class="kicker mono"><span class="live"></span>
           <span lang="en">Blog · November 2026 · 8 min read</span>
-          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span>
+          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 8 دقائق قراءة</span>
         </p>
         <h1 class="post-title">
           <span lang="en">A single sign-on where the browser never sees a token</span>
-          <span lang="fr">Un SSO où le navigateur ne voit jamais un token</span>
+          <span lang="fr">Un SSO où le navigateur ne voit jamais un token</span><span lang="ar">دخول موحَّد لا يرى فيه المتصفح أي رمز</span>
         </h1>
         <p class="lead">
           <span lang="en">What I learned building an OAuth2 / OpenID Connect single sign-on during my internship at Mobilis: PKCE, the Backend-for-Frontend pattern, and the race condition hidden in refresh token rotation.</span>
-          <span lang="fr">Ce que j'ai appris en construisant un SSO OAuth2 / OpenID Connect pendant mon stage chez Mobilis : PKCE, le pattern Backend-for-Frontend, et la situation de concurrence cachée dans la rotation des refresh tokens.</span>
+          <span lang="fr">Ce que j'ai appris en construisant un SSO OAuth2 / OpenID Connect pendant mon stage chez Mobilis : PKCE, le pattern Backend-for-Frontend, et la situation de concurrence cachée dans la rotation des refresh tokens.</span><span lang="ar">ما تعلّمته وأنا أبني نظام دخول موحَّد بـ OAuth2 / OpenID Connect خلال تربصي في موبيليس: PKCE، ونمط Backend-for-Frontend، ومشكلة التزامن المخفية في تدوير رموز التحديث.</span>
         </p>
       </header>
 
       <div class="post-body">
-        <h2><span lang="en">The usual approach, and its weak spot</span><span lang="fr">L'approche habituelle, et son point faible</span></h2>
+        <h2><span lang="en">The usual approach, and its weak spot</span><span lang="fr">L'approche habituelle, et son point faible</span><span lang="ar">الطريقة المعتادة، ونقطة ضعفها</span></h2>
         <p><span lang="en">In many single-page apps, the front end runs the OAuth flow itself and keeps the access token and refresh token in <code>localStorage</code>. It works, but any script running on the page can read them. One XSS bug, one compromised npm package, and the attacker leaves with a refresh token they can use from anywhere, for days.</span>
-           <span lang="fr">Dans beaucoup d'applications monopage, le front fait lui-même le parcours OAuth et garde l'access token et le refresh token dans le <code>localStorage</code>. Ça marche, mais n'importe quel script de la page peut les lire. Une faille XSS, un paquet npm compromis, et l'attaquant repart avec un refresh token utilisable de n'importe où, pendant des jours.</span></p>
+           <span lang="fr">Dans beaucoup d'applications monopage, le front fait lui-même le parcours OAuth et garde l'access token et le refresh token dans le <code>localStorage</code>. Ça marche, mais n'importe quel script de la page peut les lire. Une faille XSS, un paquet npm compromis, et l'attaquant repart avec un refresh token utilisable de n'importe où, pendant des jours.</span><span lang="ar">في كثير من التطبيقات أحادية الصفحة، تتولى الواجهة بنفسها مسار OAuth وتحفظ رمز الوصول ورمز التحديث في <code>localStorage</code>. هذا يعمل، لكن أي سكربت في الصفحة يستطيع قراءتهما. ثغرة XSS واحدة، أو حزمة npm مخترقة، فيغادر المهاجم برمز تحديث يستعمله من أي مكان، لأيام.</span></p>
         <p><span lang="en">For our project, two of us built an SSO server with ASP.NET Core and OpenIddict, plus a client application. I wanted the client to follow a simple rule: <strong>the browser never holds a token.</strong></span>
-           <span lang="fr">Pour notre projet, à deux, nous avons construit un serveur SSO avec ASP.NET Core et OpenIddict, et une application cliente. Je voulais que le client respecte une règle simple : <strong>le navigateur ne détient jamais de token.</strong></span></p>
+           <span lang="fr">Pour notre projet, à deux, nous avons construit un serveur SSO avec ASP.NET Core et OpenIddict, et une application cliente. Je voulais que le client respecte une règle simple : <strong>le navigateur ne détient jamais de token.</strong></span><span lang="ar">في مشروعنا، بنينا نحن الاثنين خادم SSO بـ ASP.NET Core و OpenIddict، وتطبيقاً عميلاً. أردت أن يحترم العميل قاعدة بسيطة: <strong>المتصفح لا يحمل أي رمز أبداً.</strong></span></p>
 
-        <h2><span lang="en">The Backend-for-Frontend pattern</span><span lang="fr">Le pattern Backend-for-Frontend</span></h2>
+        <h2><span lang="en">The Backend-for-Frontend pattern</span><span lang="fr">Le pattern Backend-for-Frontend</span><span lang="ar">نمط Backend-for-Frontend</span></h2>
         <p><span lang="en">The idea is to put a small server, the BFF, between the browser and the identity server. The BFF runs the OAuth flow, keeps the tokens in its own memory, and gives the browser only a session cookie.</span>
-           <span lang="fr">L'idée est de placer un petit serveur, le BFF, entre le navigateur et le serveur d'identité. Le BFF fait le parcours OAuth, garde les tokens dans sa propre mémoire, et ne donne au navigateur qu'un cookie de session.</span></p>
+           <span lang="fr">L'idée est de placer un petit serveur, le BFF, entre le navigateur et le serveur d'identité. Le BFF fait le parcours OAuth, garde les tokens dans sa propre mémoire, et ne donne au navigateur qu'un cookie de session.</span><span lang="ar">الفكرة هي وضع خادم صغير، الـ BFF، بين المتصفح وخادم الهوية. يتولى الـ BFF مسار OAuth، ويحفظ الرموز في ذاكرته، ولا يعطي المتصفح سوى cookie للجلسة.</span></p>
         <figure class="flow" aria-label="BFF flow">
           <div class="flow-row" style="min-width:620px">
-            <div class="node"><b><span lang="en">Browser</span><span lang="fr">Navigateur</span></b><small><span lang="en">HttpOnly cookie only</span><span lang="fr">cookie HttpOnly seulement</span></small></div>
+            <div class="node"><b><span lang="en">Browser</span><span lang="fr">Navigateur</span><span lang="ar">المتصفح</span></b><small><span lang="en">HttpOnly cookie only</span><span lang="fr">cookie HttpOnly seulement</span><span lang="ar">cookie من نوع HttpOnly فقط</span></small></div>
             <span class="arrow">⇄</span>
-            <div class="node core"><b>BFF</b><small><span lang="en">tokens kept server-side</span><span lang="fr">tokens gardés côté serveur</span></small></div>
+            <div class="node core"><b>BFF</b><small><span lang="en">tokens kept server-side</span><span lang="fr">tokens gardés côté serveur</span><span lang="ar">الرموز محفوظة في الخادم</span></small></div>
             <span class="arrow">⇄</span>
-            <div class="node"><b><span lang="en">SSO server</span><span lang="fr">Serveur SSO</span></b><small>OpenID Connect · PKCE</small></div>
+            <div class="node"><b><span lang="en">SSO server</span><span lang="fr">Serveur SSO</span><span lang="ar">خادم SSO</span></b><small>OpenID Connect · PKCE</small></div>
           </div>
         </figure>
         <p><span lang="en">The cookie is <code>HttpOnly</code>, so JavaScript cannot read it, and it does not even contain a token: just an opaque session id. A script that somehow got hold of it would have a random string that means nothing outside our server.</span>
-           <span lang="fr">Le cookie est <code>HttpOnly</code>, donc JavaScript ne peut pas le lire, et il ne contient même pas de token : seulement un identifiant de session opaque. Un script qui réussirait à le récupérer n'aurait qu'une chaîne aléatoire, sans valeur en dehors de notre serveur.</span></p>
+           <span lang="fr">Le cookie est <code>HttpOnly</code>, donc JavaScript ne peut pas le lire, et il ne contient même pas de token : seulement un identifiant de session opaque. Un script qui réussirait à le récupérer n'aurait qu'une chaîne aléatoire, sans valeur en dehors de notre serveur.</span><span lang="ar">الـ cookie من نوع <code>HttpOnly</code>، فلا يستطيع JavaScript قراءته، ولا يحتوي حتى على رمز: مجرد معرّف جلسة غير قابل للقراءة. وأي سكربت ينجح في الحصول عليه لن يجد سوى سلسلة عشوائية لا قيمة لها خارج خادمنا.</span></p>
 
-        <h2><span lang="en">Step 1: starting the sign-in with PKCE</span><span lang="fr">Étape 1 : lancer la connexion avec PKCE</span></h2>
+        <h2><span lang="en">Step 1: starting the sign-in with PKCE</span><span lang="fr">Étape 1 : lancer la connexion avec PKCE</span><span lang="ar">الخطوة 1: بدء تسجيل الدخول مع PKCE</span></h2>
         <p><span lang="en">PKCE protects the authorization code: if someone intercepts it on the way back, they cannot exchange it without a secret that never left our server. The BFF generates a random <em>verifier</em>, sends only its SHA-256 hash (the <em>challenge</em>) to the SSO server, and keeps the verifier for later.</span>
-           <span lang="fr">PKCE protège le code d'autorisation : si quelqu'un l'intercepte au retour, il ne peut pas l'échanger sans un secret qui n'a jamais quitté notre serveur. Le BFF génère un <em>verifier</em> aléatoire, n'envoie au serveur SSO que son hash SHA-256 (le <em>challenge</em>), et garde le verifier pour plus tard.</span></p>
+           <span lang="fr">PKCE protège le code d'autorisation : si quelqu'un l'intercepte au retour, il ne peut pas l'échanger sans un secret qui n'a jamais quitté notre serveur. Le BFF génère un <em>verifier</em> aléatoire, n'envoie au serveur SSO que son hash SHA-256 (le <em>challenge</em>), et garde le verifier pour plus tard.</span><span lang="ar">يحمي PKCE رمز التفويض: إذا اعترضه أحد في طريق العودة، لا يستطيع استبداله دون سرّ لم يغادر خادمنا قط. يولّد الـ BFF قيمة <em>verifier</em> عشوائية، ولا يرسل إلى خادم SSO إلا الـ hash الخاص بها بـ SHA-256 (الـ <em>challenge</em>)، ويحتفظ بالـ verifier لوقت لاحق.</span></p>
 <pre><code>public static string GenerateCodeVerifier()
 {
     var bytes = RandomNumberGenerator.GetBytes(32);
@@ -103,13 +103,13 @@ public static string GenerateCodeChallenge(string verifier)
     return Base64UrlEncode(bytes);
 }</code></pre>
         <p><span lang="en">The verifier and a random <code>state</code> go into two short-lived cookies (10 minutes, <code>HttpOnly</code>), then the user is redirected to the SSO server with <code>code_challenge_method=S256</code>. On the server side, PKCE is not optional: OpenIddict is configured with <code>RequireProofKeyForCodeExchange()</code>, so a client that skips it is refused.</span>
-           <span lang="fr">Le verifier et un <code>state</code> aléatoire vont dans deux cookies de courte durée (10 minutes, <code>HttpOnly</code>), puis l'utilisateur est redirigé vers le serveur SSO avec <code>code_challenge_method=S256</code>. Côté serveur, PKCE n'est pas optionnel : OpenIddict est configuré avec <code>RequireProofKeyForCodeExchange()</code>, donc un client qui s'en passe est refusé.</span></p>
+           <span lang="fr">Le verifier et un <code>state</code> aléatoire vont dans deux cookies de courte durée (10 minutes, <code>HttpOnly</code>), puis l'utilisateur est redirigé vers le serveur SSO avec <code>code_challenge_method=S256</code>. Côté serveur, PKCE n'est pas optionnel : OpenIddict est configuré avec <code>RequireProofKeyForCodeExchange()</code>, donc un client qui s'en passe est refusé.</span><span lang="ar">يوضع الـ verifier وقيمة <code>state</code> عشوائية في ملفي cookie قصيري المدة (10 دقائق، <code>HttpOnly</code>)، ثم يُحوَّل المستخدم إلى خادم SSO مع <code>code_challenge_method=S256</code>. وفي جهة الخادم، PKCE ليس اختيارياً: OpenIddict مضبوط بـ <code>RequireProofKeyForCodeExchange()</code>، فيُرفض أي عميل يتجاهله.</span></p>
 
-        <h2><span lang="en">Step 2: the callback, and not trusting the id_token blindly</span><span lang="fr">Étape 2 : le retour, sans faire confiance aveuglément à l'id_token</span></h2>
+        <h2><span lang="en">Step 2: the callback, and not trusting the id_token blindly</span><span lang="fr">Étape 2 : le retour, sans faire confiance aveuglément à l'id_token</span><span lang="ar">الخطوة 2: العودة، دون ثقة عمياء في الـ id_token</span></h2>
         <p><span lang="en">When the user comes back, the BFF checks that the <code>state</code> matches the cookie (this blocks forged callbacks), then exchanges the code for tokens, sending its client secret and the PKCE verifier.</span>
-           <span lang="fr">Quand l'utilisateur revient, le BFF vérifie que le <code>state</code> correspond au cookie (ça bloque les retours forgés), puis échange le code contre les tokens, en envoyant son secret client et le verifier PKCE.</span></p>
+           <span lang="fr">Quand l'utilisateur revient, le BFF vérifie que le <code>state</code> correspond au cookie (ça bloque les retours forgés), puis échange le code contre les tokens, en envoyant son secret client et le verifier PKCE.</span><span lang="ar">عندما يعود المستخدم، يتحقق الـ BFF من أن الـ <code>state</code> يطابق الـ cookie (هذا يمنع العودات المزوّرة)، ثم يستبدل الرمز بالـ tokens، مرسلاً سرّه كعميل والـ verifier الخاص بـ PKCE.</span></p>
         <p><span lang="en">A first version simply decoded the id_token and read the user's email and roles from it. That is a real mistake: decoding is not validating. The final version checks the signature with the SSO server's public keys (JWKS), the issuer, the audience and the expiry:</span>
-           <span lang="fr">Une première version se contentait de décoder l'id_token pour y lire l'e-mail et les rôles. C'est une vraie erreur : décoder n'est pas valider. La version finale vérifie la signature avec les clés publiques du serveur SSO (JWKS), l'émetteur, l'audience et l'expiration :</span></p>
+           <span lang="fr">Une première version se contentait de décoder l'id_token pour y lire l'e-mail et les rôles. C'est une vraie erreur : décoder n'est pas valider. La version finale vérifie la signature avec les clés publiques du serveur SSO (JWKS), l'émetteur, l'audience et l'expiration :</span><span lang="ar">كانت نسخة أولى تكتفي بفك ترميز الـ id_token لقراءة البريد الإلكتروني والأدوار. وهذا خطأ حقيقي: فك الترميز ليس تحققاً. النسخة النهائية تتحقق من التوقيع بالمفاتيح العامة لخادم SSO (JWKS)، ومن الجهة المُصدِرة، والجمهور، وتاريخ الانتهاء:</span></p>
 <pre><code>var discovery = await oidcConfig.GetConfigurationAsync(ct);
 var parameters = new TokenValidationParameters
 {
@@ -123,15 +123,15 @@ var parameters = new TokenValidationParameters
 };
 var user = handler.ValidateToken(tokens.IdToken, parameters, out _);</code></pre>
         <p><span lang="en">Only then does the BFF store the tokens in its memory, under a new random session id (32 bytes), and sign the user in with a cookie that carries that id and the user's claims.</span>
-           <span lang="fr">Seulement ensuite, le BFF range les tokens dans sa mémoire, sous un nouvel identifiant de session aléatoire (32 octets), et connecte l'utilisateur avec un cookie qui porte cet identifiant et les informations de l'utilisateur.</span></p>
+           <span lang="fr">Seulement ensuite, le BFF range les tokens dans sa mémoire, sous un nouvel identifiant de session aléatoire (32 octets), et connecte l'utilisateur avec un cookie qui porte cet identifiant et les informations de l'utilisateur.</span><span lang="ar">بعد ذلك فقط، يحفظ الـ BFF الرموز في ذاكرته، تحت معرّف جلسة عشوائي جديد (32 بايت)، ويُدخل المستخدم بـ cookie يحمل هذا المعرّف ومعلومات المستخدم.</span></p>
 
-        <h2><span lang="en">Step 3: refresh token rotation, and the race condition</span><span lang="fr">Étape 3 : la rotation des refresh tokens, et la situation de concurrence</span></h2>
+        <h2><span lang="en">Step 3: refresh token rotation, and the race condition</span><span lang="fr">Étape 3 : la rotation des refresh tokens, et la situation de concurrence</span><span lang="ar">الخطوة 3: تدوير رموز التحديث، ومشكلة التزامن</span></h2>
         <p><span lang="en">Access tokens are short-lived, so the BFF renews them before they expire: on each authenticated request, if the token expires in less than 60 seconds, it uses the refresh token. Our SSO server rotates refresh tokens: each one is meant to be used once, and every refresh returns a new one.</span>
-           <span lang="fr">Les access tokens ont une durée de vie courte, donc le BFF les renouvelle avant qu'ils expirent : à chaque requête authentifiée, si le token expire dans moins de 60 secondes, il utilise le refresh token. Notre serveur SSO fait tourner les refresh tokens : chacun est fait pour servir une fois, et chaque renouvellement en renvoie un nouveau.</span></p>
+           <span lang="fr">Les access tokens ont une durée de vie courte, donc le BFF les renouvelle avant qu'ils expirent : à chaque requête authentifiée, si le token expire dans moins de 60 secondes, il utilise le refresh token. Notre serveur SSO fait tourner les refresh tokens : chacun est fait pour servir une fois, et chaque renouvellement en renvoie un nouveau.</span><span lang="ar">رموز الوصول قصيرة العمر، لذا يجدّدها الـ BFF قبل انتهائها: عند كل طلب موثَّق، إذا بقي على انتهاء الرمز أقل من 60 ثانية، يستعمل رمز التحديث. وخادم SSO لدينا يدوّر رموز التحديث: كل رمز مخصّص لاستعمال واحد، وكل تجديد يعيد رمزاً جديداً.</span></p>
         <p><span lang="en">That is where I hit a subtle problem. A page often sends several requests at the same time. If they all see an almost-expired token, they all try to refresh with the <em>same</em> refresh token. The first one gets a new pair; the others send a token that is already used up, and the session can break for no good reason.</span>
-           <span lang="fr">C'est là que je suis tombé sur un problème subtil. Une page envoie souvent plusieurs requêtes en même temps. Si elles voient toutes un token presque expiré, elles essaient toutes de le renouveler avec le <em>même</em> refresh token. La première obtient une nouvelle paire ; les autres envoient un token déjà utilisé, et la session peut casser sans raison.</span></p>
+           <span lang="fr">C'est là que je suis tombé sur un problème subtil. Une page envoie souvent plusieurs requêtes en même temps. Si elles voient toutes un token presque expiré, elles essaient toutes de le renouveler avec le <em>même</em> refresh token. La première obtient une nouvelle paire ; les autres envoient un token déjà utilisé, et la session peut casser sans raison.</span><span lang="ar">هنا صادفت مشكلة دقيقة. كثيراً ما ترسل الصفحة عدة طلبات في الوقت نفسه. إذا رأت كلها رمزاً قارب على الانتهاء، تحاول كلها تجديده بـ<em>نفس</em> رمز التحديث. يحصل الأول على زوج جديد؛ ويرسل الباقون رمزاً مستعملاً، فقد تنقطع الجلسة دون سبب.</span></p>
         <p><span lang="en">The fix is a lock per session, plus a second check once the lock is acquired, because another request may have refreshed while we were waiting:</span>
-           <span lang="fr">La solution : un verrou par session, plus une deuxième vérification une fois le verrou obtenu, parce qu'une autre requête a peut-être déjà renouvelé pendant qu'on attendait :</span></p>
+           <span lang="fr">La solution : un verrou par session, plus une deuxième vérification une fois le verrou obtenu, parce qu'une autre requête a peut-être déjà renouvelé pendant qu'on attendait :</span><span lang="ar">الحل: قفل لكل جلسة، مع تحقق ثانٍ بعد الحصول على القفل، لأن طلباً آخر ربما جدّد الرمز أثناء الانتظار:</span></p>
 <pre><code>var semaphore = _locks.GetOrAdd(sessionId, _ =&gt; new SemaphoreSlim(1, 1));
 await semaphore.WaitAsync();
 try
@@ -149,35 +149,35 @@ finally
     semaphore.Release();
 }</code></pre>
 
-        <h2><span lang="en">Failing well: not every error means "sign out"</span><span lang="fr">Bien gérer les pannes : toute erreur ne veut pas dire « déconnexion »</span></h2>
+        <h2><span lang="en">Failing well: not every error means "sign out"</span><span lang="fr">Bien gérer les pannes : toute erreur ne veut pas dire « déconnexion »</span><span lang="ar">التعامل الجيد مع الأعطال: ليس كل خطأ يعني « تسجيل الخروج »</span></h2>
         <p><span lang="en">The refresh can fail for two very different reasons, so the code returns three outcomes instead of a boolean:</span>
-           <span lang="fr">Le renouvellement peut échouer pour deux raisons très différentes, donc le code renvoie trois résultats au lieu d'un booléen :</span></p>
+           <span lang="fr">Le renouvellement peut échouer pour deux raisons très différentes, donc le code renvoie trois résultats au lieu d'un booléen :</span><span lang="ar">قد يفشل التجديد لسببين مختلفين تماماً، لذا تُرجع الشيفرة ثلاث نتائج بدل قيمة منطقية واحدة:</span></p>
         <ul class="bullets">
-          <li><span lang="en"><code>Valid</code>: carry on.</span><span lang="fr"><code>Valid</code> : on continue.</span></li>
-          <li><span lang="en"><code>ReauthRequired</code>: the SSO server refused the refresh token (revoked, expired, account disabled). The session is really over: the BFF signs the user out and answers 401.</span><span lang="fr"><code>ReauthRequired</code> : le serveur SSO a refusé le refresh token (révoqué, expiré, compte désactivé). La session est vraiment finie : le BFF déconnecte l'utilisateur et répond 401.</span></li>
-          <li><span lang="en"><code>TransientFailure</code>: the network or the SSO server is down for a moment. Signing everyone out because of a 5-second outage would be worse than the outage, so the request continues with the current token.</span><span lang="fr"><code>TransientFailure</code> : le réseau ou le serveur SSO est indisponible un instant. Déconnecter tout le monde pour une panne de 5 secondes serait pire que la panne, donc la requête continue avec le token actuel.</span></li>
+          <li><span lang="en"><code>Valid</code>: carry on.</span><span lang="fr"><code>Valid</code> : on continue.</span><span lang="ar"><code>Valid</code>: نواصل.</span></li>
+          <li><span lang="en"><code>ReauthRequired</code>: the SSO server refused the refresh token (revoked, expired, account disabled). The session is really over: the BFF signs the user out and answers 401.</span><span lang="fr"><code>ReauthRequired</code> : le serveur SSO a refusé le refresh token (révoqué, expiré, compte désactivé). La session est vraiment finie : le BFF déconnecte l'utilisateur et répond 401.</span><span lang="ar"><code>ReauthRequired</code>: رفض خادم SSO رمز التحديث (ملغى، منتهي الصلاحية، حساب معطَّل). انتهت الجلسة فعلاً: يُخرج الـ BFF المستخدم ويرد بـ 401.</span></li>
+          <li><span lang="en"><code>TransientFailure</code>: the network or the SSO server is down for a moment. Signing everyone out because of a 5-second outage would be worse than the outage, so the request continues with the current token.</span><span lang="fr"><code>TransientFailure</code> : le réseau ou le serveur SSO est indisponible un instant. Déconnecter tout le monde pour une panne de 5 secondes serait pire que la panne, donc la requête continue avec le token actuel.</span><span lang="ar"><code>TransientFailure</code>: الشبكة أو خادم SSO غير متاح للحظة. إخراج الجميع بسبب عطل من 5 ثوانٍ أسوأ من العطل نفسه، لذا يستمر الطلب بالرمز الحالي.</span></li>
         </ul>
 
-        <h2><span lang="en">What I would improve</span><span lang="fr">Ce que j'améliorerais</span></h2>
+        <h2><span lang="en">What I would improve</span><span lang="fr">Ce que j'améliorerais</span><span lang="ar">ما كنت سأحسّنه</span></h2>
         <ul class="bullets">
-          <li><span lang="en">Tokens live in the BFF's in-memory cache: a restart signs everyone out, and two BFF instances would not share sessions. A shared store such as Redis would fix both.</span><span lang="fr">Les tokens vivent dans le cache mémoire du BFF : un redémarrage déconnecte tout le monde, et deux instances du BFF ne partageraient pas les sessions. Un stockage partagé comme Redis réglerait les deux.</span></li>
-          <li><span lang="en">The session cookie must be marked <code>Secure</code> once the app runs over HTTPS in production.</span><span lang="fr">Le cookie de session doit être marqué <code>Secure</code> dès que l'appli tourne en HTTPS en production.</span></li>
-          <li><span lang="en">Roles are copied into the cookie at sign-in, so a role change only applies at the next sign-in. And signing out of one app does not yet sign you out of all of them (single logout).</span><span lang="fr">Les rôles sont copiés dans le cookie à la connexion, donc un changement de rôle ne s'applique qu'à la connexion suivante. Et se déconnecter d'une appli ne déconnecte pas encore de toutes les autres (déconnexion unique).</span></li>
+          <li><span lang="en">Tokens live in the BFF's in-memory cache: a restart signs everyone out, and two BFF instances would not share sessions. A shared store such as Redis would fix both.</span><span lang="fr">Les tokens vivent dans le cache mémoire du BFF : un redémarrage déconnecte tout le monde, et deux instances du BFF ne partageraient pas les sessions. Un stockage partagé comme Redis réglerait les deux.</span><span lang="ar">تعيش الرموز في الذاكرة المؤقتة للـ BFF: إعادة التشغيل تُخرج الجميع، ونسختان من الـ BFF لن تتقاسما الجلسات. تخزين مشترك مثل Redis يحل المشكلتين.</span></li>
+          <li><span lang="en">The session cookie must be marked <code>Secure</code> once the app runs over HTTPS in production.</span><span lang="fr">Le cookie de session doit être marqué <code>Secure</code> dès que l'appli tourne en HTTPS en production.</span><span lang="ar">يجب وسم cookie الجلسة بـ <code>Secure</code> بمجرد تشغيل التطبيق عبر HTTPS في الإنتاج.</span></li>
+          <li><span lang="en">Roles are copied into the cookie at sign-in, so a role change only applies at the next sign-in. And signing out of one app does not yet sign you out of all of them (single logout).</span><span lang="fr">Les rôles sont copiés dans le cookie à la connexion, donc un changement de rôle ne s'applique qu'à la connexion suivante. Et se déconnecter d'une appli ne déconnecte pas encore de toutes les autres (déconnexion unique).</span><span lang="ar">تُنسخ الأدوار في الـ cookie عند تسجيل الدخول، فلا يُطبَّق تغيير الدور إلا عند الدخول التالي. كما أن الخروج من تطبيق لا يُخرج بعد من كل التطبيقات الأخرى (الخروج الموحَّد).</span></li>
         </ul>
 
-        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span></h2>
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
         <ul class="bullets">
-          <li><span lang="en">If the browser has nothing worth stealing, a whole class of attacks becomes much less dangerous.</span><span lang="fr">Si le navigateur n'a rien qui vaille la peine d'être volé, toute une famille d'attaques devient beaucoup moins dangereuse.</span></li>
-          <li><span lang="en">Decoding a JWT is not validating it.</span><span lang="fr">Décoder un JWT, ce n'est pas le valider.</span></li>
-          <li><span lang="en">Token rotation is great for security, but it turns concurrent requests into a problem you have to design for.</span><span lang="fr">La rotation des tokens est excellente pour la sécurité, mais elle transforme les requêtes simultanées en un problème à prévoir.</span></li>
+          <li><span lang="en">If the browser has nothing worth stealing, a whole class of attacks becomes much less dangerous.</span><span lang="fr">Si le navigateur n'a rien qui vaille la peine d'être volé, toute une famille d'attaques devient beaucoup moins dangereuse.</span><span lang="ar">إذا لم يكن في المتصفح ما يستحق السرقة، تصبح عائلة كاملة من الهجمات أقل خطورة بكثير.</span></li>
+          <li><span lang="en">Decoding a JWT is not validating it.</span><span lang="fr">Décoder un JWT, ce n'est pas le valider.</span><span lang="ar">فك ترميز JWT ليس تحققاً منه.</span></li>
+          <li><span lang="en">Token rotation is great for security, but it turns concurrent requests into a problem you have to design for.</span><span lang="fr">La rotation des tokens est excellente pour la sécurité, mais elle transforme les requêtes simultanées en un problème à prévoir.</span><span lang="ar">تدوير الرموز ممتاز للأمن، لكنه يحوّل الطلبات المتزامنة إلى مشكلة يجب التحسّب لها.</span></li>
         </ul>
         <p><span lang="en">The full code is on GitHub: the SSO server in <a href="https://github.com/adelmerad/ShopAuth" target="_blank" rel="noopener">ShopAuth</a> and the BFF client in <a href="https://github.com/adelmerad/ShopWebApp" target="_blank" rel="noopener">ShopWebApp</a>. More about the project in the <a href="sso.html">case study</a>.</span>
-           <span lang="fr">Le code complet est sur GitHub : le serveur SSO dans <a href="https://github.com/adelmerad/ShopAuth" target="_blank" rel="noopener">ShopAuth</a> et le client BFF dans <a href="https://github.com/adelmerad/ShopWebApp" target="_blank" rel="noopener">ShopWebApp</a>. Plus de détails sur le projet dans l'<a href="sso.html">étude de cas</a>.</span></p>
+           <span lang="fr">Le code complet est sur GitHub : le serveur SSO dans <a href="https://github.com/adelmerad/ShopAuth" target="_blank" rel="noopener">ShopAuth</a> et le client BFF dans <a href="https://github.com/adelmerad/ShopWebApp" target="_blank" rel="noopener">ShopWebApp</a>. Plus de détails sur le projet dans l'<a href="sso.html">étude de cas</a>.</span><span lang="ar">الشيفرة كاملة على GitHub: خادم SSO في <a href="https://github.com/adelmerad/ShopAuth" target="_blank" rel="noopener">ShopAuth</a> والعميل BFF في <a href="https://github.com/adelmerad/ShopWebApp" target="_blank" rel="noopener">ShopWebApp</a>. ومزيد من التفاصيل عن المشروع في <a href="sso.html">دراسة الحالة</a>.</span></p>
       </div>
 
       <div class="cta">
-        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span></a>
-        <a class="btn ghost" href="sso.html"><span lang="en">SSO case study</span><span lang="fr">Étude de cas SSO</span> →</a>
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="sso.html"><span lang="en">SSO case study</span><span lang="fr">Étude de cas SSO</span><span lang="ar">دراسة حالة SSO</span> <span class="arr">→</span></a>
       </div>
     </article>
   </main>
