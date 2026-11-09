@@ -294,3 +294,7 @@ html[lang="ar"] body { line-height: 1.75; }
 html[dir="rtl"] .arr { display: inline-block; transform: scaleX(-1); }
 html[dir="rtl"] pre, html[dir="rtl"] code { direction: ltr; unicode-bidi: isolate; }
 html[dir="rtl"] pre { text-align: left; }
+
+/* Availability line */
+.status { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); font-size: 13px; color: var(--muted); }
+.status .clock { color: var(--text); }

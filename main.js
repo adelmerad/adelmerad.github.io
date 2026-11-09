@@ -44,3 +44,14 @@ if ("IntersectionObserver" in window) {
   }, { threshold: 0.12 });
   targets.forEach((el) => { el.classList.add("reveal"); io.observe(el); });
 }
+
+// Live local time in Algiers next to the availability line
+const clocks = document.querySelectorAll(".clock");
+if (clocks.length) {
+  const tick = () => {
+    const t = new Date().toLocaleTimeString("en-GB", { timeZone: "Africa/Algiers", hour: "2-digit", minute: "2-digit" });
+    clocks.forEach((c) => { c.textContent = t; });
+  };
+  tick();
+  setInterval(tick, 30000);
+}
