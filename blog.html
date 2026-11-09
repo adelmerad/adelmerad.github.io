@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog — Adel Merad</title>
+  <meta name="description" content="Articles by Adel Merad about what he builds and learns: authentication, backends, realtime and more.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog.html">
+  <meta property="og:title" content="Blog — Adel Merad">
+  <meta property="og:description" content="Articles about what I build and learn.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://adelmerad.github.io/blog.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
+      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="Blog — Adel Merad" data-title-fr="Blog — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span></a>
+        <a href="./#contact">Contact</a>
+      </nav>
+      <div class="toggles">
+        <button id="lang" class="pill" title="Français / English"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="case-hero">
+      <p class="kicker mono"><span class="live"></span>Blog</p>
+      <h1 class="case-title"><span lang="en">Notes from the work</span><span lang="fr">Notes de travail</span></h1>
+      <p class="lead">
+        <span lang="en">Short articles about problems I ran into while building real projects, and how I solved them.</span>
+        <span lang="fr">De courts articles sur les problèmes rencontrés en construisant de vrais projets, et comment je les ai résolus.</span>
+      </p>
+    </section>
+
+    <section class="case-section">
+      <ul class="posts">
+        <li>
+          <a class="post-card" href="blog-sso-bff.html">
+            <span class="mono muted"><span lang="en">November 2026 · 8 min read · Security</span><span lang="fr">Novembre 2026 · 8 min de lecture · Sécurité</span></span>
+            <h2><span lang="en">A single sign-on where the browser never sees a token</span><span lang="fr">Un SSO où le navigateur ne voit jamais un token</span></h2>
+            <p><span lang="en">PKCE, the Backend-for-Frontend pattern, and the race condition hidden in refresh token rotation, from my internship at Mobilis.</span><span lang="fr">PKCE, le pattern Backend-for-Frontend, et la situation de concurrence cachée dans la rotation des refresh tokens, tirés de mon stage chez Mobilis.</span></p>
+            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span> →</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
