@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" data-langs="en fr ar">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
     // Apply saved theme/language before paint to avoid a flash
@@ -34,12 +34,12 @@
     } catch {}
   </script>
 </head>
-<body class="case" data-title-en="Realtime Leaderboard — Adel Merad" data-title-fr="Realtime Leaderboard — Adel Merad">
+<body class="case" data-title-en="Realtime Leaderboard — Adel Merad" data-title-fr="Realtime Leaderboard — Adel Merad" data-title-ar="Realtime Leaderboard — Adel Merad">
   <header class="nav">
     <div class="wrap nav-inner">
       <a class="logo" href="./">AM<span class="dot">.</span></a>
       <nav class="links">
-        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span><span lang="ar">→ كل المشاريع</span></a>
       </nav>
       <div class="toggles">
         <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
@@ -52,85 +52,85 @@
     <section class="case-hero">
       <p class="kicker mono"><span class="live"></span>
         <span lang="en">Side project · 2026</span>
-        <span lang="fr">Projet perso · 2026</span>
+        <span lang="fr">Projet perso · 2026</span><span lang="ar">مشروع شخصي · 2026</span>
       </p>
       <h1 class="case-title">Realtime Leaderboard</h1>
       <p class="lead">
         <span lang="en">A leaderboard service for any game. Games send scores through a REST API, and everyone watching sees the rankings change live, with no refresh, even across several servers.</span>
-        <span lang="fr">Un service de classement pour n'importe quel jeu. Les jeux envoient leurs scores par une API REST, et tous ceux qui regardent voient le classement bouger en direct, sans recharger, même sur plusieurs serveurs.</span>
+        <span lang="fr">Un service de classement pour n'importe quel jeu. Les jeux envoient leurs scores par une API REST, et tous ceux qui regardent voient le classement bouger en direct, sans recharger, même sur plusieurs serveurs.</span><span lang="ar">خدمة ترتيب لأي لعبة. ترسل الألعاب نتائجها عبر REST API، ويرى كل المتابعين الترتيب يتغيّر مباشرةً، دون إعادة تحميل، حتى عبر عدة خوادم.</span>
       </p>
       <dl class="facts">
-        <div><dt><span lang="en">Role</span><span lang="fr">Rôle</span></dt><dd><span lang="en">Solo project: from a front-end prototype (2025) to a full service with a database, an API and tests (2026)</span><span lang="fr">Projet solo : d'un prototype front (2025) à un service complet avec base de données, API et tests (2026)</span></dd></div>
-        <div><dt><span lang="en">Hosting</span><span lang="fr">Hébergement</span></dt><dd><span lang="en">Render (Frankfurt) and Neon PostgreSQL</span><span lang="fr">Render (Francfort) et Neon PostgreSQL</span></dd></div>
-        <div><dt>Stack</dt><dd>Next.js 14 · TypeScript · PostgreSQL 16 · Prisma · Server-Sent Events · Zod · Vitest · Tailwind CSS</dd></div>
-        <div><dt><span lang="en">Links</span><span lang="fr">Liens</span></dt><dd><a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener"><span lang="en">Live demo</span><span lang="fr">Démo en ligne</span> ↗</a> · <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">Code ↗</a> <span class="muted"><span lang="en">(free hosting: up to a minute to wake up)</span><span lang="fr">(hébergement gratuit : jusqu'à une minute pour démarrer)</span></span></dd></div>
+        <div><dt><span lang="en">Role</span><span lang="fr">Rôle</span><span lang="ar">الدور</span></dt><dd><span lang="en">Solo project: from a front-end prototype (2025) to a full service with a database, an API and tests (2026)</span><span lang="fr">Projet solo : d'un prototype front (2025) à un service complet avec base de données, API et tests (2026)</span><span lang="ar">مشروع فردي: من نموذج أولي للواجهة (2025) إلى خدمة كاملة بقاعدة بيانات و API واختبارات (2026)</span></dd></div>
+        <div><dt><span lang="en">Hosting</span><span lang="fr">Hébergement</span><span lang="ar">الاستضافة</span></dt><dd><span lang="en">Render (Frankfurt) and Neon PostgreSQL</span><span lang="fr">Render (Francfort) et Neon PostgreSQL</span><span lang="ar">Render (فرانكفورت) و Neon PostgreSQL</span></dd></div>
+        <div><dt><span lang="en">Stack</span><span lang="fr">Stack</span><span lang="ar">التقنيات</span></dt><dd>Next.js 14 · TypeScript · PostgreSQL 16 · Prisma · Server-Sent Events · Zod · Vitest · Tailwind CSS</dd></div>
+        <div><dt><span lang="en">Links</span><span lang="fr">Liens</span><span lang="ar">الروابط</span></dt><dd><a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener"><span lang="en">Live demo</span><span lang="fr">Démo en ligne</span><span lang="ar">العرض التجريبي</span> ↗</a> · <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">Code ↗</a> <span class="muted"><span lang="en">(free hosting: up to a minute to wake up)</span><span lang="fr">(hébergement gratuit : jusqu'à une minute pour démarrer)</span><span lang="ar">(استضافة مجانية: قد يستغرق التشغيل حتى دقيقة)</span></span></dd></div>
       </dl>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">01</span><span lang="en">The challenge</span><span lang="fr">Le défi</span></h2>
+      <h2 class="h2"><span class="mono num">01</span><span lang="en">The challenge</span><span lang="fr">Le défi</span><span lang="ar">التحدي</span></h2>
       <div class="prose">
         <p><span lang="en">Showing a ranking is easy. Keeping it live for every viewer is not: when a score arrives on one server, viewers connected to another server must see it too, right away, without each browser polling the API every second.</span>
-           <span lang="fr">Afficher un classement, c'est facile. Le garder en direct pour tout le monde, beaucoup moins : quand un score arrive sur un serveur, ceux qui sont connectés à un autre serveur doivent le voir aussi, tout de suite, sans que chaque navigateur interroge l'API toutes les secondes.</span></p>
+           <span lang="fr">Afficher un classement, c'est facile. Le garder en direct pour tout le monde, beaucoup moins : quand un score arrive sur un serveur, ceux qui sont connectés à un autre serveur doivent le voir aussi, tout de suite, sans que chaque navigateur interroge l'API toutes les secondes.</span><span lang="ar">عرض ترتيب أمر سهل. إبقاؤه مباشراً للجميع أصعب بكثير: عندما تصل نتيجة إلى خادم، يجب أن يراها فوراً المتصلون بخادم آخر أيضاً، دون أن يستعلم كل متصفح الـ API كل ثانية.</span></p>
       </div>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">02</span><span lang="en">How it stays live</span><span lang="fr">Comment ça reste en direct</span></h2>
+      <h2 class="h2"><span class="mono num">02</span><span lang="en">How it stays live</span><span lang="fr">Comment ça reste en direct</span><span lang="ar">كيف يبقى الترتيب مباشراً</span></h2>
       <figure class="flow" aria-label="Realtime flow">
         <div class="flow-row">
-          <div class="node"><b><span lang="en">Game</span><span lang="fr">Jeu</span></b><small>POST /scores · API key</small></div>
+          <div class="node"><b><span lang="en">Game</span><span lang="fr">Jeu</span><span lang="ar">اللعبة</span></b><small>POST /scores · API key</small></div>
           <span class="arrow">→</span>
-          <div class="node"><b><span lang="en">Server A</span><span lang="fr">Serveur A</span></b><small>INSERT + NOTIFY</small></div>
+          <div class="node"><b><span lang="en">Server A</span><span lang="fr">Serveur A</span><span lang="ar">الخادم A</span></b><small>INSERT + NOTIFY</small></div>
           <span class="arrow">→</span>
           <div class="node core"><b>PostgreSQL</b><small>LISTEN / NOTIFY</small></div>
           <span class="arrow">→</span>
-          <div class="node"><b><span lang="en">Servers A, B…</span><span lang="fr">Serveurs A, B…</span></b><small>LISTEN</small></div>
+          <div class="node"><b><span lang="en">Servers A, B…</span><span lang="fr">Serveurs A, B…</span><span lang="ar">الخوادم A، B…</span></b><small>LISTEN</small></div>
           <span class="arrow">→</span>
-          <div class="node"><b><span lang="en">Viewers</span><span lang="fr">Spectateurs</span></b><small>Server-Sent Events</small></div>
+          <div class="node"><b><span lang="en">Viewers</span><span lang="fr">Spectateurs</span><span lang="ar">المتابعون</span></b><small>Server-Sent Events</small></div>
         </div>
       </figure>
       <div class="prose" style="margin-top:22px">
         <p><span lang="en">When a score is saved, the server publishes an event with PostgreSQL NOTIFY. Every server keeps one LISTEN connection and forwards the event to its own browsers over Server-Sent Events. Viewers on different servers stay in sync, with no Redis and no separate WebSocket server. Bursts of scores are grouped (200 ms) into a single ranking refresh per viewer.</span>
-           <span lang="fr">Quand un score est enregistré, le serveur publie un événement avec NOTIFY de PostgreSQL. Chaque serveur garde une connexion LISTEN et transmet l'événement à ses propres navigateurs par Server-Sent Events. Les spectateurs sur des serveurs différents restent synchronisés, sans Redis ni serveur WebSocket à part. Les rafales de scores sont regroupées (200 ms) en une seule mise à jour du classement par spectateur.</span></p>
+           <span lang="fr">Quand un score est enregistré, le serveur publie un événement avec NOTIFY de PostgreSQL. Chaque serveur garde une connexion LISTEN et transmet l'événement à ses propres navigateurs par Server-Sent Events. Les spectateurs sur des serveurs différents restent synchronisés, sans Redis ni serveur WebSocket à part. Les rafales de scores sont regroupées (200 ms) en une seule mise à jour du classement par spectateur.</span><span lang="ar">عند حفظ نتيجة، ينشر الخادم حدثاً عبر NOTIFY في PostgreSQL. ويحتفظ كل خادم باتصال LISTEN وينقل الحدث إلى متصفحاته عبر Server-Sent Events. فيبقى المتابعون على خوادم مختلفة متزامنين، دون Redis ولا خادم WebSocket منفصل. وتُجمَّع دفعات النتائج (200 ms) في تحديث واحد للترتيب لكل متابع.</span></p>
       </div>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">03</span><span lang="en">Key decisions</span><span lang="fr">Choix techniques</span></h2>
+      <h2 class="h2"><span class="mono num">03</span><span lang="en">Key decisions</span><span lang="fr">Choix techniques</span><span lang="ar">الخيارات التقنية</span></h2>
       <div class="decisions">
-        <article><h3><span lang="en">Fair ranking rules</span><span lang="fr">Des règles de classement justes</span></h3>
-          <p><span lang="en">Each player's best score per period is computed in SQL (DISTINCT ON). Ties share a rank ("1224" style) and the earliest player comes first. Games can be high-score or lowest-wins (speedruns).</span><span lang="fr">Le meilleur score de chaque joueur sur la période est calculé en SQL (DISTINCT ON). Les ex aequo partagent un rang (style « 1224 ») et le premier arrivé passe devant. Un jeu peut être au meilleur score ou au plus petit temps (speedruns).</span></p></article>
-        <article><h3><span lang="en">Secure API keys</span><span lang="fr">Des clés d'API sûres</span></h3>
-          <p><span lang="en">Each game gets its own key, shown once and stored only as a SHA-256 hash. Keys can be rotated from the admin panel, and comparisons are constant-time.</span><span lang="fr">Chaque jeu a sa propre clé, affichée une seule fois et stockée seulement sous forme de hash SHA-256. Les clés se renouvellent depuis l'admin, et les comparaisons sont en temps constant.</span></p></article>
-        <article><h3><span lang="en">Built to fail well</span><span lang="fr">Prévu pour les pannes</span></h3>
-          <p><span lang="en">Score submission is rate-limited (token bucket, 429 with Retry-After). SSE streams send heartbeats and browsers reconnect on their own; the database listener reconnects with exponential backoff when Neon suspends an idle database.</span><span lang="fr">L'envoi de scores est limité (token bucket, 429 avec Retry-After). Les flux SSE envoient des signaux de vie et les navigateurs se reconnectent seuls ; l'écoute de la base se reconnecte avec un délai croissant quand Neon met une base inactive en veille.</span></p></article>
+        <article><h3><span lang="en">Fair ranking rules</span><span lang="fr">Des règles de classement justes</span><span lang="ar">قواعد ترتيب عادلة</span></h3>
+          <p><span lang="en">Each player's best score per period is computed in SQL (DISTINCT ON). Ties share a rank ("1224" style) and the earliest player comes first. Games can be high-score or lowest-wins (speedruns).</span><span lang="fr">Le meilleur score de chaque joueur sur la période est calculé en SQL (DISTINCT ON). Les ex aequo partagent un rang (style « 1224 ») et le premier arrivé passe devant. Un jeu peut être au meilleur score ou au plus petit temps (speedruns).</span><span lang="ar">تُحسب أفضل نتيجة لكل لاعب خلال الفترة بـ SQL (DISTINCT ON). المتعادلون يتقاسمون المرتبة (بأسلوب « 1224 ») ومن سبق يتقدّم. ويمكن أن تعتمد اللعبة على أعلى نتيجة أو على أقصر وقت (speedruns).</span></p></article>
+        <article><h3><span lang="en">Secure API keys</span><span lang="fr">Des clés d'API sûres</span><span lang="ar">مفاتيح API آمنة</span></h3>
+          <p><span lang="en">Each game gets its own key, shown once and stored only as a SHA-256 hash. Keys can be rotated from the admin panel, and comparisons are constant-time.</span><span lang="fr">Chaque jeu a sa propre clé, affichée une seule fois et stockée seulement sous forme de hash SHA-256. Les clés se renouvellent depuis l'admin, et les comparaisons sont en temps constant.</span><span lang="ar">لكل لعبة مفتاحها الخاص، يُعرض مرة واحدة ولا يُخزَّن إلا على شكل hash من نوع SHA-256. وتُجدَّد المفاتيح من لوحة الإدارة، وتتم المقارنات في زمن ثابت.</span></p></article>
+        <article><h3><span lang="en">Built to fail well</span><span lang="fr">Prévu pour les pannes</span><span lang="ar">مُصمَّم لتحمّل الأعطال</span></h3>
+          <p><span lang="en">Score submission is rate-limited (token bucket, 429 with Retry-After). SSE streams send heartbeats and browsers reconnect on their own; the database listener reconnects with exponential backoff when Neon suspends an idle database.</span><span lang="fr">L'envoi de scores est limité (token bucket, 429 avec Retry-After). Les flux SSE envoient des signaux de vie et les navigateurs se reconnectent seuls ; l'écoute de la base se reconnecte avec un délai croissant quand Neon met une base inactive en veille.</span><span lang="ar">إرسال النتائج محدود المعدّل (token bucket، و 429 مع Retry-After). وترسل تدفقات SSE إشارات حياة وتعيد المتصفحات الاتصال تلقائياً؛ ويعيد الاستماع لقاعدة البيانات الاتصال بمهلة متزايدة عندما يضع Neon قاعدة غير نشطة في وضع السكون.</span></p></article>
       </div>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">04</span><span lang="en">Screens</span><span lang="fr">Écrans</span></h2>
+      <h2 class="h2"><span class="mono num">04</span><span lang="en">Screens</span><span lang="fr">Écrans</span><span lang="ar">الشاشات</span></h2>
       <div class="gallery two-up">
-        <figure><img src="assets/projects/leaderboard-live.jpg" width="1280" height="1000" loading="lazy" alt="Live leaderboard of a game"><figcaption><span lang="en">A game's live ranking, with period filters</span><span lang="fr">Le classement en direct d'un jeu, avec les filtres de période</span></figcaption></figure>
-        <figure><img src="assets/projects/leaderboard-admin.jpg" width="1280" height="929" loading="lazy" alt="Admin dashboard"><figcaption><span lang="en">Admin: games, keys and manual scores</span><span lang="fr">Admin : jeux, clés et scores ajoutés à la main</span></figcaption></figure>
+        <figure><img src="assets/projects/leaderboard-live.jpg" width="1280" height="1000" loading="lazy" alt="Live leaderboard of a game"><figcaption><span lang="en">A game's live ranking, with period filters</span><span lang="fr">Le classement en direct d'un jeu, avec les filtres de période</span><span lang="ar">الترتيب المباشر للعبة، مع مرشّحات الفترة</span></figcaption></figure>
+        <figure><img src="assets/projects/leaderboard-admin.jpg" width="1280" height="929" loading="lazy" alt="Admin dashboard"><figcaption><span lang="en">Admin: games, keys and manual scores</span><span lang="fr">Admin : jeux, clés et scores ajoutés à la main</span><span lang="ar">لوحة الإدارة: الألعاب والمفاتيح والنتائج المضافة يدوياً</span></figcaption></figure>
       </div>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span></h2>
+      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span><span lang="ar">ما تعلّمته</span></h2>
       <div class="prose">
         <ul class="bullets">
-          <li><span lang="en">Realtime without extra infrastructure: PostgreSQL LISTEN/NOTIFY and Server-Sent Events are often enough.</span><span lang="fr">Du temps réel sans infrastructure en plus : LISTEN/NOTIFY de PostgreSQL et les Server-Sent Events suffisent souvent.</span></li>
-          <li><span lang="en">Why some apps cannot run serverless: long-lived connections need a real Node.js server, and poolers do not support LISTEN.</span><span lang="fr">Pourquoi certaines applis ne peuvent pas tourner en serverless : les connexions longues demandent un vrai serveur Node.js, et les poolers ne gèrent pas LISTEN.</span></li>
-          <li><span lang="en">Testing the rules that matter: ranking and ties, period boundaries, key hashing, session expiry and rate limiting are covered by unit tests.</span><span lang="fr">Tester les règles qui comptent : classement et ex aequo, limites des périodes, hash des clés, expiration de session et limitation de débit sont couverts par des tests unitaires.</span></li>
+          <li><span lang="en">Realtime without extra infrastructure: PostgreSQL LISTEN/NOTIFY and Server-Sent Events are often enough.</span><span lang="fr">Du temps réel sans infrastructure en plus : LISTEN/NOTIFY de PostgreSQL et les Server-Sent Events suffisent souvent.</span><span lang="ar">الوقت الحقيقي دون بنية إضافية: LISTEN/NOTIFY في PostgreSQL و Server-Sent Events تكفي غالباً.</span></li>
+          <li><span lang="en">Why some apps cannot run serverless: long-lived connections need a real Node.js server, and poolers do not support LISTEN.</span><span lang="fr">Pourquoi certaines applis ne peuvent pas tourner en serverless : les connexions longues demandent un vrai serveur Node.js, et les poolers ne gèrent pas LISTEN.</span><span lang="ar">لماذا لا يمكن لبعض التطبيقات العمل بنمط serverless: الاتصالات الطويلة تتطلب خادم Node.js حقيقياً، والـ poolers لا تدعم LISTEN.</span></li>
+          <li><span lang="en">Testing the rules that matter: ranking and ties, period boundaries, key hashing, session expiry and rate limiting are covered by unit tests.</span><span lang="fr">Tester les règles qui comptent : classement et ex aequo, limites des périodes, hash des clés, expiration de session et limitation de débit sont couverts par des tests unitaires.</span><span lang="ar">اختبار القواعد المهمة: الترتيب والتعادل، وحدود الفترات، وتشفير المفاتيح، وانتهاء الجلسة، وتحديد المعدّل، كلها مغطّاة باختبارات وحدات.</span></li>
         </ul>
-        <p class="muted"><span lang="en">Next step: the rate limiter lives in memory, per server; behind a load balancer it should move to a shared store.</span><span lang="fr">Piste d'amélioration : la limitation de débit est en mémoire, par serveur ; derrière un répartiteur de charge, elle devrait passer dans un stockage partagé.</span></p>
+        <p class="muted"><span lang="en">Next step: the rate limiter lives in memory, per server; behind a load balancer it should move to a shared store.</span><span lang="fr">Piste d'amélioration : la limitation de débit est en mémoire, par serveur ; derrière un répartiteur de charge, elle devrait passer dans un stockage partagé.</span><span lang="ar">تحسين ممكن: تحديد المعدّل محفوظ في الذاكرة لكل خادم؛ وخلف موزّع للحمل يجب نقله إلى تخزين مشترك.</span></p>
       </div>
       <div class="cta">
-        <a class="btn primary" href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener"><span lang="en">Try the demo</span><span lang="fr">Essayer la démo</span> ↗</a>
+        <a class="btn primary" href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener"><span lang="en">Try the demo</span><span lang="fr">Essayer la démo</span><span lang="ar">جرّب العرض التجريبي</span> ↗</a>
         <a class="btn" href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">GitHub ↗</a>
-        <a class="btn" href="blog-realtime.html"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span> →</a>
-        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+        <a class="btn" href="blog-realtime.html"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span><span lang="ar">اقرأ المقال</span> <span class="arr">→</span></a>
+        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span><span lang="ar">→ كل المشاريع</span></a>
       </div>
     </section>
   </main>
