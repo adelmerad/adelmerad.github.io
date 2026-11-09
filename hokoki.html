@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" data-langs="en fr ar">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
     // Apply saved theme/language before paint to avoid a flash
@@ -34,12 +34,12 @@
     } catch {}
   </script>
 </head>
-<body class="case" data-title-en="HOKOKI — Adel Merad" data-title-fr="HOKOKI — Adel Merad">
+<body class="case" data-title-en="HOKOKI — Adel Merad" data-title-fr="HOKOKI — Adel Merad" data-title-ar="HOKOKI (حقوقي) — Adel Merad">
   <header class="nav">
     <div class="wrap nav-inner">
       <a class="logo" href="./">AM<span class="dot">.</span></a>
       <nav class="links">
-        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+        <a href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span><span lang="ar">→ كل المشاريع</span></a>
       </nav>
       <div class="toggles">
         <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
@@ -52,90 +52,90 @@
     <section class="case-hero">
       <p class="kicker mono"><span class="live"></span>
         <span lang="en">NCS Hackathon · June 2026</span>
-        <span lang="fr">Hackathon NCS · Juin 2026</span>
+        <span lang="fr">Hackathon NCS · Juin 2026</span><span lang="ar">هاكاثون NCS · جوان 2026</span>
       </p>
       <h1 class="case-title">HOKOKI</h1>
       <p class="lead">
         <span lang="en">An AI legal assistant for Algeria: ask a legal question in Arabic, check a contract, follow an administrative procedure step by step, or find a lawyer.</span>
-        <span lang="fr">Un assistant juridique IA pour l'Algérie : poser une question de droit en arabe, vérifier un contrat, suivre une démarche administrative pas à pas, ou trouver un avocat.</span>
+        <span lang="fr">Un assistant juridique IA pour l'Algérie : poser une question de droit en arabe, vérifier un contrat, suivre une démarche administrative pas à pas, ou trouver un avocat.</span><span lang="ar">مساعد قانوني بالذكاء الاصطناعي للجزائر: اطرح سؤالاً قانونياً بالعربية، أو تحقّق من عقد، أو اتبع إجراءً إدارياً خطوة بخطوة، أو ابحث عن محامٍ.</span>
       </p>
       <dl class="facts">
-        <div><dt><span lang="en">Team</span><span lang="fr">Équipe</span></dt><dd><span lang="en">Team project. I worked across the front end, the API and the AI service.</span><span lang="fr">Projet d'équipe. J'ai travaillé sur le front, l'API et le service IA.</span></dd></div>
-        <div><dt><span lang="en">Context</span><span lang="fr">Contexte</span></dt><dd><span lang="en">NCS Hackathon, Algiers</span><span lang="fr">Hackathon NCS, Alger</span></dd></div>
-        <div><dt>Stack</dt><dd>React · TypeScript · Tailwind CSS · NestJS · PostgreSQL · LangChain · Chroma · Llama 3.3 (Groq)</dd></div>
-        <div><dt><span lang="en">Links</span><span lang="fr">Liens</span></dt><dd><a href="https://hokoki.vercel.app" target="_blank" rel="noopener"><span lang="en">Live demo</span><span lang="fr">Démo en ligne</span> ↗</a> · <a href="https://github.com/adelmerad/HOKOKI" target="_blank" rel="noopener">Code ↗</a> · <a href="https://github.com/Hokoki-DZ" target="_blank" rel="noopener"><span lang="en">Team organization</span><span lang="fr">Organisation de l'équipe</span> ↗</a></dd></div>
+        <div><dt><span lang="en">Team</span><span lang="fr">Équipe</span><span lang="ar">الفريق</span></dt><dd><span lang="en">Team project. I worked across the front end, the API and the AI service.</span><span lang="fr">Projet d'équipe. J'ai travaillé sur le front, l'API et le service IA.</span><span lang="ar">مشروع جماعي. عملت على الواجهة والـ API وخدمة الذكاء الاصطناعي.</span></dd></div>
+        <div><dt><span lang="en">Context</span><span lang="fr">Contexte</span><span lang="ar">السياق</span></dt><dd><span lang="en">NCS Hackathon, Algiers</span><span lang="fr">Hackathon NCS, Alger</span><span lang="ar">هاكاثون NCS، الجزائر العاصمة</span></dd></div>
+        <div><dt><span lang="en">Stack</span><span lang="fr">Stack</span><span lang="ar">التقنيات</span></dt><dd>React · TypeScript · Tailwind CSS · NestJS · PostgreSQL · LangChain · Chroma · Llama 3.3 (Groq)</dd></div>
+        <div><dt><span lang="en">Links</span><span lang="fr">Liens</span><span lang="ar">الروابط</span></dt><dd><a href="https://hokoki.vercel.app" target="_blank" rel="noopener"><span lang="en">Live demo</span><span lang="fr">Démo en ligne</span><span lang="ar">العرض التجريبي</span> ↗</a> · <a href="https://github.com/adelmerad/HOKOKI" target="_blank" rel="noopener">Code ↗</a> · <a href="https://github.com/Hokoki-DZ" target="_blank" rel="noopener"><span lang="en">Team organization</span><span lang="fr">Organisation de l'équipe</span><span lang="ar">منظمة الفريق</span> ↗</a></dd></div>
       </dl>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">01</span><span lang="en">The problem</span><span lang="fr">Le problème</span></h2>
+      <h2 class="h2"><span class="mono num">01</span><span lang="en">The problem</span><span lang="fr">Le problème</span><span lang="ar">المشكلة</span></h2>
       <div class="prose">
         <p><span lang="en">Algerian law is spread across official texts that are hard to search and hard to read. Most people don't know their rights, don't understand the contracts they sign, and get lost in administrative procedures. Asking a lawyer for every small question is expensive.</span>
-           <span lang="fr">Le droit algérien est éparpillé dans des textes officiels difficiles à chercher et à lire. La plupart des gens ne connaissent pas leurs droits, ne comprennent pas les contrats qu'ils signent et se perdent dans les démarches administratives. Consulter un avocat pour chaque petite question coûte cher.</span></p>
+           <span lang="fr">Le droit algérien est éparpillé dans des textes officiels difficiles à chercher et à lire. La plupart des gens ne connaissent pas leurs droits, ne comprennent pas les contrats qu'ils signent et se perdent dans les démarches administratives. Consulter un avocat pour chaque petite question coûte cher.</span><span lang="ar">القانون الجزائري متفرّق في نصوص رسمية يصعب البحث فيها وقراءتها. أغلب الناس لا يعرفون حقوقهم، ولا يفهمون العقود التي يوقّعونها، ويضيعون في الإجراءات الإدارية. واستشارة محامٍ في كل سؤال صغير مكلفة.</span></p>
         <p><span lang="en">HOKOKI ("my rights") puts everything in one mobile app, in Arabic.</span>
-           <span lang="fr">HOKOKI (« mes droits ») réunit tout dans une seule appli mobile, en arabe.</span></p>
+           <span lang="fr">HOKOKI (« mes droits ») réunit tout dans une seule appli mobile, en arabe.</span><span lang="ar">تطبيق « حقوقي » (HOKOKI) يجمع كل ذلك في تطبيق واحد للهاتف، باللغة العربية.</span></p>
       </div>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">02</span>Architecture</h2>
+      <h2 class="h2"><span class="mono num">02</span><span lang="en">Architecture</span><span lang="fr">Architecture</span><span lang="ar">البنية</span></h2>
       <div class="case-split">
         <img class="case-img" src="assets/projects/hokoki.jpg" width="1200" height="750" loading="lazy" alt="HOKOKI mobile screens: legal assistant, home and lawyers">
         <ul class="parts">
-          <li><h3><span lang="en">Mobile-first web app</span><span lang="fr">Appli web mobile</span></h3>
-            <p><span lang="en">React, TypeScript and Tailwind, right-to-left Arabic interface, with screens for citizens and a dashboard for lawyers.</span><span lang="fr">React, TypeScript et Tailwind, interface en arabe de droite à gauche, avec des écrans pour les citoyens et un tableau de bord pour les avocats.</span></p></li>
-          <li><h3><span lang="en">Main API</span><span lang="fr">API principale</span></h3>
-            <p><span lang="en">NestJS and PostgreSQL: JWT authentication, laws, procedures with per-user progress, conversations, lawyer bookings, notifications, Swagger docs and rate limiting.</span><span lang="fr">NestJS et PostgreSQL : authentification JWT, lois, démarches avec la progression de chaque utilisateur, conversations, réservations d'avocats, notifications, documentation Swagger et limitation du débit.</span></p></li>
-          <li><h3><span lang="en">AI service</span><span lang="fr">Service IA</span></h3>
-            <p><span lang="en">A separate TypeScript service with LangChain: official law PDFs are split into articles, embedded and stored in a Chroma vector database; Llama 3.3 70B (via Groq) answers from the retrieved articles.</span><span lang="fr">Un service TypeScript séparé avec LangChain : les PDF officiels des lois sont découpés en articles, vectorisés et stockés dans une base vectorielle Chroma ; Llama 3.3 70B (via Groq) répond à partir des articles retrouvés.</span></p></li>
+          <li><h3><span lang="en">Mobile-first web app</span><span lang="fr">Appli web mobile</span><span lang="ar">تطبيق ويب للهاتف</span></h3>
+            <p><span lang="en">React, TypeScript and Tailwind, right-to-left Arabic interface, with screens for citizens and a dashboard for lawyers.</span><span lang="fr">React, TypeScript et Tailwind, interface en arabe de droite à gauche, avec des écrans pour les citoyens et un tableau de bord pour les avocats.</span><span lang="ar">React و TypeScript و Tailwind، بواجهة عربية من اليمين إلى اليسار، مع شاشات للمواطنين ولوحة تحكم للمحامين.</span></p></li>
+          <li><h3><span lang="en">Main API</span><span lang="fr">API principale</span><span lang="ar">الـ API الرئيسية</span></h3>
+            <p><span lang="en">NestJS and PostgreSQL: JWT authentication, laws, procedures with per-user progress, conversations, lawyer bookings, notifications, Swagger docs and rate limiting.</span><span lang="fr">NestJS et PostgreSQL : authentification JWT, lois, démarches avec la progression de chaque utilisateur, conversations, réservations d'avocats, notifications, documentation Swagger et limitation du débit.</span><span lang="ar">NestJS و PostgreSQL: مصادقة JWT، والقوانين، والإجراءات مع تقدّم كل مستخدم، والمحادثات، وحجز المحامين، والإشعارات، وتوثيق Swagger، وتحديد معدّل الطلبات.</span></p></li>
+          <li><h3><span lang="en">AI service</span><span lang="fr">Service IA</span><span lang="ar">خدمة الذكاء الاصطناعي</span></h3>
+            <p><span lang="en">A separate TypeScript service with LangChain: official law PDFs are split into articles, embedded and stored in a Chroma vector database; Llama 3.3 70B (via Groq) answers from the retrieved articles.</span><span lang="fr">Un service TypeScript séparé avec LangChain : les PDF officiels des lois sont découpés en articles, vectorisés et stockés dans une base vectorielle Chroma ; Llama 3.3 70B (via Groq) répond à partir des articles retrouvés.</span><span lang="ar">خدمة TypeScript مستقلة مع LangChain: تُقسَّم ملفات PDF الرسمية للقوانين إلى مواد، وتُحوَّل إلى متجهات وتُخزَّن في قاعدة بيانات متجهية Chroma؛ ويجيب نموذج Llama 3.3 70B (عبر Groq) انطلاقاً من المواد المسترجعة.</span></p></li>
         </ul>
       </div>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">03</span><span lang="en">How the AI works</span><span lang="fr">Comment fonctionne l'IA</span></h2>
+      <h2 class="h2"><span class="mono num">03</span><span lang="en">How the AI works</span><span lang="fr">Comment fonctionne l'IA</span><span lang="ar">كيف يعمل الذكاء الاصطناعي</span></h2>
       <div class="decisions">
         <article>
-          <h3><span lang="en">Answers grounded in the law</span><span lang="fr">Des réponses fondées sur la loi</span></h3>
+          <h3><span lang="en">Answers grounded in the law</span><span lang="fr">Des réponses fondées sur la loi</span><span lang="ar">إجابات مبنية على القانون</span></h3>
           <p><span lang="en">For each question, the service retrieves the most relevant articles (RAG) and the model answers from them, citing articles and sources instead of answering from memory.</span>
-             <span lang="fr">Pour chaque question, le service retrouve les articles les plus pertinents (RAG) et le modèle répond à partir d'eux, en citant articles et sources au lieu de répondre de mémoire.</span></p>
+             <span lang="fr">Pour chaque question, le service retrouve les articles les plus pertinents (RAG) et le modèle répond à partir d'eux, en citant articles et sources au lieu de répondre de mémoire.</span><span lang="ar">لكل سؤال، تسترجع الخدمة المواد الأكثر صلة (RAG) ويجيب النموذج انطلاقاً منها، مع ذكر المواد والمصادر بدل الإجابة من الذاكرة.</span></p>
         </article>
         <article>
-          <h3><span lang="en">Contract analysis</span><span lang="fr">Analyse de contrats</span></h3>
+          <h3><span lang="en">Contract analysis</span><span lang="fr">Analyse de contrats</span><span lang="ar">تحليل العقود</span></h3>
           <p><span lang="en">A contract (text or PDF) is compared with the relevant legal articles. The result is a structured report validated by a schema: a compliance score out of 100, each issue with its severity, the article it breaks and a suggested fix, plus the mandatory clauses that are missing.</span>
-             <span lang="fr">Un contrat (texte ou PDF) est comparé aux articles de loi pertinents. Le résultat est un rapport structuré validé par un schéma : un score de conformité sur 100, chaque problème avec sa gravité, l'article enfreint et une correction proposée, plus les clauses obligatoires manquantes.</span></p>
+             <span lang="fr">Un contrat (texte ou PDF) est comparé aux articles de loi pertinents. Le résultat est un rapport structuré validé par un schéma : un score de conformité sur 100, chaque problème avec sa gravité, l'article enfreint et une correction proposée, plus les clauses obligatoires manquantes.</span><span lang="ar">يُقارَن العقد (نصاً أو PDF) بمواد القانون ذات الصلة. والنتيجة تقرير منظَّم يُتحقَّق منه بمخطط (schema): درجة مطابقة من 100، وكل مشكلة مع درجة خطورتها والمادة المخالَفة وتصحيح مقترح، إضافةً إلى البنود الإلزامية الناقصة.</span></p>
         </article>
         <article>
-          <h3><span lang="en">Procedure guides</span><span lang="fr">Guides de démarches</span></h3>
+          <h3><span lang="en">Procedure guides</span><span lang="fr">Guides de démarches</span><span lang="ar">أدلة الإجراءات</span></h3>
           <p><span lang="en">The service first classifies the user's situation, then builds a step-by-step guide with the documents to bring and where to go, keeping the conversation history.</span>
-             <span lang="fr">Le service classe d'abord la situation de l'utilisateur, puis construit un guide pas à pas avec les documents à fournir et où aller, en gardant l'historique de la conversation.</span></p>
+             <span lang="fr">Le service classe d'abord la situation de l'utilisateur, puis construit un guide pas à pas avec les documents à fournir et où aller, en gardant l'historique de la conversation.</span><span lang="ar">تصنّف الخدمة أولاً وضعية المستخدم، ثم تبني دليلاً خطوة بخطوة بالوثائق المطلوبة والجهة التي يجب التوجه إليها، مع الاحتفاظ بسجل المحادثة.</span></p>
         </article>
       </div>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">04</span><span lang="en">Screens</span><span lang="fr">Écrans</span></h2>
-      <p class="muted note-top"><span lang="en">Laws browser, procedures, contract analyzer and the lawyer dashboard (demo data).</span><span lang="fr">Les lois, les démarches, l'analyse de contrats et le tableau de bord avocat (données de démonstration).</span></p>
+      <h2 class="h2"><span class="mono num">04</span><span lang="en">Screens</span><span lang="fr">Écrans</span><span lang="ar">الشاشات</span></h2>
+      <p class="muted note-top"><span lang="en">Laws browser, procedures, contract analyzer and the lawyer dashboard (demo data).</span><span lang="fr">Les lois, les démarches, l'analyse de contrats et le tableau de bord avocat (données de démonstration).</span><span lang="ar">القوانين، والإجراءات، وتحليل العقود، ولوحة تحكم المحامي (بيانات تجريبية).</span></p>
       <div class="gallery">
         <figure><img src="assets/projects/hokoki-screens.jpg" width="1340" height="705" loading="lazy" alt="HOKOKI screens: laws, procedures, contract analysis and lawyer dashboard"></figure>
       </div>
       <p class="muted"><span lang="en">The public demo runs without the AI service: the app uses sample data and labelled sample answers. Sign in with any phone number and password (e.g. 0555123456 / demo1234).</span>
-         <span lang="fr">La démo publique tourne sans le service IA : l'appli utilise des données d'exemple et des réponses d'exemple signalées comme telles. Connectez-vous avec n'importe quel numéro et mot de passe (ex. 0555123456 / demo1234).</span></p>
+         <span lang="fr">La démo publique tourne sans le service IA : l'appli utilise des données d'exemple et des réponses d'exemple signalées comme telles. Connectez-vous avec n'importe quel numéro et mot de passe (ex. 0555123456 / demo1234).</span><span lang="ar">العرض التجريبي العام يعمل دون خدمة الذكاء الاصطناعي: يستعمل التطبيق بيانات نموذجية وإجابات نموذجية مشار إليها بوضوح. سجّل الدخول بأي رقم وكلمة مرور (مثلاً 0555123456 / demo1234).</span></p>
     </section>
 
     <section class="case-section">
-      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span></h2>
+      <h2 class="h2"><span class="mono num">05</span><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span><span lang="ar">ما تعلّمته</span></h2>
       <div class="prose">
         <ul class="bullets">
-          <li><span lang="en">Building a RAG pipeline end to end: turning official PDFs into searchable articles, then getting answers that cite their sources.</span><span lang="fr">Construire une chaîne RAG de bout en bout : transformer des PDF officiels en articles consultables, puis obtenir des réponses qui citent leurs sources.</span></li>
-          <li><span lang="en">Asking a model for structured output validated by a schema, so the front end can display a report instead of free text.</span><span lang="fr">Demander à un modèle une sortie structurée validée par un schéma, pour que le front affiche un rapport et non du texte libre.</span></li>
-          <li><span lang="en">Shipping a full product with a team in a few days: splitting the work between front end, API and AI, and agreeing on the contracts between them.</span><span lang="fr">Livrer un produit complet en équipe en quelques jours : répartir le travail entre front, API et IA, et se mettre d'accord sur les échanges entre eux.</span></li>
+          <li><span lang="en">Building a RAG pipeline end to end: turning official PDFs into searchable articles, then getting answers that cite their sources.</span><span lang="fr">Construire une chaîne RAG de bout en bout : transformer des PDF officiels en articles consultables, puis obtenir des réponses qui citent leurs sources.</span><span lang="ar">بناء سلسلة RAG من البداية إلى النهاية: تحويل ملفات PDF رسمية إلى مواد قابلة للبحث، ثم الحصول على إجابات تذكر مصادرها.</span></li>
+          <li><span lang="en">Asking a model for structured output validated by a schema, so the front end can display a report instead of free text.</span><span lang="fr">Demander à un modèle une sortie structurée validée par un schéma, pour que le front affiche un rapport et non du texte libre.</span><span lang="ar">مطالبة النموذج بمخرجات منظَّمة يُتحقَّق منها بمخطط، لكي تعرض الواجهة تقريراً لا نصاً حراً.</span></li>
+          <li><span lang="en">Shipping a full product with a team in a few days: splitting the work between front end, API and AI, and agreeing on the contracts between them.</span><span lang="fr">Livrer un produit complet en équipe en quelques jours : répartir le travail entre front, API et IA, et se mettre d'accord sur les échanges entre eux.</span><span lang="ar">تسليم منتج كامل ضمن فريق في أيام قليلة: توزيع العمل بين الواجهة والـ API والذكاء الاصطناعي، والاتفاق على طريقة التواصل بينها.</span></li>
         </ul>
       </div>
       <div class="cta">
-        <a class="btn primary" href="https://hokoki.vercel.app" target="_blank" rel="noopener"><span lang="en">Try the demo</span><span lang="fr">Essayer la démo</span> ↗</a>
+        <a class="btn primary" href="https://hokoki.vercel.app" target="_blank" rel="noopener"><span lang="en">Try the demo</span><span lang="fr">Essayer la démo</span><span lang="ar">جرّب العرض التجريبي</span> ↗</a>
         <a class="btn" href="https://github.com/adelmerad/HOKOKI" target="_blank" rel="noopener">GitHub ↗</a>
-        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span></a>
+        <a class="btn ghost" href="./#work"><span lang="en">← All projects</span><span lang="fr">← Tous les projets</span><span lang="ar">→ كل المشاريع</span></a>
       </div>
     </section>
   </main>
