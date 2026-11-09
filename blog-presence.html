@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I replaced a paper attendance book with a web app — Adel Merad</title>
+  <meta name="description" content="The story of a small internal tool at a medical imaging center: from a notebook and hand-made payroll to a phone-first web app, and what building for one real user taught me.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-presence.html">
+  <meta property="og:title" content="I replaced a paper attendance book with a web app">
+  <meta property="og:description" content="What building a small tool for one real user taught me.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-presence.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
+      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="I replaced a paper attendance book with a web app — Adel Merad" data-title-fr="J'ai remplacé un cahier de présence par une appli web — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html">Blog</a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span></a>
+      </nav>
+      <div class="toggles">
+        <button id="lang" class="pill" title="Français / English"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 6 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 6 min de lecture</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">I replaced a paper attendance book with a web app</span>
+          <span lang="fr">J'ai remplacé un cahier de présence par une appli web</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">Not a startup, not a hackathon: a small tool for one real user at the medical imaging center I manage. It taught me more about building software than many bigger projects.</span>
+          <span lang="fr">Pas une startup, pas un hackathon : un petit outil pour un seul vrai utilisateur, dans le centre d'imagerie médicale que je gère. Il m'a appris plus sur la conception de logiciels que bien des projets plus gros.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+        <h2><span lang="en">The notebook</span><span lang="fr">Le cahier</span></h2>
+        <p><span lang="en">At the center, attendance was written in a notebook, and at the end of each month the pay was calculated by hand. That sounds simple until you look at the rules. Some staff are paid per day, depending on their role. The radiographer is paid per scan. Technicians and receptionists who also run scans get a bonus per scan. Replacement doctors are paid an amount agreed for the day. The head doctor is tracked but not paid through this system.</span>
+           <span lang="fr">Au centre, les présences étaient notées dans un cahier, et en fin de mois la paie était calculée à la main. Ça paraît simple, jusqu'à ce qu'on regarde les règles. Certains sont payés à la journée, selon leur rôle. Le manipulateur est payé à l'acte. Les techniciens et réceptionnistes qui font aussi des examens touchent un bonus par examen. Les médecins remplaçants sont payés un montant convenu pour la journée. Le médecin chef est suivi, mais pas payé par ce système.</span></p>
+        <p><span lang="en">The result: mistakes were easy, and nobody knew the month's total until the month was over.</span>
+           <span lang="fr">Résultat : les erreurs étaient faciles, et personne ne connaissait le total du mois avant la fin du mois.</span></p>
+
+        <h2><span lang="en">Version 1: as small as possible</span><span lang="fr">Version 1 : le plus petit possible</span></h2>
+        <p><span lang="en">The first version, in August 2026, ran on one computer at the center. Data was saved in JSON files, and a small script started the app. No server, no account, no hosting. It was enough to answer the only question that mattered at first: does a calendar with live totals really replace the notebook?</span>
+           <span lang="fr">La première version, en août 2026, tournait sur un seul ordinateur du centre. Les données étaient enregistrées dans des fichiers JSON, et un petit script lançait l'appli. Pas de serveur, pas de compte, pas d'hébergement. C'était suffisant pour répondre à la seule question qui comptait au départ : un calendrier avec des totaux en direct remplace-t-il vraiment le cahier ?</span></p>
+        <p><span lang="en">It did. And it immediately raised the next need: entering attendance from a phone, from anywhere, not only from that one computer.</span>
+           <span lang="fr">Oui. Et ça a tout de suite fait apparaître le besoin suivant : saisir les présences depuis un téléphone, de n'importe où, pas seulement depuis cet ordinateur.</span></p>
+
+        <h2><span lang="en">Turning the rules into one small function</span><span lang="fr">Transformer les règles en une petite fonction</span></h2>
+        <p><span lang="en">The key design decision was the data model. For each day and each employee, the app stores one value: <code>true</code> for "present", or a number. The number means the scans done by the radiographer, extra scans done by a technician or receptionist, or the amount paid to a replacement doctor. One value per cell, and all the complexity lives in a single, readable function:</span>
+           <span lang="fr">La décision clé a été le modèle de données. Pour chaque jour et chaque employé, l'appli enregistre une seule valeur : <code>true</code> pour « présent », ou un nombre. Ce nombre représente les examens du manipulateur, les examens faits en plus par un technicien ou un réceptionniste, ou le montant versé à un médecin remplaçant. Une valeur par case, et toute la complexité tient dans une seule fonction lisible :</span></p>
+<pre><code>export function dailyPay(employee, value, rates): number {
+  if (value === undefined) return 0            // absent
+  if (employee.monthlySalary) {                // fixed salary: only extra scans count
+    return typeof value === "number" &amp;&amp; canDoBonusScans(employee.role)
+      ? value * rates.scanBonus : 0
+  }
+  switch (employee.role) {
+    case "chef":         return 0                               // not paid here
+    case "medecin":      return typeof value === "number" ? value : 0
+    case "manipulateur": return typeof value === "number" ? value * rates.manipulateur : 0
+    default:             // present, maybe with extra scans
+      return typeof value === "number" &amp;&amp; canDoBonusScans(employee.role)
+        ? rates[employee.role] + value * rates.scanBonus
+        : rates[employee.role]
+  }
+}</code></pre>
+        <p><span lang="en">The month's payslip is just this function summed over the days. Because it is recalculated on every entry, the total is always up to date.</span>
+           <span lang="fr">La fiche de paie du mois, c'est simplement cette fonction additionnée sur les jours. Comme elle est recalculée à chaque saisie, le total est toujours à jour.</span></p>
+
+        <h2><span lang="en">Version 2: online, on a phone</span><span lang="fr">Version 2 : en ligne, sur téléphone</span></h2>
+        <p><span lang="en">In October, the app moved online: Next.js on Vercel, data in Upstash Redis, both on free plans. Three things mattered:</span>
+           <span lang="fr">En octobre, l'appli est passée en ligne : Next.js sur Vercel, données dans Upstash Redis, les deux en offre gratuite. Trois points comptaient :</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Phone first.</strong> Tab navigation, entry in panels at the bottom of the screen, large touch targets, and it installs on the home screen like an app.</span><span lang="fr"><strong>D'abord le téléphone.</strong> Navigation par onglets, saisie dans des panneaux en bas d'écran, grandes zones tactiles, et elle s'installe sur l'écran d'accueil comme une appli.</span></li>
+          <li><span lang="en"><strong>No lost entries.</strong> Each day is its own field in a Redis hash, as is each employee and each rate. Saving one day only touches that day, so a save from the phone and one from the computer at the same moment cannot erase each other. The JSON-file version has the same concern: two saves at almost the same time could each read the old file, and the second write would make a just-added employee "disappear". So every read-modify-write on a file is queued behind the previous one.</span><span lang="fr"><strong>Aucune saisie perdue.</strong> Chaque jour est un champ à part dans un hash Redis, tout comme chaque employé et chaque tarif. Enregistrer un jour ne touche que ce jour : un enregistrement depuis le téléphone et un autre depuis l'ordinateur au même moment ne peuvent pas s'effacer. La version en fichiers JSON a le même souci : deux enregistrements presque simultanés pouvaient lire tous les deux l'ancien fichier, et la deuxième écriture faisait « disparaître » un employé qui venait d'être ajouté. Chaque lecture-modification-écriture d'un fichier attend donc la précédente.</span></li>
+          <li><span lang="en"><strong>Simple, solid access.</strong> Every page and API route goes through one check. The session cookie (HttpOnly, Secure) is derived from the password, so changing the password signs out every device at once. Every API input is validated with Zod.</span><span lang="fr"><strong>Un accès simple et solide.</strong> Toutes les pages et routes API passent par un seul contrôle. Le cookie de session (HttpOnly, Secure) est dérivé du mot de passe : changer le mot de passe déconnecte tous les appareils d'un coup. Chaque entrée de l'API est validée avec Zod.</span></li>
+        </ul>
+
+        <h2><span lang="en">The real requirements came after launch</span><span lang="fr">Les vrais besoins sont arrivés après la mise en ligne</span></h2>
+        <p><span lang="en">As soon as the app was used every day, new needs showed up: replacement doctors, extra-scan bonuses, a fixed monthly salary for some staff, and later a radiographer role paid per day. None of these were in the first version, and that was fine. Because the model was simple (one value per cell, one pay function), each new rule was a small change, not a rewrite.</span>
+           <span lang="fr">Dès que l'appli a été utilisée chaque jour, de nouveaux besoins sont apparus : les médecins remplaçants, les bonus d'examens en plus, un salaire mensuel fixe pour certains, et plus tard un rôle de manipulateur payé à la journée. Rien de tout ça n'était dans la première version, et c'était très bien. Comme le modèle était simple (une valeur par case, une fonction de paie), chaque nouvelle règle a été un petit changement, pas une réécriture.</span></p>
+
+        <h2><span lang="en">What I learned</span><span lang="fr">Ce que j'ai appris</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Start smaller than you think.</strong> A version that runs on one computer was enough to prove the idea.</span><span lang="fr"><strong>Commencer plus petit qu'on ne le pense.</strong> Une version sur un seul ordinateur suffisait à prouver l'idée.</span></li>
+          <li><span lang="en"><strong>The data model is the design.</strong> Getting "one value per day per person" right made every later feature easy.</span><span lang="fr"><strong>Le modèle de données, c'est la conception.</strong> Bien choisir « une valeur par jour et par personne » a rendu chaque fonctionnalité suivante facile.</span></li>
+          <li><span lang="en"><strong>Small apps still deserve care.</strong> When the numbers are someone's salary, losing one entry is not acceptable.</span><span lang="fr"><strong>Une petite appli mérite quand même du soin.</strong> Quand les chiffres sont le salaire de quelqu'un, perdre une saisie n'est pas acceptable.</span></li>
+          <li><span lang="en"><strong>Launch is the start, not the end.</strong> The most useful features came from watching the app being used.</span><span lang="fr"><strong>La mise en ligne est un début, pas une fin.</strong> Les fonctionnalités les plus utiles sont venues en voyant l'appli utilisée.</span></li>
+        </ul>
+        <p><span lang="en">More screens and details in the <a href="presence.html">case study</a>, and the code on <a href="https://github.com/adelmerad/gestion-de-presence" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Plus d'écrans et de détails dans l'<a href="presence.html">étude de cas</a>, et le code sur <a href="https://github.com/adelmerad/gestion-de-presence" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span></a>
+        <a class="btn ghost" href="presence.html"><span lang="en">Attendance app case study</span><span lang="fr">Étude de cas de l'appli</span> →</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
