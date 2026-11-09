@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" data-langs="en fr ar">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,31 +22,34 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
     // Apply saved theme/language before paint to avoid a flash
     try {
-      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
-      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
-      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
     } catch {}
   </script>
 </head>
-<body>
+<body data-title-ar="Adel Merad — مطوّر Full-Stack">
   <header class="nav">
     <div class="wrap nav-inner">
       <a class="logo" href="#top">AM<span class="dot">.</span></a>
       <nav class="links">
-        <a href="#work"><span lang="en">Work</span><span lang="fr">Projets</span></a>
-        <a href="#experience"><span lang="en">Experience</span><span lang="fr">Parcours</span></a>
-        <a href="#skills"><span lang="en">Skills</span><span lang="fr">Compétences</span></a>
-        <a href="blog.html">Blog</a>
-        <a href="#contact">Contact</a>
+        <a href="#work"><span lang="en">Work</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+        <a href="#experience"><span lang="en">Experience</span><span lang="fr">Parcours</span><span lang="ar">المسار</span></a>
+        <a href="#skills"><span lang="en">Skills</span><span lang="fr">Compétences</span><span lang="ar">المهارات</span></a>
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="#contact"><span lang="en">Contact</span><span lang="fr">Contact</span><span lang="ar">تواصل</span></a>
       </nav>
       <div class="toggles">
-        <button id="lang" class="pill" title="Français / English"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
         <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
       </div>
     </div>
@@ -59,21 +62,22 @@
       <div class="hero-text">
       <p class="kicker mono"><span class="live"></span>
         <span lang="en">Full-stack developer · Algiers, Algeria</span>
-        <span lang="fr">Développeur full-stack · Alger, Algérie</span>
+        <span lang="fr">Développeur full-stack · Alger, Algérie</span><span lang="ar">مطوّر Full-Stack · الجزائر العاصمة</span>
       </p>
       <h1>Adel Merad</h1>
       <p class="lead">
         <span lang="en">I build web applications end to end, from the database and the API to the interface people use. Two of them run every day in a medical imaging center.</span>
-        <span lang="fr">Je construis des applications web de bout en bout, de la base de données et l'API jusqu'à l'interface. Deux d'entre elles tournent chaque jour dans un centre d'imagerie médicale.</span>
+        <span lang="fr">Je construis des applications web de bout en bout, de la base de données et l'API jusqu'à l'interface. Deux d'entre elles tournent chaque jour dans un centre d'imagerie médicale.</span><span lang="ar">أبني تطبيقات الويب من البداية إلى النهاية، من قاعدة البيانات والـ API إلى الواجهة التي يستعملها الناس. اثنان منها يعملان كل يوم في مركز للتصوير الطبي.</span>
       </p>
       <p class="sub">
         <span lang="en">Software Engineering Master's student at USTHB. Open to internships, freelance and remote work.</span>
-        <span lang="fr">Étudiant en Master Génie Logiciel à l'USTHB. Ouvert aux stages, missions freelance et postes à distance.</span>
+        <span lang="fr">Étudiant en Master Génie Logiciel à l'USTHB. Ouvert aux stages, missions freelance et postes à distance.</span><span lang="ar">طالب ماستر في هندسة البرمجيات بجامعة هواري بومدين (USTHB). منفتح على التربصات والعمل الحر والعمل عن بُعد.</span>
       </p>
       <div class="cta">
-        <a class="btn primary" href="#work"><span lang="en">See my work</span><span lang="fr">Voir mes projets</span> →</a>
+        <a class="btn primary" href="#work"><span lang="en">See my work</span><span lang="fr">Voir mes projets</span><span lang="ar">اطّلع على مشاريعي</span> <span class="arr">→</span></a>
         <a class="btn" href="assets/Adel_Merad_CV_EN.pdf" lang="en" download>Download CV</a>
         <a class="btn" href="assets/Adel_Merad_CV_FR.pdf" lang="fr" download>Télécharger le CV</a>
+        <a class="btn" href="assets/Adel_Merad_CV_FR.pdf" lang="ar" download>تحميل السيرة الذاتية (بالفرنسية)</a>
         <a class="btn ghost" href="https://github.com/adelmerad" target="_blank" rel="noopener">GitHub</a>
         <a class="btn ghost" href="https://www.linkedin.com/in/adel-merad-57b5a4301/" target="_blank" rel="noopener">LinkedIn</a>
       </div>
@@ -85,47 +89,47 @@
       </div>
 
       <dl class="stats">
-        <div><dt>2</dt><dd><span lang="en">apps in production</span><span lang="fr">applis en production</span></dd></div>
-        <div><dt>7</dt><dd><span lang="en">live demos</span><span lang="fr">démos en ligne</span></dd></div>
-        <div><dt>2</dt><dd><span lang="en">internships: Mobilis, ASAL</span><span lang="fr">stages : Mobilis, ASAL</span></dd></div>
-        <div><dt>4</dt><dd><span lang="en">hackathons</span><span lang="fr">hackathons</span></dd></div>
+        <div><dt>2</dt><dd><span lang="en">apps in production</span><span lang="fr">applis en production</span><span lang="ar">تطبيقات قيد الاستعمال الفعلي</span></dd></div>
+        <div><dt>7</dt><dd><span lang="en">live demos</span><span lang="fr">démos en ligne</span><span lang="ar">عروض تجريبية على الإنترنت</span></dd></div>
+        <div><dt>2</dt><dd><span lang="en">internships: Mobilis, ASAL</span><span lang="fr">stages : Mobilis, ASAL</span><span lang="ar">تربصات: موبيليس والوكالة الفضائية الجزائرية</span></dd></div>
+        <div><dt>4</dt><dd><span lang="en">hackathons</span><span lang="fr">hackathons</span><span lang="ar">هاكاثونات</span></dd></div>
       </dl>
     </section>
 
     <!-- FEATURED WORK -->
     <section id="work" class="wrap section">
       <h2 class="h2"><span class="mono num">01</span>
-        <span lang="en">Selected work</span><span lang="fr">Projets choisis</span>
+        <span lang="en">Selected work</span><span lang="fr">Projets choisis</span><span lang="ar">مشاريع مختارة</span>
       </h2>
 
       <div class="grid">
         <article class="card feature">
           <img class="shot" src="assets/projects/presence.jpg" width="1200" height="750" loading="lazy" alt="Attendance app calendar with the monthly payroll, demo data">
-          <div class="tag-row"><span class="badge prod"><span lang="en">In production</span><span lang="fr">En production</span></span><span class="mono muted">CIM Dr MERAD</span></div>
-          <h3><span lang="en">Attendance &amp; payroll app</span><span lang="fr">Appli de présence et de paie</span></h3>
+          <div class="tag-row"><span class="badge prod"><span lang="en">In production</span><span lang="fr">En production</span><span lang="ar">قيد الاستعمال</span></span><span class="mono muted">CIM Dr MERAD</span></div>
+          <h3><span lang="en">Attendance &amp; payroll app</span><span lang="fr">Appli de présence et de paie</span><span lang="ar">تطبيق الحضور والرواتب</span></h3>
           <p>
             <span lang="en">Replaces the paper attendance book and manual payroll of a medical imaging center: staff attendance is entered each day and pay is computed live, per day, per exam or with bonuses. Mobile-first and installable.</span>
-            <span lang="fr">Remplace le cahier de présence et le calcul manuel des salaires d'un centre d'imagerie médicale : les présences sont saisies chaque jour et la paie est calculée en continu, à la journée, à l'acte ou avec bonus. Pensée pour le téléphone et installable.</span>
+            <span lang="fr">Remplace le cahier de présence et le calcul manuel des salaires d'un centre d'imagerie médicale : les présences sont saisies chaque jour et la paie est calculée en continu, à la journée, à l'acte ou avec bonus. Pensée pour le téléphone et installable.</span><span lang="ar">يعوّض دفتر الحضور والحساب اليدوي للرواتب في مركز للتصوير الطبي: يُسجَّل الحضور كل يوم وتُحسب الرواتب مباشرةً، باليوم أو بالفحص أو مع مكافآت. مصمَّم للهاتف أولاً ويمكن تثبيته كتطبيق.</span>
           </p>
           <ul class="stack"><li>Next.js</li><li>TypeScript</li><li>Redis</li><li>Vercel</li></ul>
           <div class="links-row">
-            <a class="stretched" href="presence.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span> →</a>
+            <a class="stretched" href="presence.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span><span lang="ar">دراسة حالة</span> <span class="arr">→</span></a>
             <a href="https://github.com/adelmerad/gestion-de-presence" target="_blank" rel="noopener">Code ↗</a>
-            <span class="note"><span lang="en">Internal tool, sign-in required</span><span lang="fr">Outil interne, accès protégé</span></span>
+            <span class="note"><span lang="en">Internal tool, sign-in required</span><span lang="fr">Outil interne, accès protégé</span><span lang="ar">أداة داخلية، الدخول محميّ</span></span>
           </div>
         </article>
 
         <article class="card feature">
           <img class="shot" src="assets/projects/cim.jpg" width="1200" height="750" loading="lazy" alt="Home page of the CIM Dr MERAD website">
-          <div class="tag-row"><span class="badge prod"><span lang="en">In production</span><span lang="fr">En production</span></span><span class="mono muted">cimdrmerad.com</span></div>
-          <h3><span lang="en">Medical imaging center website</span><span lang="fr">Site du centre d'imagerie</span></h3>
+          <div class="tag-row"><span class="badge prod"><span lang="en">In production</span><span lang="fr">En production</span><span lang="ar">قيد الاستعمال</span></span><span class="mono muted">cimdrmerad.com</span></div>
+          <h3><span lang="en">Medical imaging center website</span><span lang="fr">Site du centre d'imagerie</span><span lang="ar">موقع مركز التصوير الطبي</span></h3>
           <p>
             <span lang="en">Bilingual French/Arabic site with local SEO, structured data, a rule-based chatbot and appointment requests through WhatsApp.</span>
-            <span lang="fr">Site bilingue français/arabe avec SEO local, données structurées, chatbot à règles et demandes de rendez-vous par WhatsApp.</span>
+            <span lang="fr">Site bilingue français/arabe avec SEO local, données structurées, chatbot à règles et demandes de rendez-vous par WhatsApp.</span><span lang="ar">موقع بالفرنسية والعربية مع تحسين الظهور المحلي في محركات البحث، وبيانات منظَّمة، ومساعد آلي قائم على القواعد، وطلب المواعيد عبر واتساب.</span>
           </p>
           <ul class="stack"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>GA4</li></ul>
           <div class="links-row">
-            <a class="stretched" href="cim.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span> →</a>
+            <a class="stretched" href="cim.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span><span lang="ar">دراسة حالة</span> <span class="arr">→</span></a>
             <a href="https://cimdrmerad.com" target="_blank" rel="noopener">Live ↗</a>
             <a href="https://github.com/adelmerad/CIM-Dr-MERAD" target="_blank" rel="noopener">Code ↗</a>
           </div>
@@ -133,15 +137,15 @@
 
         <article class="card feature">
           <img class="shot" src="assets/projects/sso.jpg" width="1200" height="750" loading="lazy" alt="SSO admin panel listing the registered applications, demo data">
-          <div class="tag-row"><span class="badge"><span lang="en">Internship</span><span lang="fr">Stage</span></span><span class="mono muted">Mobilis</span></div>
-          <h3><span lang="en">Single sign-on platform</span><span lang="fr">Plateforme d'authentification unique (SSO)</span></h3>
+          <div class="tag-row"><span class="badge"><span lang="en">Internship</span><span lang="fr">Stage</span><span lang="ar">تربص</span></span><span class="mono muted">Mobilis</span></div>
+          <h3><span lang="en">Single sign-on platform</span><span lang="fr">Plateforme d'authentification unique (SSO)</span><span lang="ar">منصة الدخول الموحَّد (SSO)</span></h3>
           <p>
             <span lang="en">Sign in once, access every application. OAuth2 / OpenID Connect server with mandatory PKCE, refresh token rotation, per-application roles and an admin panel, plus a Backend-for-Frontend client.</span>
-            <span lang="fr">Une seule connexion pour toutes les applications. Serveur OAuth2 / OpenID Connect avec PKCE obligatoire, rotation des refresh tokens, rôles par application et panneau d'administration, plus un client Backend-for-Frontend.</span>
+            <span lang="fr">Une seule connexion pour toutes les applications. Serveur OAuth2 / OpenID Connect avec PKCE obligatoire, rotation des refresh tokens, rôles par application et panneau d'administration, plus un client Backend-for-Frontend.</span><span lang="ar">تسجيل دخول واحد لجميع التطبيقات. خادم OAuth2 / OpenID Connect مع PKCE إلزامي، وتدوير رموز التحديث (refresh tokens)، وأدوار خاصة بكل تطبيق، ولوحة إدارة، إضافةً إلى عميل Backend-for-Frontend.</span>
           </p>
           <ul class="stack"><li>ASP.NET Core</li><li>OpenIddict</li><li>EF Core</li><li>SQL Server</li><li>React</li></ul>
           <div class="links-row">
-            <a class="stretched" href="sso.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span> →</a>
+            <a class="stretched" href="sso.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span><span lang="ar">دراسة حالة</span> <span class="arr">→</span></a>
             <a href="https://github.com/adelmerad/ShopAuth" target="_blank" rel="noopener">Code ↗</a>
             <a href="https://github.com/adelmerad/ShopWebApp" target="_blank" rel="noopener">BFF client ↗</a>
           </div>
@@ -153,83 +157,83 @@
           <h3>HOKOKI</h3>
           <p>
             <span lang="en">AI legal assistant for Algeria: laws in plain language, legal chat, contract analysis, step-by-step procedures and a lawyer marketplace.</span>
-            <span lang="fr">Assistant juridique IA pour l'Algérie : les lois en langage simple, chat juridique, analyse de contrats, procédures pas à pas et annuaire d'avocats.</span>
+            <span lang="fr">Assistant juridique IA pour l'Algérie : les lois en langage simple, chat juridique, analyse de contrats, procédures pas à pas et annuaire d'avocats.</span><span lang="ar">مساعد قانوني بالذكاء الاصطناعي للجزائر: القوانين بلغة بسيطة، ومحادثة قانونية، وتحليل العقود، وإجراءات خطوة بخطوة، ودليل للمحامين.</span>
           </p>
           <ul class="stack"><li>React</li><li>NestJS</li><li>PostgreSQL</li><li>LangChain</li><li>RAG</li></ul>
           <div class="links-row">
-            <a class="stretched" href="hokoki.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span> →</a>
+            <a class="stretched" href="hokoki.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span><span lang="ar">دراسة حالة</span> <span class="arr">→</span></a>
             <a href="https://hokoki.vercel.app" target="_blank" rel="noopener">Live ↗</a>
             <a href="https://github.com/adelmerad/HOKOKI" target="_blank" rel="noopener">Code ↗</a>
-            <span class="note"><span lang="en">Demo: sign in with any phone number and password (e.g. 0555123456 / demo1234)</span><span lang="fr">Démo : connectez-vous avec n'importe quel numéro et mot de passe (ex. 0555123456 / demo1234)</span></span>
+            <span class="note"><span lang="en">Demo: sign in with any phone number and password (e.g. 0555123456 / demo1234)</span><span lang="fr">Démo : connectez-vous avec n'importe quel numéro et mot de passe (ex. 0555123456 / demo1234)</span><span lang="ar">عرض تجريبي: سجّل الدخول بأي رقم هاتف وكلمة مرور (مثلاً 0555123456 / demo1234)</span></span>
           </div>
         </article>
 
         <article class="card feature">
           <img class="shot" src="assets/projects/leaderboard.jpg" width="1200" height="750" loading="lazy" alt="Realtime Leaderboard home page with live activity">
-          <div class="tag-row"><span class="badge"><span lang="en">Side project</span><span lang="fr">Projet perso</span></span><span class="mono muted">2026</span></div>
+          <div class="tag-row"><span class="badge"><span lang="en">Side project</span><span lang="fr">Projet perso</span><span lang="ar">مشروع شخصي</span></span><span class="mono muted">2026</span></div>
           <h3>Realtime Leaderboard</h3>
           <p>
             <span lang="en">Live rankings for any game: REST API with hashed per-game keys, updates pushed with Server-Sent Events and PostgreSQL LISTEN/NOTIFY.</span>
-            <span lang="fr">Classements en direct pour n'importe quel jeu : API REST avec clés par jeu hachées, mises à jour poussées par Server-Sent Events et LISTEN/NOTIFY de PostgreSQL.</span>
+            <span lang="fr">Classements en direct pour n'importe quel jeu : API REST avec clés par jeu hachées, mises à jour poussées par Server-Sent Events et LISTEN/NOTIFY de PostgreSQL.</span><span lang="ar">ترتيب مباشر لأي لعبة: واجهة REST API بمفتاح مُشفَّر (hash) لكل لعبة، وتحديثات فورية عبر Server-Sent Events و LISTEN/NOTIFY في PostgreSQL.</span>
           </p>
           <ul class="stack"><li>Next.js</li><li>PostgreSQL</li><li>Prisma</li><li>SSE</li><li>Vitest</li></ul>
           <div class="links-row">
-            <a class="stretched" href="leaderboard.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span> →</a>
+            <a class="stretched" href="leaderboard.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span><span lang="ar">دراسة حالة</span> <span class="arr">→</span></a>
             <a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener">Live ↗</a>
             <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">Code ↗</a>
-            <span class="note"><span lang="en">Free hosting: the first load can take up to a minute</span><span lang="fr">Hébergement gratuit : le premier chargement peut prendre jusqu'à une minute</span></span>
+            <span class="note"><span lang="en">Free hosting: the first load can take up to a minute</span><span lang="fr">Hébergement gratuit : le premier chargement peut prendre jusqu'à une minute</span><span lang="ar">استضافة مجانية: قد يستغرق التحميل الأول ما يصل إلى دقيقة</span></span>
           </div>
         </article>
 
         <article class="card feature">
           <img class="shot" src="assets/projects/shopo.jpg" width="1200" height="750" loading="lazy" alt="ShopO seller dashboard with orders and products">
-          <div class="tag-row"><span class="badge"><span lang="en">Bachelor's project</span><span lang="fr">Projet de Licence</span></span><span class="mono muted">USTHB 2025</span></div>
+          <div class="tag-row"><span class="badge"><span lang="en">Bachelor's project</span><span lang="fr">Projet de Licence</span><span lang="ar">مشروع تخرّج (ليسانس)</span></span><span class="mono muted">USTHB 2025</span></div>
           <h3>ShopO</h3>
           <p>
             <span lang="en">Multi-seller electronics marketplace with client, seller and admin dashboards, PayPal and cash on delivery, and a hybrid recommender (K-Means + cosine similarity).</span>
-            <span lang="fr">Marketplace multi-vendeurs d'électronique avec espaces client, vendeur et admin, paiement PayPal et à la livraison, et un système de recommandation hybride (K-Means + similarité cosinus).</span>
+            <span lang="fr">Marketplace multi-vendeurs d'électronique avec espaces client, vendeur et admin, paiement PayPal et à la livraison, et un système de recommandation hybride (K-Means + similarité cosinus).</span><span lang="ar">متجر إلكتروني متعدد البائعين للأجهزة الإلكترونية، بفضاءات للزبون والبائع والمشرف، ودفع عبر PayPal أو عند الاستلام، ونظام توصيات هجين (K-Means + تشابه جيب التمام).</span>
           </p>
           <ul class="stack"><li>Laravel</li><li>React</li><li>MySQL</li><li>Flask</li></ul>
           <div class="links-row">
-            <a class="stretched" href="shopo.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span> →</a>
+            <a class="stretched" href="shopo.html"><span lang="en">Case study</span><span lang="fr">Étude de cas</span><span lang="ar">دراسة حالة</span> <span class="arr">→</span></a>
             <a href="https://github.com/adelmerad/multi-seller-marketplace" target="_blank" rel="noopener">Code ↗</a>
           </div>
         </article>
       </div>
 
-      <h3 class="h3"><span lang="en">More projects</span><span lang="fr">Autres projets</span></h3>
+      <h3 class="h3"><span lang="en">More projects</span><span lang="fr">Autres projets</span><span lang="ar">مشاريع أخرى</span></h3>
       <ul class="list">
         <li><a href="https://github.com/adelmerad/APCS" target="_blank" rel="noopener">APCS</a>
           <span lang="en">AI-powered port terminal management: truck booking, QR gate access, LLM assistant with tool calling (MicroHack).</span>
-          <span lang="fr">Gestion de terminal portuaire avec IA : réservation des camions, accès par QR code, assistant LLM avec appel d'outils (MicroHack).</span>
+          <span lang="fr">Gestion de terminal portuaire avec IA : réservation des camions, accès par QR code, assistant LLM avec appel d'outils (MicroHack).</span><span lang="ar">تسيير محطة ميناء بالذكاء الاصطناعي: حجز الشاحنات، والدخول برمز QR، ومساعد LLM يستدعي الأدوات (MicroHack).</span>
           <em class="mono">Laravel · React · FastAPI · Gemini</em></li>
         <li><a href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener">Diab</a>
           <span lang="en">Gamified diabetes tracker where healthy habits grow a personal garden (PEXILIS Hackathon). <small>Demo: sign up with any details.</small></span>
-          <span lang="fr">Suivi du diabète gamifié : les bonnes habitudes font pousser un jardin virtuel (hackathon PEXILIS). <small>Démo : créez un compte avec n'importe quelles infos.</small></span>
+          <span lang="fr">Suivi du diabète gamifié : les bonnes habitudes font pousser un jardin virtuel (hackathon PEXILIS). <small>Démo : créez un compte avec n'importe quelles infos.</small></span><span lang="ar">تطبيق لمتابعة السكري بأسلوب الألعاب: العادات الصحية تُنمّي حديقة افتراضية (هاكاثون PEXILIS). <small>عرض تجريبي: أنشئ حساباً بأي معلومات.</small></span>
           <em class="mono">Expo · React Native · Zustand</em></li>
         <li><a href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener">MiniAlgo Compiler</a>
           <span lang="en">Full compiler: quadruples, 5 optimization passes and 8086 assembly generation.</span>
-          <span lang="fr">Compilateur complet : quadruplets, 5 passes d'optimisation et génération d'assembleur 8086.</span>
+          <span lang="fr">Compilateur complet : quadruplets, 5 passes d'optimisation et génération d'assembleur 8086.</span><span lang="ar">مترجم (compiler) كامل: الرباعيات (quadruples)، و5 مراحل تحسين، وتوليد شيفرة التجميع 8086.</span>
           <em class="mono">C · Flex · Bison</em></li>
         <li><a href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener">MPEG-4 Encoder</a>
           <span lang="en">Video encoder/decoder with DCT I-frames and motion-compensated P-frames.</span>
-          <span lang="fr">Encodeur/décodeur vidéo avec images I par DCT et images P à compensation de mouvement.</span>
+          <span lang="fr">Encodeur/décodeur vidéo avec images I par DCT et images P à compensation de mouvement.</span><span lang="ar">مُرمِّز ومفكِّك فيديو بإطارات I عبر DCT وإطارات P بتعويض الحركة.</span>
           <em class="mono">Python · NumPy · OpenCV</em></li>
         <li><a href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener">Threads &amp; Semaphores Visualizer</a>
           <span lang="en">Step-by-step animation of POSIX threads and semaphores.</span>
-          <span lang="fr">Animation pas à pas des threads POSIX et des sémaphores.</span>
+          <span lang="fr">Animation pas à pas des threads POSIX et des sémaphores.</span><span lang="ar">محاكاة متحركة خطوة بخطوة لخيوط POSIX والإشارات (semaphores).</span>
           <em class="mono">JavaScript</em></li>
         <li><a href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener">Printer Allocation Monitor</a>
           <span lang="en">Interactive simulator of a synchronization monitor with starvation detection.</span>
-          <span lang="fr">Simulateur interactif d'un moniteur de synchronisation, avec détection de la famine.</span>
+          <span lang="fr">Simulateur interactif d'un moniteur de synchronisation, avec détection de la famine.</span><span lang="ar">محاكي تفاعلي لمراقب التزامن (monitor)، مع كشف حالات المجاعة (starvation).</span>
           <em class="mono">JavaScript · Canvas</em></li>
         <li><a href="https://github.com/adelmerad/el-tarf-land-cover" target="_blank" rel="noopener">El-Tarf Land Cover</a>
           <span lang="en">Land cover classification from Sentinel-2 imagery, based on my internship at ASAL.</span>
-          <span lang="fr">Classification de l'occupation du sol à partir d'images Sentinel-2, tirée de mon stage à l'ASAL.</span>
+          <span lang="fr">Classification de l'occupation du sol à partir d'images Sentinel-2, tirée de mon stage à l'ASAL.</span><span lang="ar">تصنيف الغطاء الأرضي من صور Sentinel-2، انطلاقاً من تربصي في الوكالة الفضائية الجزائرية.</span>
           <em class="mono">Google Earth Engine</em></li>
         <li><a href="https://github.com/adelmerad/shecare" target="_blank" rel="noopener">SheCare</a>
           <span lang="en">Companion app for women battling breast cancer (Startup Weekend Algiers).</span>
-          <span lang="fr">Application d'accompagnement des femmes atteintes du cancer du sein (Startup Weekend Algiers).</span>
+          <span lang="fr">Application d'accompagnement des femmes atteintes du cancer du sein (Startup Weekend Algiers).</span><span lang="ar">تطبيق لمرافقة النساء المصابات بسرطان الثدي (Startup Weekend Algiers).</span>
           <em class="mono">Next.js · PostgreSQL · Auth.js</em></li>
       </ul>
     </section>
@@ -237,83 +241,83 @@
     <!-- EXPERIENCE -->
     <section id="experience" class="wrap section">
       <h2 class="h2"><span class="mono num">02</span>
-        <span lang="en">Experience</span><span lang="fr">Parcours</span>
+        <span lang="en">Experience</span><span lang="fr">Parcours</span><span lang="ar">المسار</span>
       </h2>
       <ol class="timeline">
         <li>
-          <div class="when mono"><span lang="en">Dec 2025 — Now</span><span lang="fr">Déc. 2025 — Auj.</span></div>
+          <div class="when mono"><span lang="en">Dec 2025 — Now</span><span lang="fr">Déc. 2025 — Auj.</span><span lang="ar">ديسمبر 2025 — الآن</span></div>
           <div>
-            <h3><span lang="en">Manager &amp; Full-Stack Developer</span><span lang="fr">Gérant et développeur full-stack</span> · CIM Dr MERAD</h3>
+            <h3><span lang="en">Manager &amp; Full-Stack Developer</span><span lang="fr">Gérant et développeur full-stack</span><span lang="ar">مدير ومطوّر Full-Stack</span> · CIM Dr MERAD</h3>
             <p><span lang="en">I run the digital side and day-to-day operations of a medical imaging center (CT scan, ultrasound, mammography): website, internal apps, IT and the RIS, plus marketing such as a Pink October campaign on Meta Ads.</span>
-               <span lang="fr">Je gère le numérique et les opérations quotidiennes d'un centre d'imagerie médicale (scanner, échographie, mammographie) : site web, applis internes, informatique et RIS, ainsi que le marketing, comme une campagne Octobre Rose sur Meta Ads.</span></p>
+               <span lang="fr">Je gère le numérique et les opérations quotidiennes d'un centre d'imagerie médicale (scanner, échographie, mammographie) : site web, applis internes, informatique et RIS, ainsi que le marketing, comme une campagne Octobre Rose sur Meta Ads.</span><span lang="ar">أتولّى الجانب الرقمي والتسيير اليومي لمركز تصوير طبي (السكانير، الإيكوغرافيا، الماموغرافيا): الموقع، والتطبيقات الداخلية، والإعلام الآلي ونظام RIS، إضافةً إلى التسويق، مثل حملة أكتوبر الوردي على Meta Ads.</span></p>
           </div>
         </li>
         <li>
-          <div class="when mono"><span lang="en">Summer 2026</span><span lang="fr">Été 2026</span></div>
+          <div class="when mono"><span lang="en">Summer 2026</span><span lang="fr">Été 2026</span><span lang="ar">صيف 2026</span></div>
           <div>
-            <h3><span lang="en">Software Engineer Intern</span><span lang="fr">Stagiaire ingénieur logiciel</span> · Mobilis</h3>
+            <h3><span lang="en">Software Engineer Intern</span><span lang="fr">Stagiaire ingénieur logiciel</span><span lang="ar">متربص مهندس برمجيات</span> · Mobilis</h3>
             <p><span lang="en">Built a single sign-on platform on OAuth2 / OpenID Connect and a Backend-for-Frontend client, in a team of two.</span>
-               <span lang="fr">Conception d'une plateforme SSO sur OAuth2 / OpenID Connect et d'un client Backend-for-Frontend, en binôme.</span></p>
+               <span lang="fr">Conception d'une plateforme SSO sur OAuth2 / OpenID Connect et d'un client Backend-for-Frontend, en binôme.</span><span lang="ar">بناء منصة دخول موحَّد على OAuth2 / OpenID Connect وعميل Backend-for-Frontend، ضمن فريق من شخصين.</span></p>
           </div>
         </li>
         <li>
-          <div class="when mono"><span lang="en">Sep — Oct 2025</span><span lang="fr">Sept. — Oct. 2025</span></div>
+          <div class="when mono"><span lang="en">Sep — Oct 2025</span><span lang="fr">Sept. — Oct. 2025</span><span lang="ar">سبتمبر — أكتوبر 2025</span></div>
           <div>
-            <h3><span lang="en">Remote Sensing Intern</span><span lang="fr">Stagiaire en télédétection</span> · <span lang="en">Algerian Space Agency (ASAL)</span><span lang="fr">Agence Spatiale Algérienne (ASAL)</span></h3>
+            <h3><span lang="en">Remote Sensing Intern</span><span lang="fr">Stagiaire en télédétection</span><span lang="ar">متربص في الاستشعار عن بُعد</span> · <span lang="en">Algerian Space Agency (ASAL)</span><span lang="fr">Agence Spatiale Algérienne (ASAL)</span><span lang="ar">الوكالة الفضائية الجزائرية (ASAL)</span></h3>
             <p><span lang="en">Processed Alsat-2B and Sentinel-2 imagery and analyzed vegetation change (NDVI, 2000–2020) in the El-Tarf province with Google Earth Engine.</span>
-               <span lang="fr">Traitement d'images Alsat-2B et Sentinel-2, et analyse de l'évolution de la végétation (NDVI, 2000–2020) dans la wilaya d'El-Tarf avec Google Earth Engine.</span></p>
+               <span lang="fr">Traitement d'images Alsat-2B et Sentinel-2, et analyse de l'évolution de la végétation (NDVI, 2000–2020) dans la wilaya d'El-Tarf avec Google Earth Engine.</span><span lang="ar">معالجة صور Alsat-2B و Sentinel-2، وتحليل تطوّر الغطاء النباتي (NDVI، 2000–2020) في ولاية الطارف باستخدام Google Earth Engine.</span></p>
           </div>
         </li>
         <li>
-          <div class="when mono"><span lang="en">2024 — Now</span><span lang="fr">2024 — Auj.</span></div>
+          <div class="when mono"><span lang="en">2024 — Now</span><span lang="fr">2024 — Auj.</span><span lang="ar">2024 — الآن</span></div>
           <div>
-            <h3><span lang="en">Member</span><span lang="fr">Membre</span> · Micro Club (USTHB)</h3>
+            <h3><span lang="en">Member</span><span lang="fr">Membre</span><span lang="ar">عضو</span> · Micro Club (USTHB)</h3>
             <p><span lang="en">Development Department &amp; IT Section: club and event websites, technical workshops and events.</span>
-               <span lang="fr">Département Développement et Section IT : sites du club et des événements, ateliers techniques et événements.</span></p>
+               <span lang="fr">Département Développement et Section IT : sites du club et des événements, ateliers techniques et événements.</span><span lang="ar">قسم التطوير وفرع الإعلام الآلي: مواقع النادي والفعاليات، والورشات التقنية والفعاليات.</span></p>
           </div>
         </li>
         <li>
-          <div class="when mono">2022 — <span lang="en">Now</span><span lang="fr">Auj.</span></div>
+          <div class="when mono">2022 — <span lang="en">Now</span><span lang="fr">Auj.</span><span lang="ar">الآن</span></div>
           <div>
             <h3>USTHB</h3>
             <p><span lang="en">Master's in Software Engineering (in progress) · Bachelor's in Computer Science (2025).</span>
-               <span lang="fr">Master Génie Logiciel (en cours) · Licence en Informatique (2025).</span></p>
+               <span lang="fr">Master Génie Logiciel (en cours) · Licence en Informatique (2025).</span><span lang="ar">ماستر في هندسة البرمجيات (قيد الدراسة) · ليسانس في الإعلام الآلي (2025).</span></p>
           </div>
         </li>
       </ol>
 
-      <h3 class="h3"><span lang="en">Hackathons &amp; competitions</span><span lang="fr">Hackathons et compétitions</span></h3>
+      <h3 class="h3"><span lang="en">Hackathons &amp; competitions</span><span lang="fr">Hackathons et compétitions</span><span lang="ar">الهاكاثونات والمسابقات</span></h3>
       <ul class="chips">
         <li>NCS Hackathon — HOKOKI</li>
         <li>MicroHack — APCS</li>
         <li>PEXILIS — Diab</li>
         <li>Startup Weekend Algiers — SheCare</li>
-        <li>GreenHat CTF 2 — <span lang="en">Top 10</span><span lang="fr">Top 10</span></li>
+        <li>GreenHat CTF 2 — <span lang="en">Top 10</span><span lang="fr">Top 10</span><span lang="ar">ضمن أفضل 10</span></li>
       </ul>
     </section>
 
     <!-- SKILLS -->
     <section id="skills" class="wrap section">
       <h2 class="h2"><span class="mono num">03</span>
-        <span lang="en">Skills</span><span lang="fr">Compétences</span>
+        <span lang="en">Skills</span><span lang="fr">Compétences</span><span lang="ar">المهارات</span>
       </h2>
       <div class="skills">
         <div><h3 class="skill-h">Backend</h3><p>ASP.NET Core · NestJS · Laravel · Node.js · FastAPI · REST</p></div>
         <div><h3 class="skill-h">Frontend &amp; Mobile</h3><p>React · Next.js · TypeScript · Tailwind CSS · React Native</p></div>
-        <div><h3 class="skill-h"><span lang="en">Databases</span><span lang="fr">Bases de données</span></h3><p>PostgreSQL · MySQL · SQL Server · MongoDB · Redis · Prisma · EF Core</p></div>
-        <div><h3 class="skill-h"><span lang="en">Security</span><span lang="fr">Sécurité</span></h3><p>OAuth2 · OpenID Connect · PKCE · SSO · CTF</p></div>
-        <div><h3 class="skill-h"><span lang="en">AI</span><span lang="fr">IA</span></h3><p>RAG · LangChain · <span lang="en">LLM integration</span><span lang="fr">intégration de LLM</span> · scikit-learn</p></div>
-        <div><h3 class="skill-h"><span lang="en">Tools</span><span lang="fr">Outils</span></h3><p>Git · Docker · Linux · Vercel · Google Earth Engine</p></div>
+        <div><h3 class="skill-h"><span lang="en">Databases</span><span lang="fr">Bases de données</span><span lang="ar">قواعد البيانات</span></h3><p>PostgreSQL · MySQL · SQL Server · MongoDB · Redis · Prisma · EF Core</p></div>
+        <div><h3 class="skill-h"><span lang="en">Security</span><span lang="fr">Sécurité</span><span lang="ar">الأمن</span></h3><p>OAuth2 · OpenID Connect · PKCE · SSO · CTF</p></div>
+        <div><h3 class="skill-h"><span lang="en">AI</span><span lang="fr">IA</span><span lang="ar">الذكاء الاصطناعي</span></h3><p>RAG · LangChain · <span lang="en">LLM integration</span><span lang="fr">intégration de LLM</span><span lang="ar">دمج نماذج اللغة (LLM)</span> · scikit-learn</p></div>
+        <div><h3 class="skill-h"><span lang="en">Tools</span><span lang="fr">Outils</span><span lang="ar">الأدوات</span></h3><p>Git · Docker · Linux · Vercel · Google Earth Engine</p></div>
       </div>
-      <p class="muted langs"><span lang="en">Languages: Arabic (native), French (fluent), English (professional).</span><span lang="fr">Langues : arabe (maternelle), français (courant), anglais (professionnel).</span></p>
+      <p class="muted langs"><span lang="en">Languages: Arabic (native), French (fluent), English (professional).</span><span lang="fr">Langues : arabe (maternelle), français (courant), anglais (professionnel).</span><span lang="ar">اللغات: العربية (اللغة الأم)، الفرنسية (بطلاقة)، الإنجليزية (مستوى مهني).</span></p>
     </section>
 
     <!-- CONTACT -->
     <section id="contact" class="wrap section contact">
-      <h2 class="h2"><span class="mono num">04</span>Contact</h2>
+      <h2 class="h2"><span class="mono num">04</span><span lang="en">Contact</span><span lang="fr">Contact</span><span lang="ar">تواصل</span></h2>
       <p class="big">
         <span lang="en">Have a project, an internship or a role in mind? Let's talk.</span>
-        <span lang="fr">Un projet, un stage ou un poste en tête ? Parlons-en.</span>
+        <span lang="fr">Un projet, un stage ou un poste en tête ? Parlons-en.</span><span lang="ar">لديك مشروع أو تربص أو وظيفة في بالك؟ لنتحدّث.</span>
       </p>
       <a class="mail" href="mailto:adelmerad94@gmail.com">adelmerad94@gmail.com</a>
       <div class="cta">
@@ -325,7 +329,7 @@
 
   <footer class="wrap foot mono muted">
     <span>© <span id="year">2026</span> Adel Merad</span>
-    <span><span lang="en">HTML, CSS and JavaScript, no framework.</span><span lang="fr">HTML, CSS et JavaScript, sans framework.</span></span>
+    <span><span lang="en">HTML, CSS and JavaScript, no framework.</span><span lang="fr">HTML, CSS et JavaScript, sans framework.</span><span lang="ar">HTML و CSS و JavaScript، بدون إطار عمل.</span></span>
   </footer>
 
   <script src="main.js"></script>

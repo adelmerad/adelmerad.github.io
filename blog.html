@@ -23,10 +23,14 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
+    // Apply saved theme/language before paint to avoid a flash
     try {
-      const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t;
-      const l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
-      if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.lang = "fr"; }
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
     } catch {}
   </script>
 </head>
@@ -39,7 +43,7 @@
         <a href="./#contact">Contact</a>
       </nav>
       <div class="toggles">
-        <button id="lang" class="pill" title="Français / English"><span lang="en">FR</span><span lang="fr">EN</span></button>
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
         <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
       </div>
     </div>

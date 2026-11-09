@@ -9,8 +9,8 @@
   --accent-ink: #04201c;
   --prod: #e2b33c;
   --radius: 16px;
-  --sans: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --sans: "Space Grotesk", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", "IBM Plex Sans Arabic", ui-monospace, Consolas, monospace;
 }
 :root[data-theme="light"] {
   --bg: #f6f5f1;
@@ -25,8 +25,9 @@
 }
 
 /* Language switch: only the active language is shown */
-html[data-lang="en"] body [lang="fr"],
-html[data-lang="fr"] body [lang="en"] { display: none !important; }
+html[data-lang="en"] body [lang="fr"], html[data-lang="en"] body [lang="ar"],
+html[data-lang="fr"] body [lang="en"], html[data-lang="fr"] body [lang="ar"],
+html[data-lang="ar"] body [lang="en"], html[data-lang="ar"] body [lang="fr"] { display: none !important; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; scroll-padding-top: 80px; }
@@ -52,7 +53,7 @@ ul, ol { list-style: none; }
 .nav-inner { display: flex; align-items: center; gap: 24px; height: 64px; }
 .logo { font-weight: 700; font-size: 20px; text-decoration: none; letter-spacing: -.5px; }
 .dot { color: var(--accent); }
-.links { display: flex; gap: 22px; margin-left: auto; }
+.links { display: flex; gap: 22px; margin-inline-start: auto; }
 .links a { text-decoration: none; color: var(--muted); font-size: 15px; }
 .links a:hover { color: var(--text); }
 .toggles { display: flex; gap: 8px; }
@@ -71,7 +72,7 @@ ul, ol { list-style: none; }
   border-radius: 20px; border: 1px solid var(--line);
 }
 .portrait figcaption {
-  position: absolute; left: 12px; bottom: 12px; font-size: 12px;
+  position: absolute; inset-inline-start: 12px; bottom: 12px; font-size: 12px;
   padding: 4px 10px; border-radius: 999px; color: #e7efed; background: rgba(8, 14, 13, .7);
 }
 .hero { padding: 96px 0 72px; }
@@ -181,7 +182,7 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
 }
 @media (max-width: 640px) {
   .links { display: none; }
-  .toggles { margin-left: auto; }
+  .toggles { margin-inline-start: auto; }
   .hero { padding: 64px 0 48px; }
   h1 { letter-spacing: -2px; }
   .section { padding: 56px 0; }
@@ -212,7 +213,7 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
 .case-section { padding: 56px 0; border-top: 1px solid var(--line); }
 .prose { max-width: 760px; font-size: 17px; }
 .prose p + p, .prose .bullets + p { margin-top: 16px; }
-.bullets { list-style: disc; padding-left: 20px; }
+.bullets { list-style: disc; padding-inline-start: 20px; }
 .bullets li { margin-bottom: 8px; }
 .case-split { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; }
 .case-img { width: 100%; height: auto; border-radius: var(--radius); border: 1px solid var(--line); }
@@ -278,3 +279,16 @@ h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px
 .post-body .flow { margin: 8px 0 22px; }
 .post-body .bullets { margin: 0 0 18px; }
 .post .cta { margin-top: 40px; }
+
+/* Language switch */
+.lang-switch { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); }
+.lang-switch button { font: 500 12.5px var(--mono); color: var(--muted); background: none; border: 0; border-radius: 999px; height: 26px; min-width: 32px; padding: 0 8px; cursor: pointer; }
+.lang-switch button:hover { color: var(--text); }
+html[data-lang="en"] [data-set-lang="en"], html[data-lang="fr"] [data-set-lang="fr"], html[data-lang="ar"] [data-set-lang="ar"] { background: var(--accent); color: var(--accent-ink); }
+html:not([data-langs~="ar"]) .ar-only { display: none; }
+.lang-switch .ar-only { font-family: "IBM Plex Sans Arabic", var(--sans); font-size: 14px; }
+
+/* Arabic / right-to-left */
+html[lang="ar"] body, html[lang="ar"] body * { letter-spacing: 0 !important; }
+html[lang="ar"] body { line-height: 1.75; }
+html[dir="rtl"] .arr { display: inline-block; transform: scaleX(-1); }
