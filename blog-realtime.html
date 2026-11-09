@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" data-langs="en fr ar">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#0b1110">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
   <script>
     // Apply saved theme/language before paint to avoid a flash
@@ -34,13 +34,13 @@
     } catch {}
   </script>
 </head>
-<body class="case" data-title-en="Realtime without WebSockets — Adel Merad" data-title-fr="Du temps réel sans WebSocket — Adel Merad">
+<body class="case" data-title-en="Realtime without WebSockets — Adel Merad" data-title-fr="Du temps réel sans WebSocket — Adel Merad" data-title-ar="الوقت الحقيقي دون WebSocket — Adel Merad">
   <header class="nav">
     <div class="wrap nav-inner">
       <a class="logo" href="./">AM<span class="dot">.</span></a>
       <nav class="links">
-        <a href="blog.html">Blog</a>
-        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span></a>
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
       </nav>
       <div class="toggles">
         <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
@@ -54,50 +54,50 @@
       <header class="post-head">
         <p class="kicker mono"><span class="live"></span>
           <span lang="en">Blog · November 2026 · 8 min read</span>
-          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span>
+          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 8 دقائق قراءة</span>
         </p>
         <h1 class="post-title">
           <span lang="en">Realtime without WebSockets: PostgreSQL LISTEN/NOTIFY and Server-Sent Events</span>
-          <span lang="fr">Du temps réel sans WebSocket : LISTEN/NOTIFY de PostgreSQL et les Server-Sent Events</span>
+          <span lang="fr">Du temps réel sans WebSocket : LISTEN/NOTIFY de PostgreSQL et les Server-Sent Events</span><span lang="ar">الوقت الحقيقي دون WebSocket: LISTEN/NOTIFY في PostgreSQL و Server-Sent Events</span>
         </h1>
         <p class="lead">
           <span lang="en">How I kept live rankings in sync across several servers with nothing more than the database I already had, and the production pitfalls I ran into.</span>
-          <span lang="fr">Comment j'ai gardé des classements en direct synchronisés sur plusieurs serveurs avec rien de plus que la base de données que j'avais déjà, et les pièges rencontrés en production.</span>
+          <span lang="fr">Comment j'ai gardé des classements en direct synchronisés sur plusieurs serveurs avec rien de plus que la base de données que j'avais déjà, et les pièges rencontrés en production.</span><span lang="ar">كيف أبقيت ترتيباً مباشراً متزامناً عبر عدة خوادم بقاعدة البيانات التي كانت لديّ أصلاً، دون أي إضافة، والفخاخ التي صادفتها في بيئة الإنتاج.</span>
         </p>
       </header>
 
       <div class="post-body">
-        <h2><span lang="en">The problem</span><span lang="fr">Le problème</span></h2>
+        <h2><span lang="en">The problem</span><span lang="fr">Le problème</span><span lang="ar">المشكلة</span></h2>
         <p><span lang="en"><a href="leaderboard.html">Realtime Leaderboard</a> is a ranking service for games: a game sends a score through a REST API, and everyone watching the leaderboard should see it move, right away, without refreshing.</span>
-           <span lang="fr"><a href="leaderboard.html">Realtime Leaderboard</a> est un service de classement pour les jeux : un jeu envoie un score par une API REST, et tous ceux qui regardent le classement doivent le voir bouger, tout de suite, sans recharger.</span></p>
+           <span lang="fr"><a href="leaderboard.html">Realtime Leaderboard</a> est un service de classement pour les jeux : un jeu envoie un score par une API REST, et tous ceux qui regardent le classement doivent le voir bouger, tout de suite, sans recharger.</span><span lang="ar"><a href="leaderboard.html">Realtime Leaderboard</a> خدمة ترتيب للألعاب: ترسل اللعبة نتيجة عبر REST API، ويجب أن يرى كل من يتابع الترتيب تغيّره فوراً، دون إعادة تحميل.</span></p>
         <p><span lang="en">With one server, that is easy. With two or more, it is not: the score arrives on server A, but some viewers are connected to server B. Server B has to find out. The classic answer is a WebSocket server plus Redis pub/sub. I wanted to see how far I could go without adding any of that.</span>
-           <span lang="fr">Avec un seul serveur, c'est facile. Avec deux ou plus, non : le score arrive sur le serveur A, mais certains spectateurs sont connectés au serveur B. Le serveur B doit l'apprendre. La réponse classique, c'est un serveur WebSocket et Redis en pub/sub. Je voulais voir jusqu'où on peut aller sans rien ajouter de tout ça.</span></p>
+           <span lang="fr">Avec un seul serveur, c'est facile. Avec deux ou plus, non : le score arrive sur le serveur A, mais certains spectateurs sont connectés au serveur B. Le serveur B doit l'apprendre. La réponse classique, c'est un serveur WebSocket et Redis en pub/sub. Je voulais voir jusqu'où on peut aller sans rien ajouter de tout ça.</span><span lang="ar">مع خادم واحد، الأمر سهل. مع اثنين أو أكثر، لا: تصل النتيجة إلى الخادم A، لكن بعض المتابعين متصلون بالخادم B، ويجب أن يعلم الخادم B بذلك. الحل المعتاد هو خادم WebSocket مع Redis بنمط pub/sub. أردت أن أرى إلى أي حد يمكن الذهاب دون إضافة أي من ذلك.</span></p>
 
-        <h2><span lang="en">Why Server-Sent Events, not WebSockets</span><span lang="fr">Pourquoi des Server-Sent Events, et pas des WebSockets</span></h2>
+        <h2><span lang="en">Why Server-Sent Events, not WebSockets</span><span lang="fr">Pourquoi des Server-Sent Events, et pas des WebSockets</span><span lang="ar">لماذا Server-Sent Events وليس WebSockets</span></h2>
         <p><span lang="en">Viewers only <em>receive</em> updates; scores are sent through the REST API. For one-way traffic, Server-Sent Events (SSE) are simpler: it is a normal HTTP response that never ends, the browser's built-in <code>EventSource</code> reconnects on its own, and events can have names (<code>leaderboard</code>, <code>score</code>, <code>game-deleted</code>).</span>
-           <span lang="fr">Les spectateurs ne font que <em>recevoir</em> des mises à jour ; les scores passent par l'API REST. Pour un trafic dans un seul sens, les Server-Sent Events (SSE) sont plus simples : c'est une réponse HTTP normale qui ne se termine jamais, l'<code>EventSource</code> intégré au navigateur se reconnecte tout seul, et les événements peuvent avoir un nom (<code>leaderboard</code>, <code>score</code>, <code>game-deleted</code>).</span></p>
+           <span lang="fr">Les spectateurs ne font que <em>recevoir</em> des mises à jour ; les scores passent par l'API REST. Pour un trafic dans un seul sens, les Server-Sent Events (SSE) sont plus simples : c'est une réponse HTTP normale qui ne se termine jamais, l'<code>EventSource</code> intégré au navigateur se reconnecte tout seul, et les événements peuvent avoir un nom (<code>leaderboard</code>, <code>score</code>, <code>game-deleted</code>).</span><span lang="ar">المتابعون <em>يستقبلون</em> التحديثات فقط؛ أما النتائج فتمرّ عبر REST API. ولحركة في اتجاه واحد، تُعدّ Server-Sent Events (SSE) أبسط: إنها استجابة HTTP عادية لا تنتهي أبداً، ويعيد <code>EventSource</code> المدمج في المتصفح الاتصال تلقائياً، ويمكن تسمية الأحداث (<code>leaderboard</code>، <code>score</code>، <code>game-deleted</code>).</span></p>
 
-        <h2><span lang="en">PostgreSQL as the message bus</span><span lang="fr">PostgreSQL comme bus de messages</span></h2>
+        <h2><span lang="en">PostgreSQL as the message bus</span><span lang="fr">PostgreSQL comme bus de messages</span><span lang="ar">PostgreSQL كناقل للرسائل</span></h2>
         <p><span lang="en">PostgreSQL has a little-known feature: <code>NOTIFY</code> sends a message on a channel, and every connection that ran <code>LISTEN</code> on that channel receives it. That is pub/sub, already inside the database.</span>
-           <span lang="fr">PostgreSQL a une fonctionnalité peu connue : <code>NOTIFY</code> envoie un message sur un canal, et toutes les connexions qui ont fait <code>LISTEN</code> sur ce canal le reçoivent. C'est du pub/sub, déjà dans la base de données.</span></p>
+           <span lang="fr">PostgreSQL a une fonctionnalité peu connue : <code>NOTIFY</code> envoie un message sur un canal, et toutes les connexions qui ont fait <code>LISTEN</code> sur ce canal le reçoivent. C'est du pub/sub, déjà dans la base de données.</span><span lang="ar">في PostgreSQL ميزة غير معروفة كثيراً: يرسل <code>NOTIFY</code> رسالة على قناة، وتستقبلها كل الاتصالات التي نفّذت <code>LISTEN</code> على تلك القناة. إنه pub/sub موجود أصلاً داخل قاعدة البيانات.</span></p>
         <figure class="flow" aria-label="Realtime flow">
           <div class="flow-row" style="min-width:680px">
-            <div class="node"><b><span lang="en">Game</span><span lang="fr">Jeu</span></b><small>POST /scores</small></div>
+            <div class="node"><b><span lang="en">Game</span><span lang="fr">Jeu</span><span lang="ar">اللعبة</span></b><small>POST /scores</small></div>
             <span class="arrow">→</span>
-            <div class="node"><b><span lang="en">Server A</span><span lang="fr">Serveur A</span></b><small>INSERT + NOTIFY</small></div>
+            <div class="node"><b><span lang="en">Server A</span><span lang="fr">Serveur A</span><span lang="ar">الخادم A</span></b><small>INSERT + NOTIFY</small></div>
             <span class="arrow">→</span>
             <div class="node core"><b>PostgreSQL</b><small>leaderboard_events</small></div>
             <span class="arrow">→</span>
-            <div class="node"><b><span lang="en">Servers A, B…</span><span lang="fr">Serveurs A, B…</span></b><small>LISTEN → SSE</small></div>
+            <div class="node"><b><span lang="en">Servers A, B…</span><span lang="fr">Serveurs A, B…</span><span lang="ar">الخوادم A، B…</span></b><small>LISTEN → SSE</small></div>
           </div>
         </figure>
         <p><span lang="en">Publishing is one line, after the score is saved:</span>
-           <span lang="fr">Publier tient en une ligne, après l'enregistrement du score :</span></p>
+           <span lang="fr">Publier tient en une ligne, après l'enregistrement du score :</span><span lang="ar">النشر سطر واحد، بعد حفظ النتيجة:</span></p>
 <pre><code>export async function publish(event: RealtimeEvent): Promise&lt;void&gt; {
   await db.$executeRaw`SELECT pg_notify(${CHANNEL}, ${JSON.stringify(event)})`
 }</code></pre>
         <p><span lang="en">On the receiving side, each server opens <strong>one</strong> dedicated connection, runs <code>LISTEN leaderboard_events</code>, and re-emits every notification on an in-process <code>EventEmitter</code>. Each open SSE stream simply subscribes to that emitter. One database connection per server, however many viewers it has.</span>
-           <span lang="fr">Côté réception, chaque serveur ouvre <strong>une seule</strong> connexion dédiée, exécute <code>LISTEN leaderboard_events</code>, et réémet chaque notification sur un <code>EventEmitter</code> en mémoire. Chaque flux SSE ouvert s'abonne simplement à cet émetteur. Une connexion à la base par serveur, quel que soit le nombre de spectateurs.</span></p>
+           <span lang="fr">Côté réception, chaque serveur ouvre <strong>une seule</strong> connexion dédiée, exécute <code>LISTEN leaderboard_events</code>, et réémet chaque notification sur un <code>EventEmitter</code> en mémoire. Chaque flux SSE ouvert s'abonne simplement à cet émetteur. Une connexion à la base par serveur, quel que soit le nombre de spectateurs.</span><span lang="ar">في جهة الاستقبال، يفتح كل خادم اتصالاً مخصّصاً <strong>واحداً فقط</strong>، وينفّذ <code>LISTEN leaderboard_events</code>، ويعيد بث كل إشعار عبر <code>EventEmitter</code> في الذاكرة. وكل تدفق SSE مفتوح يشترك ببساطة في هذا الباث. اتصال واحد بقاعدة البيانات لكل خادم، مهما كان عدد المتابعين.</span></p>
 <pre><code>client.on("notification", (msg) =&gt; {
   if (msg.channel !== CHANNEL || !msg.payload) return
   hub.emitter.emit("event", JSON.parse(msg.payload))
@@ -105,57 +105,57 @@
 await client.connect()
 await client.query(`LISTEN ${CHANNEL}`)</code></pre>
 
-        <h2><span lang="en">Keeping an SSE stream alive</span><span lang="fr">Garder un flux SSE en vie</span></h2>
+        <h2><span lang="en">Keeping an SSE stream alive</span><span lang="fr">Garder un flux SSE en vie</span><span lang="ar">إبقاء تدفق SSE حياً</span></h2>
         <p><span lang="en">An SSE response is a <code>ReadableStream</code> that the server keeps writing to. A few details make the difference between "works on my machine" and "works behind a real proxy":</span>
-           <span lang="fr">Une réponse SSE est un <code>ReadableStream</code> dans lequel le serveur continue d'écrire. Quelques détails font la différence entre « ça marche chez moi » et « ça marche derrière un vrai proxy » :</span></p>
+           <span lang="fr">Une réponse SSE est un <code>ReadableStream</code> dans lequel le serveur continue d'écrire. Quelques détails font la différence entre « ça marche chez moi » et « ça marche derrière un vrai proxy » :</span><span lang="ar">استجابة SSE هي <code>ReadableStream</code> يواصل الخادم الكتابة فيه. وبعض التفاصيل تصنع الفرق بين « يعمل عندي » و« يعمل خلف proxy حقيقي »:</span></p>
         <ul class="bullets">
-          <li><span lang="en">A <strong>snapshot first</strong>: on connect, the stream sends the full current ranking. So if a viewer misses events while reconnecting, it does not matter: the next connection starts from the truth.</span><span lang="fr">D'abord <strong>un instantané</strong> : à la connexion, le flux envoie le classement complet. Si un spectateur rate des événements pendant une reconnexion, ce n'est pas grave : la connexion suivante repart de la vérité.</span></li>
-          <li><span lang="en">A <strong>heartbeat</strong> comment (<code>: ping</code>) every 25 seconds, because proxies and load balancers close connections that stay silent too long.</span><span lang="fr">Un <strong>signal de vie</strong> (le commentaire <code>: ping</code>) toutes les 25 secondes, parce que les proxys et répartiteurs de charge coupent les connexions trop longtemps silencieuses.</span></li>
-          <li><span lang="en"><code>retry: 3000</code> tells the browser to reconnect after 3 seconds if the connection drops.</span><span lang="fr"><code>retry: 3000</code> demande au navigateur de se reconnecter après 3 secondes si la connexion tombe.</span></li>
-          <li><span lang="en">The right headers, so nothing in between buffers the stream:</span><span lang="fr">Les bons en-têtes, pour que rien entre les deux ne mette le flux en mémoire tampon :</span></li>
+          <li><span lang="en">A <strong>snapshot first</strong>: on connect, the stream sends the full current ranking. So if a viewer misses events while reconnecting, it does not matter: the next connection starts from the truth.</span><span lang="fr">D'abord <strong>un instantané</strong> : à la connexion, le flux envoie le classement complet. Si un spectateur rate des événements pendant une reconnexion, ce n'est pas grave : la connexion suivante repart de la vérité.</span><span lang="ar">أولاً <strong>لقطة كاملة</strong>: عند الاتصال، يرسل التدفق الترتيب كاملاً. وإذا فاتت المتابعَ أحداثٌ أثناء إعادة الاتصال، فلا بأس: الاتصال التالي ينطلق من الحالة الصحيحة.</span></li>
+          <li><span lang="en">A <strong>heartbeat</strong> comment (<code>: ping</code>) every 25 seconds, because proxies and load balancers close connections that stay silent too long.</span><span lang="fr">Un <strong>signal de vie</strong> (le commentaire <code>: ping</code>) toutes les 25 secondes, parce que les proxys et répartiteurs de charge coupent les connexions trop longtemps silencieuses.</span><span lang="ar"><strong>إشارة حياة</strong> (التعليق <code>: ping</code>) كل 25 ثانية، لأن الـ proxy وموزّعات الحمل تقطع الاتصالات الصامتة لمدة طويلة.</span></li>
+          <li><span lang="en"><code>retry: 3000</code> tells the browser to reconnect after 3 seconds if the connection drops.</span><span lang="fr"><code>retry: 3000</code> demande au navigateur de se reconnecter après 3 secondes si la connexion tombe.</span><span lang="ar"><code>retry: 3000</code> يطلب من المتصفح إعادة الاتصال بعد 3 ثوانٍ إذا انقطع الاتصال.</span></li>
+          <li><span lang="en">The right headers, so nothing in between buffers the stream:</span><span lang="fr">Les bons en-têtes, pour que rien entre les deux ne mette le flux en mémoire tampon :</span><span lang="ar">الترويسات الصحيحة، حتى لا يخزّن أي وسيط التدفق مؤقتاً:</span></li>
         </ul>
 <pre><code>"Content-Type": "text/event-stream; charset=utf-8",
 "Cache-Control": "no-cache, no-transform",
 "X-Accel-Buffering": "no",</code></pre>
         <p><span lang="en">When the viewer leaves, the request's abort signal fires, and the stream stops its heartbeat and unsubscribes, so nothing leaks.</span>
-           <span lang="fr">Quand le spectateur part, le signal d'annulation de la requête se déclenche, et le flux arrête son signal de vie et se désabonne : rien ne fuit.</span></p>
+           <span lang="fr">Quand le spectateur part, le signal d'annulation de la requête se déclenche, et le flux arrête son signal de vie et se désabonne : rien ne fuit.</span><span lang="ar">عندما يغادر المتابع، تنطلق إشارة إلغاء الطلب، فيوقف التدفق إشارة الحياة ويلغي اشتراكه: لا شيء يتسرّب.</span></p>
 
-        <h2><span lang="en">Bursts of scores</span><span lang="fr">Les rafales de scores</span></h2>
+        <h2><span lang="en">Bursts of scores</span><span lang="fr">Les rafales de scores</span><span lang="ar">دفعات النتائج</span></h2>
         <p><span lang="en">Recomputing the ranking after every single score would be wasteful when ten scores arrive in the same second. Each stream forwards the individual <code>score</code> event right away (for the "new score" highlight), but waits 200 ms of calm before sending one fresh ranking.</span>
-           <span lang="fr">Recalculer le classement après chaque score serait du gaspillage quand dix scores arrivent dans la même seconde. Chaque flux transmet tout de suite l'événement <code>score</code> (pour mettre en avant le nouveau score), mais attend 200 ms de calme avant d'envoyer un seul classement à jour.</span></p>
+           <span lang="fr">Recalculer le classement après chaque score serait du gaspillage quand dix scores arrivent dans la même seconde. Chaque flux transmet tout de suite l'événement <code>score</code> (pour mettre en avant le nouveau score), mais attend 200 ms de calme avant d'envoyer un seul classement à jour.</span><span lang="ar">إعادة حساب الترتيب بعد كل نتيجة هدر حين تصل عشر نتائج في الثانية نفسها. ينقل كل تدفق حدث <code>score</code> فوراً (لإبراز النتيجة الجديدة)، لكنه ينتظر 200 ms من الهدوء قبل إرسال ترتيب محدَّث واحد.</span></p>
 <pre><code>send("score", event)
 if (timer) clearTimeout(timer)
 timer = setTimeout(async () =&gt; {
   send("leaderboard", await getLeaderboard(game, period))
 }, 200)</code></pre>
         <p><span lang="en">The ranking itself is one SQL query: <code>DISTINCT ON ("playerId")</code> keeps each player's best score in the period, and ties go to whoever got there first.</span>
-           <span lang="fr">Le classement lui-même est une seule requête SQL : <code>DISTINCT ON ("playerId")</code> garde le meilleur score de chaque joueur sur la période, et en cas d'égalité, le premier arrivé passe devant.</span></p>
+           <span lang="fr">Le classement lui-même est une seule requête SQL : <code>DISTINCT ON ("playerId")</code> garde le meilleur score de chaque joueur sur la période, et en cas d'égalité, le premier arrivé passe devant.</span><span lang="ar">الترتيب نفسه استعلام SQL واحد: <code>DISTINCT ON ("playerId")</code> يُبقي أفضل نتيجة لكل لاعب خلال الفترة، وعند التعادل يتقدّم من سبق.</span></p>
 
-        <h2><span lang="en">What production taught me</span><span lang="fr">Ce que la production m'a appris</span></h2>
+        <h2><span lang="en">What production taught me</span><span lang="fr">Ce que la production m'a appris</span><span lang="ar">ما علّمتني إياه بيئة الإنتاج</span></h2>
         <ul class="bullets">
-          <li><span lang="en"><strong>Connection poolers break LISTEN.</strong> My hosted database (Neon) gives a pooled URL, and poolers in transaction mode do not keep a session, so <code>LISTEN</code> silently gets nothing. The listener uses the direct, unpooled URL; normal queries keep the pooled one.</span><span lang="fr"><strong>Les poolers de connexions cassent LISTEN.</strong> Ma base hébergée (Neon) fournit une adresse avec pooler, et un pooler en mode transaction ne garde pas de session : <code>LISTEN</code> ne reçoit alors rien, sans erreur. L'écoute utilise l'adresse directe ; les requêtes normales gardent celle avec pooler.</span></li>
-          <li><span lang="en"><strong>The connection will drop.</strong> Neon suspends an idle database, networks hiccup. The listener reconnects with exponential backoff (1 s, 2 s, 4 s… up to 30 s), and only while someone is actually subscribed.</span><span lang="fr"><strong>La connexion va tomber.</strong> Neon met en veille une base inactive, le réseau a des ratés. L'écoute se reconnecte avec un délai croissant (1 s, 2 s, 4 s… jusqu'à 30 s), et seulement tant que quelqu'un est vraiment abonné.</span></li>
-          <li><span lang="en"><strong>Serverless is the wrong fit.</strong> Long-lived SSE streams and a permanent LISTEN connection need a real Node.js server, so the app runs on Render, not on serverless functions.</span><span lang="fr"><strong>Le serverless ne convient pas.</strong> Des flux SSE longs et une connexion LISTEN permanente demandent un vrai serveur Node.js : l'appli tourne donc sur Render, pas sur des fonctions serverless.</span></li>
-          <li><span lang="en"><strong>Keep payloads small.</strong> A NOTIFY payload must stay under 8 KB, so events carry ids and values, not whole rankings.</span><span lang="fr"><strong>Garder des messages petits.</strong> Un message NOTIFY doit rester sous 8 Ko : les événements portent des identifiants et des valeurs, pas des classements entiers.</span></li>
+          <li><span lang="en"><strong>Connection poolers break LISTEN.</strong> My hosted database (Neon) gives a pooled URL, and poolers in transaction mode do not keep a session, so <code>LISTEN</code> silently gets nothing. The listener uses the direct, unpooled URL; normal queries keep the pooled one.</span><span lang="fr"><strong>Les poolers de connexions cassent LISTEN.</strong> Ma base hébergée (Neon) fournit une adresse avec pooler, et un pooler en mode transaction ne garde pas de session : <code>LISTEN</code> ne reçoit alors rien, sans erreur. L'écoute utilise l'adresse directe ; les requêtes normales gardent celle avec pooler.</span><span lang="ar"><strong>مُجمِّعات الاتصالات (poolers) تُعطّل LISTEN.</strong> قاعدتي المستضافة (Neon) توفّر عنواناً مع pooler، والـ pooler في وضع المعاملات لا يحتفظ بالجلسة: فلا يستقبل <code>LISTEN</code> شيئاً، ودون أي خطأ. يستعمل الاستماع العنوان المباشر؛ وتبقى الاستعلامات العادية على العنوان مع pooler.</span></li>
+          <li><span lang="en"><strong>The connection will drop.</strong> Neon suspends an idle database, networks hiccup. The listener reconnects with exponential backoff (1 s, 2 s, 4 s… up to 30 s), and only while someone is actually subscribed.</span><span lang="fr"><strong>La connexion va tomber.</strong> Neon met en veille une base inactive, le réseau a des ratés. L'écoute se reconnecte avec un délai croissant (1 s, 2 s, 4 s… jusqu'à 30 s), et seulement tant que quelqu'un est vraiment abonné.</span><span lang="ar"><strong>الاتصال سينقطع حتماً.</strong> يضع Neon القاعدة غير النشطة في وضع السكون، وللشبكة هفواتها. يعيد الاستماع الاتصال بمهلة متزايدة (1 s، 2 s، 4 s… حتى 30 s)، وفقط ما دام هناك مشترك فعلي.</span></li>
+          <li><span lang="en"><strong>Serverless is the wrong fit.</strong> Long-lived SSE streams and a permanent LISTEN connection need a real Node.js server, so the app runs on Render, not on serverless functions.</span><span lang="fr"><strong>Le serverless ne convient pas.</strong> Des flux SSE longs et une connexion LISTEN permanente demandent un vrai serveur Node.js : l'appli tourne donc sur Render, pas sur des fonctions serverless.</span><span lang="ar"><strong>الـ serverless لا يناسب.</strong> تدفقات SSE الطويلة واتصال LISTEN الدائم يتطلبان خادم Node.js حقيقياً: لذا يعمل التطبيق على Render، لا على دوال serverless.</span></li>
+          <li><span lang="en"><strong>Keep payloads small.</strong> A NOTIFY payload must stay under 8 KB, so events carry ids and values, not whole rankings.</span><span lang="fr"><strong>Garder des messages petits.</strong> Un message NOTIFY doit rester sous 8 Ko : les événements portent des identifiants et des valeurs, pas des classements entiers.</span><span lang="ar"><strong>إبقاء الرسائل صغيرة.</strong> يجب أن تبقى رسالة NOTIFY أقل من 8 KB: تحمل الأحداث معرّفات وقيماً، لا ترتيباً كاملاً.</span></li>
         </ul>
 
-        <h2><span lang="en">When I would use something else</span><span lang="fr">Quand j'utiliserais autre chose</span></h2>
+        <h2><span lang="en">When I would use something else</span><span lang="fr">Quand j'utiliserais autre chose</span><span lang="ar">متى أستعمل حلاً آخر</span></h2>
         <p><span lang="en">NOTIFY is not a durable queue: a server that is offline misses the messages (the snapshot on reconnect covers that here). With very high traffic, or if clients also needed to send messages, Redis or a dedicated WebSocket service would make sense. For a leaderboard, the database I already had was enough.</span>
-           <span lang="fr">NOTIFY n'est pas une file durable : un serveur hors ligne rate les messages (ici, l'instantané à la reconnexion compense). Avec un très gros trafic, ou si les clients devaient aussi envoyer des messages, Redis ou un service WebSocket dédié auraient du sens. Pour un classement, la base que j'avais déjà suffisait.</span></p>
+           <span lang="fr">NOTIFY n'est pas une file durable : un serveur hors ligne rate les messages (ici, l'instantané à la reconnexion compense). Avec un très gros trafic, ou si les clients devaient aussi envoyer des messages, Redis ou un service WebSocket dédié auraient du sens. Pour un classement, la base que j'avais déjà suffisait.</span><span lang="ar">NOTIFY ليس طابوراً دائماً: الخادم غير المتصل تفوته الرسائل (وهنا تعوّض اللقطة الكاملة عند إعادة الاتصال). مع حركة كبيرة جداً، أو إذا كان على العملاء إرسال رسائل أيضاً، يصبح لـ Redis أو لخدمة WebSocket مخصّصة معنى. أما لترتيب ألعاب، فقاعدة البيانات التي كانت لديّ كفت.</span></p>
 
-        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span></h2>
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
         <ul class="bullets">
-          <li><span lang="en">For one-way realtime, Server-Sent Events are simpler than WebSockets and reconnect for free.</span><span lang="fr">Pour du temps réel dans un seul sens, les Server-Sent Events sont plus simples que les WebSockets et se reconnectent gratuitement.</span></li>
-          <li><span lang="en">PostgreSQL LISTEN/NOTIFY can sync several servers without adding Redis.</span><span lang="fr">LISTEN/NOTIFY de PostgreSQL peut synchroniser plusieurs serveurs sans ajouter Redis.</span></li>
-          <li><span lang="en">Design for dropped connections from day one: snapshot on connect, heartbeats and backoff.</span><span lang="fr">Prévoir les coupures dès le premier jour : instantané à la connexion, signaux de vie et reconnexion progressive.</span></li>
+          <li><span lang="en">For one-way realtime, Server-Sent Events are simpler than WebSockets and reconnect for free.</span><span lang="fr">Pour du temps réel dans un seul sens, les Server-Sent Events sont plus simples que les WebSockets et se reconnectent gratuitement.</span><span lang="ar">للوقت الحقيقي في اتجاه واحد، Server-Sent Events أبسط من WebSockets وتعيد الاتصال تلقائياً.</span></li>
+          <li><span lang="en">PostgreSQL LISTEN/NOTIFY can sync several servers without adding Redis.</span><span lang="fr">LISTEN/NOTIFY de PostgreSQL peut synchroniser plusieurs serveurs sans ajouter Redis.</span><span lang="ar">يمكن لـ LISTEN/NOTIFY في PostgreSQL مزامنة عدة خوادم دون إضافة Redis.</span></li>
+          <li><span lang="en">Design for dropped connections from day one: snapshot on connect, heartbeats and backoff.</span><span lang="fr">Prévoir les coupures dès le premier jour : instantané à la connexion, signaux de vie et reconnexion progressive.</span><span lang="ar">التحسّب للانقطاعات من اليوم الأول: لقطة كاملة عند الاتصال، وإشارات حياة، وإعادة اتصال تدريجية.</span></li>
         </ul>
         <p><span lang="en">Try it on the <a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener">live demo</a> (free hosting, it may take up to a minute to wake up), or read the code on <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">GitHub</a>.</span>
-           <span lang="fr">Essayez la <a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener">démo en ligne</a> (hébergement gratuit, jusqu'à une minute pour démarrer), ou lisez le code sur <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">GitHub</a>.</span></p>
+           <span lang="fr">Essayez la <a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener">démo en ligne</a> (hébergement gratuit, jusqu'à une minute pour démarrer), ou lisez le code sur <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">جرّب <a href="https://realtime-leaderboard-gmdt.onrender.com" target="_blank" rel="noopener">العرض التجريبي</a> (استضافة مجانية، قد يستغرق التشغيل حتى دقيقة)، أو اقرأ الشيفرة على <a href="https://github.com/adelmerad/Realtime-Leaderboard" target="_blank" rel="noopener">GitHub</a>.</span></p>
       </div>
 
       <div class="cta">
-        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span></a>
-        <a class="btn ghost" href="leaderboard.html"><span lang="en">Leaderboard case study</span><span lang="fr">Étude de cas Leaderboard</span> →</a>
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="leaderboard.html"><span lang="en">Leaderboard case study</span><span lang="fr">Étude de cas Leaderboard</span><span lang="ar">دراسة حالة Leaderboard</span> <span class="arr">→</span></a>
       </div>
     </article>
   </main>
