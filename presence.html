@@ -27,7 +27,7 @@
     try {
       const r = document.documentElement;
       const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
-      let l = localStorage.getItem("lang") || (navigator.language || "").slice(0, 2);
+      let l = localStorage.getItem("lang") || "en";
       const langs = (r.dataset.langs || "en fr").split(" ");
       if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
       r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
