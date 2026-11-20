@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A garden that grows with your health, and the date bugs hiding in it — Adel Merad</title>
+  <meta name="description" content="Diab, a gamified diabetes tracker built with Expo at a hackathon: offline-first state with Zustand, streaks and achievements, bringing a React Native app to the web, and five date bugs found rereading the code.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-diab.html">
+  <meta property="og:title" content="A garden that grows with your health, and the date bugs hiding in it">
+  <meta property="og:description" content="Offline-first React Native with Zustand, streaks and achievements, Expo on the web, and five date bugs.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-diab.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="A garden that grows with your health — Adel Merad" data-title-fr="Un jardin qui pousse avec votre santé — Adel Merad" data-title-ar="حديقة تنمو مع صحتك — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 8 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 8 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">A garden that grows with your health, and the date bugs hiding in it</span>
+          <span lang="fr">Un jardin qui pousse avec votre santé, et les bugs de dates cachés dedans</span><span lang="ar">حديقة تنمو مع صحتك، وأخطاء التواريخ المختبئة فيها</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">Diab turns diabetes care into a garden: healthy days earn plants. We built it with Expo at a hackathon, I later brought it to the web, and rereading it I found that almost every bug was about the same thing: what "today" means.</span>
+          <span lang="fr">Diab transforme le suivi du diabète en jardin : les journées saines font gagner des plantes. Nous l'avons construit avec Expo pendant un hackathon, je l'ai ensuite porté sur le web, et en le relisant, j'ai vu que presque tous les bugs portaient sur la même chose : ce que veut dire « aujourd'hui ».</span><span lang="ar">يحوّل Diab متابعة السكري إلى حديقة: الأيام الصحية تكسبك نباتات. بنيناه بـ Expo خلال هاكاثون، ثم نقلته لاحقاً إلى الويب، وعند إعادة قراءته وجدت أن كل الأخطاء تقريباً تدور حول الشيء نفسه: ماذا تعني كلمة «اليوم».</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+        <h2><span lang="en">The idea</span><span lang="fr">L'idée</span><span lang="ar">الفكرة</span></h2>
+        <p><span lang="en">Living with diabetes means tracking glucose, food, water, walking, sleep and a long list of appointments, every day, for years. The hard part is not the tracking, it is staying motivated. At the PEXILIS Hackathon (Open Mind Club, February 2026), our team built <a href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener">Diab</a>: a React Native app where good habits earn plants for a personal garden. Balanced glucose for a day gives an Aloe Vera; a week of walking gives a lavender field.</span>
+           <span lang="fr">Vivre avec le diabète, c'est suivre la glycémie, l'alimentation, l'eau, la marche, le sommeil et une longue liste de rendez-vous, tous les jours, pendant des années. Le plus dur n'est pas de noter, c'est de rester motivé. Au hackathon PEXILIS (Open Mind Club, février 2026), notre équipe a construit <a href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener">Diab</a> : une appli React Native où les bonnes habitudes font gagner des plantes pour un jardin personnel. Une glycémie équilibrée pendant une journée donne un aloe vera ; une semaine de marche donne un champ de lavande.</span><span lang="ar">العيش مع السكري يعني متابعة السكر في الدم، والأكل، والماء، والمشي، والنوم، وقائمة طويلة من المواعيد، كل يوم، لسنوات. والصعب ليس التسجيل، بل البقاء متحفزاً. في هاكاثون PEXILIS (نادي Open Mind، فيفري 2026)، بنى فريقنا <a href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener">Diab</a>: تطبيق React Native تكسبك فيه العادات الجيدة نباتات لحديقتك الخاصة. سكر متوازن ليوم كامل يمنحك صبّاراً (ألوفيرا)، وأسبوع من المشي يمنحك حقل خزامى.</span></p>
+        <p><span lang="en">Everything the garden measures comes from what the user enters, so there is no point in cheating: the garden only reflects your own effort.</span>
+           <span lang="fr">Tout ce que mesure le jardin vient de ce que l'utilisateur saisit : tricher ne sert à rien, le jardin ne reflète que ses propres efforts.</span><span lang="ar">كل ما تقيسه الحديقة يأتي مما يدخله المستخدم، فلا فائدة من الغش: الحديقة لا تعكس إلا جهدك أنت.</span></p>
+
+        <h2><span lang="en">Offline first, with no backend</span><span lang="fr">Hors ligne d'abord, sans backend</span><span lang="ar">دون اتصال أولاً، ودون خادم خلفي</span></h2>
+        <p><span lang="en">Health data is personal, and a hackathon has no time for a server. So the app has no backend at all: each part of the state (records, daily tasks, goals, achievements, garden) is a small Zustand store, saved automatically to the phone's storage with the <code>persist</code> middleware.</span>
+           <span lang="fr">Les données de santé sont personnelles, et un hackathon ne laisse pas le temps de faire un serveur. L'appli n'a donc aucun backend : chaque partie de l'état (mesures, tâches du jour, objectifs, succès, jardin) est un petit store Zustand, sauvegardé automatiquement dans le stockage du téléphone grâce au middleware <code>persist</code>.</span><span lang="ar">البيانات الصحية شخصية، والهاكاثون لا يترك وقتاً لبناء خادم. لذلك لا يملك التطبيق أي خادم خلفي: كل جزء من الحالة (القياسات، ومهام اليوم، والأهداف، والإنجازات، والحديقة) مخزن Zustand صغير، يُحفظ تلقائياً في ذاكرة الهاتف عبر الوسيط <code>persist</code>.</span></p>
+<pre><code>export const useTaskStore = create&lt;TaskStore&gt;()(
+  persist(
+    (set, get) =&gt; ({
+      tasks: defaultTasks,
+      currentDate: todayString(),
+      history: [],          // days where every task was done
+      toggleTask: (id) =&gt; set(/* ... */),
+      checkForDayReset: () =&gt; set(/* ... */),
+    }),
+    { name: "daily_tasks", storage: createJSONStorage(() =&gt; AsyncStorage) },
+  ),
+);</code></pre>
+
+        <h2><span lang="en">Daily tasks and streaks</span><span lang="fr">Les tâches du jour et les séries</span><span lang="ar">مهام اليوم والسلاسل</span></h2>
+        <p><span lang="en">Daily tasks ("take medication", "check fasting glucose", "10-minute walk") must reset every day, without any server to run a midnight job. The trick is a lazy reset: the store remembers the date it belongs to, and when the app opens, if that date is not today, every task is unchecked. When all tasks are done, the day is added to a history list.</span>
+           <span lang="fr">Les tâches du jour (« prendre son traitement », « glycémie à jeun », « marche de 10 minutes ») doivent se remettre à zéro chaque jour, sans serveur pour lancer une tâche à minuit. L'astuce, c'est une remise à zéro paresseuse : le store retient la date à laquelle il correspond, et à l'ouverture de l'appli, si cette date n'est pas aujourd'hui, toutes les tâches sont décochées. Quand toutes les tâches sont faites, la journée est ajoutée à un historique.</span><span lang="ar">يجب أن تعود مهام اليوم («تناول الدواء»، «قياس السكر صائماً»، «مشي 10 دقائق») إلى الصفر كل يوم، دون خادم يشغّل مهمة عند منتصف الليل. والحيلة هي إعادة ضبط كسولة: يحفظ المخزن التاريخ الذي يخصه، وعند فتح التطبيق، إذا لم يكن هذا التاريخ هو اليوم، تُلغى علامة كل المهام. وعند إنجاز كل المهام، يُضاف اليوم إلى قائمة السجل.</span></p>
+        <p><span lang="en">Streaks are then computed, never stored: start from today and walk back one day at a time while the day meets its goal. Achievements work the same way, as small functions over the records, registered by type:</span>
+           <span lang="fr">Les séries sont ensuite calculées, jamais stockées : partir d'aujourd'hui et reculer d'un jour à la fois tant que la journée atteint son objectif. Les succès fonctionnent pareil, comme de petites fonctions sur les mesures, enregistrées par type :</span><span lang="ar">ثم تُحسب السلاسل ولا تُخزَّن أبداً: نبدأ من اليوم ونرجع يوماً بيوم ما دام اليوم يحقق هدفه. والإنجازات تعمل بالطريقة نفسها، كدوال صغيرة على القياسات، مسجّلة حسب النوع:</span></p>
+<pre><code>const achievementEvaluators: Record&lt;AchievementType, GoalEvaluator&gt; = {
+  PERFECT_DAY: (_, { api }) =&gt; {
+    const metrics = ["Activity", "Daily", "Water", "Sleep", "Glucose", "Diet"];
+    const done = metrics.filter((m) =&gt; api.getMetricStreak(m) &gt;= 1).length;
+    return { completion: done === metrics.length, progress: done / metrics.length };
+  },
+  GLUCOSE_REBALANCE: /* ... */,
+};</code></pre>
+        <p><span lang="en">Returning a <code>progress</code> between 0 and 1, and not just done or not done, lets the screen show "4 of 6" and keeps people going.</span>
+           <span lang="fr">Renvoyer une <code>progress</code> entre 0 et 1, et pas seulement fait ou pas fait, permet à l'écran d'afficher « 4 sur 6 » et donne envie de continuer.</span><span lang="ar">إرجاع قيمة <code>progress</code> بين 0 و1، لا مجرد «تم» أو «لم يتم»، يسمح للشاشة بعرض «4 من 6» ويشجع على المواصلة.</span></p>
+
+        <h2><span lang="en">Bringing a React Native app to the web</span><span lang="fr">Porter une appli React Native sur le web</span><span lang="ar">نقل تطبيق React Native إلى الويب</span></h2>
+        <p><span lang="en">A hackathon app that only runs in Expo Go on someone's phone is hard to show on a CV. Months later, I made a web version, since Expo already ships <code>react-native-web</code>. The export built fine, but in the browser the app never really started: the first screen stayed stuck, the forms did nothing, and the console showed one error: <code>Cannot use 'import.meta' outside a module</code>. Zustand's middleware contains <code>import.meta.env</code>, and the web bundle is not loaded as a module. The Expo Babel preset can rewrite <code>import.meta</code>, but only does it for server code by default, so one option fixed it without touching the app:</span>
+           <span lang="fr">Une appli de hackathon qui ne tourne que dans Expo Go sur le téléphone de quelqu'un est difficile à montrer sur un CV. Des mois plus tard, j'en ai fait une version web, puisque Expo inclut déjà <code>react-native-web</code>. L'export se construisait sans erreur, mais dans le navigateur l'appli ne démarrait jamais vraiment : le premier écran restait bloqué, les formulaires ne faisaient rien, et la console affichait une seule erreur : <code>Cannot use 'import.meta' outside a module</code>. Le middleware de Zustand contient <code>import.meta.env</code>, et le bundle web n'est pas chargé comme un module. Le preset Babel d'Expo sait réécrire <code>import.meta</code>, mais par défaut seulement pour le code serveur : une seule option a tout réglé, sans toucher à l'appli :</span><span lang="ar">تطبيق هاكاثون لا يعمل إلا في Expo Go على هاتف أحدهم يصعب عرضه في سيرة ذاتية. بعد أشهر، صنعت له نسخة ويب، لأن Expo يتضمن أصلاً <code>react-native-web</code>. كان التصدير يُبنى دون خطأ، لكن التطبيق لم يشتغل فعلاً في المتصفح: بقيت الشاشة الأولى عالقة، ولم تفعل الاستمارات شيئاً، وظهر خطأ واحد في الكونسول: <code>Cannot use 'import.meta' outside a module</code>. يحتوي وسيط Zustand على <code>import.meta.env</code>، وحزمة الويب لا تُحمَّل كوحدة (module). ويستطيع إعداد Babel الخاص بـ Expo إعادة كتابة <code>import.meta</code>، لكن افتراضياً لشيفرة الخادم فقط، فأصلح خيار واحد كل شيء دون لمس التطبيق:</span></p>
+<pre><code>// babel.config.js
+module.exports = function (api) {
+  api.cache(true)
+  return {
+    // zustand's middleware uses import.meta, which the web bundle cannot run as-is
+    presets: [["babel-preset-expo", { unstable_transformImportMeta: true }]],
+  }
+}</code></pre>
+        <p><span lang="en">The second surprise: Expo's static output pre-renders every page at build time, where there is no <code>localStorage</code>. In the browser, the stores then load the saved data and the screen no longer matches the HTML, which React reports as a hydration mismatch. For an app whose whole content lives in the user's browser, pre-rendering brings nothing, so the web build became a single-page app (<code>"output": "single"</code> in <code>app.json</code>) with a Vercel rewrite sending every URL to <code>index.html</code>.</span>
+           <span lang="fr">Deuxième surprise : la sortie statique d'Expo pré-affiche chaque page au moment du build, là où il n'y a pas de <code>localStorage</code>. Dans le navigateur, les stores chargent ensuite les données sauvegardées et l'écran ne correspond plus au HTML, ce que React signale comme une erreur d'hydratation. Pour une appli dont tout le contenu vit dans le navigateur de l'utilisateur, le pré-affichage n'apporte rien : le build web est donc devenu une application d'une seule page (<code>"output": "single"</code> dans <code>app.json</code>), avec une réécriture Vercel qui envoie toutes les URL vers <code>index.html</code>.</span><span lang="ar">المفاجأة الثانية: المخرجات الثابتة في Expo تعرض كل صفحة مسبقاً وقت البناء، حيث لا يوجد <code>localStorage</code>. ثم في المتصفح، تحمّل المخازن البيانات المحفوظة فلا تعود الشاشة مطابقة لـ HTML، وهو ما يعلنه React كخطأ في الإماهة (hydration). وفي تطبيق يعيش كل محتواه في متصفح المستخدم، لا يضيف العرض المسبق شيئاً، فصار بناء الويب تطبيقاً من صفحة واحدة (<code>"output": "single"</code> في <code>app.json</code>)، مع إعادة توجيه في Vercel ترسل كل الروابط إلى <code>index.html</code>.</span></p>
+
+        <h2><span lang="en">Five date bugs</span><span lang="fr">Cinq bugs de dates</span><span lang="ar">خمسة أخطاء في التواريخ</span></h2>
+        <p><span lang="en">Rereading the code for this article, I noticed that the bugs were not in the garden, the UI or the state. They were almost all about dates.</span>
+           <span lang="fr">En relisant le code pour cet article, j'ai remarqué que les bugs n'étaient ni dans le jardin, ni dans l'interface, ni dans l'état. Ils portaient presque tous sur les dates.</span><span lang="ar">عند إعادة قراءة الشيفرة لهذا المقال، لاحظت أن الأخطاء لم تكن في الحديقة ولا في الواجهة ولا في الحالة. كانت كلها تقريباً في التواريخ.</span></p>
+
+        <h3><span lang="en">1. Two dates are never equal with ===</span><span lang="fr">1. Deux dates ne sont jamais égales avec ===</span><span lang="ar">1. تاريخان لا يتساويان أبداً بـ ===</span></h3>
+        <p><span lang="en">The "Recovery" achievement rewards bringing fasting glucose back into range after a bad day. To find yesterday's measurements, the code did this:</span>
+           <span lang="fr">Le succès « Recovery » récompense le retour d'une glycémie à jeun dans la norme après une mauvaise journée. Pour trouver les mesures d'hier, le code faisait ceci :</span><span lang="ar">يكافئ إنجاز «Recovery» إعادة السكر الصائم إلى المجال الطبيعي بعد يوم سيئ. ولإيجاد قياسات الأمس، كانت الشيفرة تفعل هذا:</span></p>
+<pre><code>recordings.filter((r) =&gt; new Date(r.date) === yesterday)   // always false
+
+// compare calendar days instead
+recordings.filter((r) =&gt; dayKey(new Date(r.date)) === dayKey(yesterday))</code></pre>
+        <p><span lang="en"><code>===</code> compares two objects by reference, and a new <code>Date</code> is always a new object, so the filter always returned nothing and the achievement could never be unlocked. TypeScript accepted it without a word. (The data fetch above it also only asked for the last 24 hours of records, which covers only part of yesterday.)</span>
+           <span lang="fr"><code>===</code> compare deux objets par référence, et une nouvelle <code>Date</code> est toujours un nouvel objet : le filtre ne renvoyait donc jamais rien, et le succès ne pouvait jamais être débloqué. TypeScript l'a accepté sans rien dire. (La lecture des données juste au-dessus ne demandait en plus que les mesures des dernières 24 heures, qui ne couvrent qu'une partie d'hier.)</span><span lang="ar"><code>===</code> تقارن كائنين حسب المرجع، و<code>Date</code> الجديد كائن جديد دائماً، لذا لم يُرجع المرشّح أي شيء أبداً، ولم يكن ممكناً فتح الإنجاز قط. وقَبِل TypeScript ذلك دون أي تنبيه. (كما أن قراءة البيانات فوقه مباشرة لم تطلب إلا قياسات آخر 24 ساعة، وهي لا تغطي إلا جزءاً من الأمس.)</span></p>
+
+        <h3><span lang="en">2. "Today" in UTC is not today in Algiers</span><span lang="fr">2. « Aujourd'hui » en UTC n'est pas aujourd'hui à Alger</span><span lang="ar">2. «اليوم» بتوقيت UTC ليس اليوم في الجزائر</span></h3>
+        <p><span lang="en">Every day key came from <code>new Date().toISOString().split("T")[0]</code>. <code>toISOString()</code> is always in UTC, and Algeria is UTC+1. Between midnight and 1 a.m., the app still thinks it is yesterday: a task done at 00:30 counts for the previous day, and the daily reset happens at 1 a.m. instead of midnight. In timezones further from UTC, the gap is several hours. The fix is one helper that builds the key from the local date (<code>getFullYear</code>, <code>getMonth</code>, <code>getDate</code>), used everywhere.</span>
+           <span lang="fr">Chaque clé de jour venait de <code>new Date().toISOString().split("T")[0]</code>. <code>toISOString()</code> est toujours en UTC, et l'Algérie est en UTC+1. Entre minuit et 1 h du matin, l'appli croit encore être la veille : une tâche faite à 0 h 30 compte pour le jour d'avant, et la remise à zéro quotidienne se fait à 1 h au lieu de minuit. Dans des fuseaux plus éloignés de UTC, l'écart est de plusieurs heures. La correction : une seule fonction qui construit la clé à partir de la date locale (<code>getFullYear</code>, <code>getMonth</code>, <code>getDate</code>), utilisée partout.</span><span lang="ar">كان كل مفتاح يوم يأتي من <code>new Date().toISOString().split("T")[0]</code>. و<code>toISOString()</code> دائماً بتوقيت UTC، والجزائر في UTC+1. بين منتصف الليل والساعة الواحدة صباحاً، يظن التطبيق أننا ما زلنا في الأمس: المهمة المنجزة على الساعة 00:30 تُحسب لليوم السابق، وتحدث إعادة الضبط اليومية على الواحدة بدل منتصف الليل. وفي مناطق زمنية أبعد عن UTC، يصل الفرق إلى عدة ساعات. والتصحيح: دالة واحدة تبني المفتاح من التاريخ المحلي (<code>getFullYear</code> و<code>getMonth</code> و<code>getDate</code>)، تُستعمل في كل مكان.</span></p>
+
+        <h3><span lang="en">3. Midnight passes while the app is open</span><span lang="fr">3. Minuit passe pendant que l'appli est ouverte</span><span lang="ar">3. يمر منتصف الليل والتطبيق مفتوح</span></h3>
+        <p><span lang="en">The lazy reset runs once, when the app starts. A phone keeps apps alive in the background for days, so someone who opens Diab in the morning may still see yesterday's ticked tasks. Running the same check when the app comes back to the foreground (React Native's <code>AppState</code>) fixes it.</span>
+           <span lang="fr">La remise à zéro paresseuse ne tourne qu'une fois, au démarrage de l'appli. Un téléphone garde les applis en arrière-plan pendant des jours : quelqu'un qui ouvre Diab le matin peut encore voir les tâches cochées de la veille. Lancer la même vérification quand l'appli revient au premier plan (<code>AppState</code> de React Native) règle le problème.</span><span lang="ar">لا تعمل إعادة الضبط الكسولة إلا مرة واحدة، عند تشغيل التطبيق. والهاتف يُبقي التطبيقات في الخلفية لأيام، فمن يفتح Diab صباحاً قد يرى مهام الأمس مؤشَّراً عليها. وتشغيل الفحص نفسه عند عودة التطبيق إلى الواجهة (<code>AppState</code> في React Native) يحل المشكلة.</span></p>
+
+        <h3><span lang="en">4. Every streak is 0 in the morning</span><span lang="fr">4. Toutes les séries valent 0 le matin</span><span lang="ar">4. كل السلاسل صفر في الصباح</span></h3>
+        <p><span lang="en">Streaks start counting from today. Before the first glass of water is logged, today fails its goal, the loop stops at once, and a 20-day streak shows 0. The usual rule: if today has no data yet, start counting from yesterday, and only break the streak once a full day was missed.</span>
+           <span lang="fr">Les séries commencent à compter à partir d'aujourd'hui. Avant le premier verre d'eau noté, aujourd'hui n'atteint pas son objectif, la boucle s'arrête tout de suite, et une série de 20 jours affiche 0. La règle habituelle : si aujourd'hui n'a pas encore de données, commencer à compter à partir d'hier, et ne casser la série qu'une fois une journée entière manquée.</span><span lang="ar">تبدأ السلاسل العد من اليوم. وقبل تسجيل أول كوب ماء، لا يحقق اليوم هدفه، فتتوقف الحلقة فوراً، وتظهر سلسلة من 20 يوماً كصفر. والقاعدة المعتادة: إذا لم تكن لليوم بيانات بعد، نبدأ العد من الأمس، ولا نكسر السلسلة إلا بعد فوات يوم كامل.</span></p>
+
+        <h3><span lang="en">5. Goals read once, at startup</span><span lang="fr">5. Des objectifs lus une seule fois, au démarrage</span><span lang="ar">5. أهداف تُقرأ مرة واحدة عند التشغيل</span></h3>
+        <p><span lang="en">The class that computes streaks copied the personal goals from the store when it was created: <code>private personalGoals = usePersonalGoalStore.getState().goals</code>. Change your water goal, and streaks keep using the old one until the app restarts. Reading the store at the moment of the calculation keeps a single source of truth.</span>
+           <span lang="fr">La classe qui calcule les séries copiait les objectifs personnels depuis le store au moment de sa création : <code>private personalGoals = usePersonalGoalStore.getState().goals</code>. Changez votre objectif d'eau, et les séries continuent d'utiliser l'ancien jusqu'au redémarrage de l'appli. Lire le store au moment du calcul garde une seule source de vérité.</span><span lang="ar">كان الصنف الذي يحسب السلاسل ينسخ الأهداف الشخصية من المخزن لحظة إنشائه: <code>private personalGoals = usePersonalGoalStore.getState().goals</code>. غيّر هدفك من الماء، وستواصل السلاسل استعمال الهدف القديم حتى إعادة تشغيل التطبيق. وقراءة المخزن لحظة الحساب تُبقي مصدراً واحداً للحقيقة.</span></p>
+
+        <h2><span lang="en">What I would do differently</span><span lang="fr">Ce que je ferais autrement</span><span lang="ar">ما كنت سأفعله بشكل مختلف</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><strong>One date module.</strong> A single <code>dayKey()</code> in local time, a single <code>isSameDay()</code>, and a lint rule against <code>toISOString().split</code>. Most of the bugs above disappear.</span><span lang="fr"><strong>Un seul module de dates.</strong> Une seule fonction <code>dayKey()</code> en heure locale, un seul <code>isSameDay()</code>, et une règle de lint contre <code>toISOString().split</code>. La plupart des bugs ci-dessus disparaissent.</span><span lang="ar"><strong>وحدة واحدة للتواريخ.</strong> دالة <code>dayKey()</code> واحدة بالتوقيت المحلي، و<code>isSameDay()</code> واحدة، وقاعدة lint تمنع <code>toISOString().split</code>. وتختفي معظم الأخطاء المذكورة أعلاه.</span></li>
+          <li><span lang="en"><strong>Tests with a fake clock.</strong> Date logic is easy to test if "now" can be injected: 23:59, 00:30, a month change, a missed day. None of these bugs survives such a test.</span><span lang="fr"><strong>Des tests avec une fausse horloge.</strong> La logique de dates est facile à tester si on peut injecter « maintenant » : 23 h 59, 0 h 30, un changement de mois, un jour manqué. Aucun de ces bugs ne survit à ce genre de test.</span><span lang="ar"><strong>اختبارات بساعة وهمية.</strong> منطق التواريخ سهل الاختبار إذا أمكن حقن «الآن»: 23:59، و00:30، وتغيّر الشهر، ويوم فائت. ولا ينجو أي من هذه الأخطاء من اختبار كهذا.</span></li>
+          <li><span lang="en"><strong>Finish the garden's rules.</strong> The design lists eight plants; in the hackathon build, two achievements are wired to real rules. The evaluator registry makes each new one a single function.</span><span lang="fr"><strong>Terminer les règles du jardin.</strong> La conception prévoit huit plantes ; dans la version du hackathon, deux succès sont reliés à de vraies règles. Le registre d'évaluateurs fait de chaque nouveau succès une seule fonction.</span><span lang="ar"><strong>إكمال قواعد الحديقة.</strong> يتضمن التصميم ثمانية نباتات؛ وفي نسخة الهاكاثون، إنجازان فقط مربوطان بقواعد حقيقية. وسجل دوال التقييم يجعل كل إنجاز جديد دالة واحدة.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">Offline-first is cheap with Zustand and <code>persist</code>, and it is the most private choice for health data.</span><span lang="fr">Le hors-ligne d'abord ne coûte pas cher avec Zustand et <code>persist</code>, et c'est le choix le plus respectueux de la vie privée pour des données de santé.</span><span lang="ar">العمل دون اتصال أولاً رخيص مع Zustand و<code>persist</code>، وهو الخيار الأكثر احتراماً للخصوصية في البيانات الصحية.</span></li>
+          <li><span lang="en">Compute streaks from history instead of storing counters: there is nothing to keep in sync.</span><span lang="fr">Calculer les séries à partir de l'historique au lieu de stocker des compteurs : il n'y a rien à garder synchronisé.</span><span lang="ar">احسب السلاسل من السجل بدل تخزين العدّادات: لا يوجد شيء يجب مزامنته.</span></li>
+          <li><span lang="en">"Today" is a decision: local time, one helper, tested with a fake clock.</span><span lang="fr">« Aujourd'hui » est une décision : heure locale, une seule fonction, testée avec une fausse horloge.</span><span lang="ar">«اليوم» قرار: توقيت محلي، ودالة واحدة، مختبرة بساعة وهمية.</span></li>
+          <li><span lang="en">A web demo turns a hackathon project into something anyone can open in ten seconds.</span><span lang="fr">Une démo web transforme un projet de hackathon en quelque chose que n'importe qui peut ouvrir en dix secondes.</span><span lang="ar">العرض على الويب يحوّل مشروع هاكاثون إلى شيء يستطيع أي شخص فتحه في عشر ثوانٍ.</span></li>
+        </ul>
+        <p><span lang="en">Try the <a href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener">live demo</a> (best in mobile view; sign up with any details, everything stays in your browser), or read the code on <a href="https://github.com/adelmerad/diab-garden" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Essayez la <a href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener">démo en ligne</a> (idéale en affichage mobile ; inscrivez-vous avec n'importe quelles informations, tout reste dans votre navigateur), ou lisez le code sur <a href="https://github.com/adelmerad/diab-garden" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">جرّب <a href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener">العرض المباشر</a> (الأفضل بعرض الهاتف؛ سجّل بأي معلومات، كل شيء يبقى في متصفحك)، أو اقرأ الشيفرة على <a href="https://github.com/adelmerad/diab-garden" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://diab-garden-frontend.vercel.app" target="_blank" rel="noopener"><span lang="en">Open the demo</span><span lang="fr">Ouvrir la démo</span><span lang="ar">افتح العرض</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
