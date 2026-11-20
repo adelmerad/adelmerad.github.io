@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>From source code to 8086 assembly: writing a compiler in C — Adel Merad</title>
+  <meta name="description" content="How the MiniAlgo compiler turns a small program into 8086 assembly: Flex, Bison, semantic checks, quadruplets with backpatching, five optimization passes, and the bugs hiding in jump targets.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-compiler.html">
+  <meta property="og:title" content="From source code to 8086 assembly: writing a compiler in C">
+  <meta property="og:description" content="Flex, Bison, quadruplets with backpatching, five optimization passes and 8086 code generation, on a real example.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-compiler.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="From source code to 8086 assembly — Adel Merad" data-title-fr="Du code source à l'assembleur 8086 — Adel Merad" data-title-ar="من الشيفرة المصدرية إلى تجميع 8086 — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 9 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 9 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 9 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">From source code to 8086 assembly: writing a compiler in C</span>
+          <span lang="fr">Du code source à l'assembleur 8086 : écrire un compilateur en C</span><span lang="ar">من الشيفرة المصدرية إلى تجميع 8086: كتابة مترجم بلغة C</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">One small program, followed through every phase of the MiniAlgo compiler: tokens, grammar, semantic checks, quadruplets, five optimization passes and 8086 code. With the real output at each step, and the jump-target bugs that make compilers tricky.</span>
+          <span lang="fr">Un petit programme, suivi à travers toutes les phases du compilateur MiniAlgo : les tokens, la grammaire, les vérifications sémantiques, les quadruplets, cinq passes d'optimisation et le code 8086. Avec la vraie sortie à chaque étape, et les bugs de cibles de saut qui rendent les compilateurs délicats.</span><span lang="ar">برنامج صغير نتتبّعه عبر كل مراحل مترجم MiniAlgo: الوحدات المعجمية، والقواعد النحوية، والفحوص الدلالية، والرباعيات، وخمس مراحل تحسين، وشيفرة 8086. مع المخرجات الحقيقية في كل خطوة، وأخطاء أهداف القفز التي تجعل المترجمات دقيقة.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+        <h2><span lang="en">Why write a compiler</span><span lang="fr">Pourquoi écrire un compilateur</span><span lang="ar">لماذا نكتب مترجماً</span></h2>
+        <p><span lang="en">Every day I write code that something else turns into instructions: TypeScript, C#, SQL. The <a href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener">MiniAlgo compiler</a> was a team project for the compilation course of my Master's at USTHB: take a small algorithmic language and go all the way down to 8086 assembly that runs in the emu8086 emulator, written in C with Flex and Bison.</span>
+           <span lang="fr">Tous les jours, j'écris du code que quelque chose d'autre transforme en instructions : TypeScript, C#, SQL. Le <a href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener">compilateur MiniAlgo</a> était un projet d'équipe pour le cours de compilation de mon Master à l'USTHB : partir d'un petit langage algorithmique et descendre jusqu'à de l'assembleur 8086 qui tourne dans l'émulateur emu8086, en C avec Flex et Bison.</span><span lang="ar">أكتب كل يوم شيفرة يحوّلها شيء آخر إلى تعليمات: TypeScript وC# وSQL. كان <a href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener">مترجم MiniAlgo</a> مشروعاً جماعياً في مقياس الترجمة ضمن الماستر في جامعة هواري بومدين: الانطلاق من لغة خوارزمية صغيرة والنزول حتى شيفرة تجميع 8086 تعمل في المحاكي emu8086، بلغة C مع Flex وBison.</span></p>
+        <p><span lang="en">Here is the program we will follow through the whole article:</span>
+           <span lang="fr">Voici le programme que nous allons suivre tout au long de l'article :</span><span lang="ar">هذا هو البرنامج الذي سنتتبّعه طوال المقال:</span></p>
+<pre><code>PROGRAM Demo
+DECL
+    INTEGER : A, B, Res ;
+ENDDECL
+BEGIN
+    A = 2 + 3 ;
+    B = A * 1 ;
+    WHILE (A &lt; 10) {
+        Res = (A + B) * (A + B) ;
+        A = A + 1 ;
+    }
+    WRITE(Res) ;
+END</code></pre>
+        <p><span lang="en">It is written badly on purpose: <code>2 + 3</code> can be computed in advance, <code>A * 1</code> is useless, and <code>A + B</code> is computed twice. A good compiler should notice all three.</span>
+           <span lang="fr">Il est mal écrit exprès : <code>2 + 3</code> peut être calculé à l'avance, <code>A * 1</code> ne sert à rien, et <code>A + B</code> est calculé deux fois. Un bon compilateur doit remarquer les trois.</span><span lang="ar">كُتب بشكل سيئ عن قصد: <code>2 + 3</code> يمكن حسابه مسبقاً، و<code>A * 1</code> لا فائدة منه، و<code>A + B</code> يُحسب مرتين. والمترجم الجيد يجب أن ينتبه إلى الثلاثة.</span></p>
+
+        <h2><span lang="en">The pipeline</span><span lang="fr">Les étapes</span><span lang="ar">مراحل الترجمة</span></h2>
+        <figure class="flow" aria-label="Compiler pipeline">
+          <div class="flow-row" style="min-width:760px">
+            <div class="node"><b><span lang="en">Lexer</span><span lang="fr">Lexique</span><span lang="ar">المحلل المعجمي</span></b><small>Flex</small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b><span lang="en">Parser</span><span lang="fr">Syntaxe</span><span lang="ar">المحلل النحوي</span></b><small>Bison + <span lang="en">checks</span><span lang="fr">vérifs</span><span lang="ar">فحوص</span></small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b><span lang="en">Quadruplets</span><span lang="fr">Quadruplets</span><span lang="ar">الرباعيات</span></b><small>(op, a, b, res)</small></div>
+            <span class="arrow">→</span>
+            <div class="node core"><b><span lang="en">Optimizer</span><span lang="fr">Optimiseur</span><span lang="ar">المحسِّن</span></b><small><span lang="en">5 passes</span><span lang="fr">5 passes</span><span lang="ar">5 مراحل</span></small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b>8086</b><small>output.asm</small></div>
+          </div>
+        </figure>
+        <ul class="bullets">
+          <li><span lang="en">The <strong>lexer</strong> (Flex) cuts the text into tokens: keywords, identifiers, numbers, operators. It also tracks the line and column of each token, so every error can say exactly where it is.</span><span lang="fr">L'<strong>analyseur lexical</strong> (Flex) découpe le texte en tokens : mots-clés, identifiants, nombres, opérateurs. Il suit aussi la ligne et la colonne de chaque token, pour que chaque erreur indique exactement où elle se trouve.</span><span lang="ar"><strong>المحلل المعجمي</strong> (Flex) يقطّع النص إلى وحدات: كلمات مفتاحية، ومعرّفات، وأعداد، وعمليات. ويتتبّع أيضاً السطر والعمود لكل وحدة، حتى يحدد كل خطأ مكانه بالضبط.</span></li>
+          <li><span lang="en">The <strong>parser</strong> (Bison) checks the grammar. Its actions do the rest of the front end: filling the symbol table (a hash table with chaining), the <strong>semantic checks</strong>, and generating intermediate code.</span><span lang="fr">L'<strong>analyseur syntaxique</strong> (Bison) vérifie la grammaire. Ses actions font le reste du travail : remplir la table des symboles (une table de hachage avec chaînage), les <strong>vérifications sémantiques</strong>, et la génération du code intermédiaire.</span><span lang="ar"><strong>المحلل النحوي</strong> (Bison) يتحقق من القواعد. وتقوم أفعاله ببقية العمل: ملء جدول الرموز (جدول تجزئة مع التسلسل)، و<strong>الفحوص الدلالية</strong>، وتوليد الشيفرة الوسيطة.</span></li>
+        </ul>
+        <p><span lang="en">The semantic checks catch what the grammar cannot: undeclared or duplicate variables, assigning a float to an integer, changing a constant, dividing by a constant zero, an array index out of bounds. The errors follow the format required by the course:</span>
+           <span lang="fr">Les vérifications sémantiques attrapent ce que la grammaire ne peut pas voir : variables non déclarées ou déclarées deux fois, réel affecté à un entier, constante modifiée, division par un zéro constant, indice de tableau hors bornes. Les erreurs suivent le format demandé par le cours :</span><span lang="ar">الفحوص الدلالية تلتقط ما لا تراه القواعد: متغيرات غير مصرّح بها أو مصرّح بها مرتين، وإسناد عدد حقيقي إلى عدد صحيح، وتعديل ثابت، والقسمة على صفر ثابت، وفهرس جدول خارج الحدود. وتتبع الأخطاء الصيغة المطلوبة في المقياس:</span></p>
+<pre><code>Erreur Semantique : ligne 20 , colonne 18 , element 'A' (double declaration)
+Erreur Semantique : ligne 48 , colonne 15 , element '/' (division par zero)
+Erreur Semantique : ligne 51 , colonne 16 , element 'T[15]' (indice hors bornes, taille=10)</code></pre>
+
+        <h2><span lang="en">Quadruplets, and jumping to a line that does not exist yet</span><span lang="fr">Les quadruplets, et sauter vers une ligne qui n'existe pas encore</span><span lang="ar">الرباعيات، والقفز إلى سطر لم يوجد بعد</span></h2>
+        <p><span lang="en">The intermediate code is a list of <strong>quadruplets</strong>: <code>(operator, operand 1, operand 2, result)</code>. Expressions use temporaries <code>T0</code>, <code>T1</code>… and control flow uses two jumps: <code>BZ</code> (jump if zero, so if the condition is false) and <code>BR</code> (always jump).</span>
+           <span lang="fr">Le code intermédiaire est une liste de <strong>quadruplets</strong> : <code>(opérateur, opérande 1, opérande 2, résultat)</code>. Les expressions utilisent des temporaires <code>T0</code>, <code>T1</code>… et le contrôle utilise deux sauts : <code>BZ</code> (sauter si zéro, donc si la condition est fausse) et <code>BR</code> (sauter toujours).</span><span lang="ar">الشيفرة الوسيطة قائمة من <strong>الرباعيات</strong>: <code>(العملية، المعامل 1، المعامل 2، النتيجة)</code>. تستعمل التعابير متغيرات مؤقتة <code>T0</code> و<code>T1</code>… ويستعمل التحكم قفزتين: <code>BZ</code> (القفز إذا كانت القيمة صفراً، أي إذا كان الشرط خاطئاً) و<code>BR</code> (القفز دائماً).</span></p>
+        <p><span lang="en">The hard part: when the parser reads <code>WHILE (A &lt; 10) {</code>, it must emit the <code>BZ</code> that leaves the loop, but it does not know yet where the loop ends. The answer is <strong>backpatching</strong>: emit the jump with an empty target, remember its index, and fill it in once the closing brace is reached.</span>
+           <span lang="fr">La partie difficile : quand l'analyseur lit <code>WHILE (A &lt; 10) {</code>, il doit émettre le <code>BZ</code> qui sort de la boucle, mais il ne sait pas encore où la boucle se termine. La réponse, c'est le <strong>backpatching</strong> (la reprise arrière) : émettre le saut avec une cible vide, retenir son numéro, et le compléter une fois l'accolade fermante atteinte.</span><span lang="ar">الجزء الصعب: عندما يقرأ المحلل <code>WHILE (A &lt; 10) {</code>، يجب أن يولّد قفزة <code>BZ</code> التي تخرج من الحلقة، لكنه لا يعرف بعد أين تنتهي الحلقة. والحل هو <strong>الترقيع الخلفي</strong> (backpatching): توليد القفزة بهدف فارغ، وحفظ رقمها، ثم إكماله عند الوصول إلى القوس المغلق.</span></p>
+<pre><code>while_stmt
+    : while_mark '(' expression ')' '{'
+      { $&lt;int_val&gt;$ = gen_quad("BZ", $3.name, "", ""); }  /* target unknown */
+      instructions '}'
+      {
+          sprintf(lbl, "%d", $&lt;int_val&gt;1);
+          gen_quad("BR", "", "", lbl);          /* back to the condition */
+          sprintf(lbl, "%d", quad_count);
+          update_quad_result($&lt;int_val&gt;6, lbl); /* now we know the exit */
+      }
+    ;
+while_mark : WHILE { $&lt;int_val&gt;$ = quad_count; } ;  /* where the condition starts */</code></pre>
+        <p><span lang="en">For our program, the compiler produces 14 quadruplets. Look at line 5: its target, 13, was filled in only after the whole loop body was generated.</span>
+           <span lang="fr">Pour notre programme, le compilateur produit 14 quadruplets. Regardez la ligne 5 : sa cible, 13, n'a été remplie qu'après la génération de tout le corps de la boucle.</span><span lang="ar">لبرنامجنا، يولّد المترجم 14 رباعية. انظر إلى السطر 5: هدفه، 13، لم يُملأ إلا بعد توليد جسم الحلقة كاملاً.</span></p>
+<pre><code> 0  ( +     , 2   , 3  , T0  )
+ 1  ( =     , T0  ,    , A   )
+ 2  ( *     , A   , 1  , T1  )
+ 3  ( =     , T1  ,    , B   )
+ 4  ( &lt;     , A   , 10 , T2  )
+ 5  ( BZ    , T2  ,    , 13  )   &lt;- exit, backpatched
+ 6  ( +     , A   , B  , T3  )
+ 7  ( +     , A   , B  , T4  )   &lt;- same as line 6
+ 8  ( *     , T3  , T4 , T5  )
+ 9  ( =     , T5  ,    , Res )
+10  ( +     , A   , 1  , T6  )
+11  ( =     , T6  ,    , A   )
+12  ( BR    ,     ,    , 4   )   &lt;- back to the condition
+13  ( WRITE , Res ,    ,     )</code></pre>
+
+        <h2><span lang="en">Five optimization passes</span><span lang="fr">Cinq passes d'optimisation</span><span lang="ar">خمس مراحل تحسين</span></h2>
+        <p><span lang="en">The optimizer runs five small passes over the quadruplets, again and again, until a full round changes nothing. One pass often creates work for another, which is why the loop matters.</span>
+           <span lang="fr">L'optimiseur applique cinq petites passes sur les quadruplets, encore et encore, jusqu'à ce qu'un tour complet ne change plus rien. Une passe crée souvent du travail pour une autre, c'est pour ça que la boucle compte.</span><span lang="ar">يطبّق المحسِّن خمس مراحل صغيرة على الرباعيات، مرة بعد مرة، حتى لا تغيّر جولة كاملة أي شيء. فكثيراً ما تخلق مرحلة عملاً لمرحلة أخرى، ولهذا تهم الحلقة.</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Constant folding:</strong> <code>(+, 2, 3, T0)</code> becomes <code>(=, 5, , T0)</code>.</span><span lang="fr"><strong>Repli des constantes :</strong> <code>(+, 2, 3, T0)</code> devient <code>(=, 5, , T0)</code>.</span><span lang="ar"><strong>طيّ الثوابت:</strong> تصبح <code>(+, 2, 3, T0)</code> هي <code>(=, 5, , T0)</code>.</span></li>
+          <li><span lang="en"><strong>Algebraic simplification:</strong> <code>A * 1</code> becomes a simple copy of <code>A</code>; the pass also knows <code>x+0</code>, <code>x-x</code>, <code>x/1</code>, and turns <code>x*2</code> into the cheaper <code>x+x</code>.</span><span lang="fr"><strong>Simplification algébrique :</strong> <code>A * 1</code> devient une simple copie de <code>A</code> ; la passe connaît aussi <code>x+0</code>, <code>x-x</code>, <code>x/1</code>, et remplace <code>x*2</code> par <code>x+x</code>, moins coûteux.</span><span lang="ar"><strong>التبسيط الجبري:</strong> تصبح <code>A * 1</code> مجرد نسخ لـ <code>A</code>؛ وتعرف المرحلة أيضاً <code>x+0</code> و<code>x-x</code> و<code>x/1</code>، وتحوّل <code>x*2</code> إلى <code>x+x</code> الأقل كلفة.</span></li>
+          <li><span lang="en"><strong>Common subexpressions:</strong> line 7 computes exactly what line 6 already computed, so it becomes <code>(=, T3, , T4)</code>.</span><span lang="fr"><strong>Expressions communes :</strong> la ligne 7 calcule exactement ce que la ligne 6 a déjà calculé, elle devient donc <code>(=, T3, , T4)</code>.</span><span lang="ar"><strong>التعابير المشتركة:</strong> السطر 7 يحسب بالضبط ما حسبه السطر 6، فيصبح <code>(=, T3, , T4)</code>.</span></li>
+          <li><span lang="en"><strong>Copy propagation:</strong> after <code>(=, T3, , T4)</code>, later uses of <code>T4</code> can read <code>T3</code> directly, so <code>T3 * T4</code> becomes <code>T3 * T3</code>.</span><span lang="fr"><strong>Propagation de copie :</strong> après <code>(=, T3, , T4)</code>, les utilisations suivantes de <code>T4</code> peuvent lire <code>T3</code> directement, donc <code>T3 * T4</code> devient <code>T3 * T3</code>.</span><span lang="ar"><strong>نشر النسخ:</strong> بعد <code>(=, T3, , T4)</code>، يمكن للاستعمالات اللاحقة لـ <code>T4</code> قراءة <code>T3</code> مباشرة، فتصبح <code>T3 * T4</code> هي <code>T3 * T3</code>.</span></li>
+          <li><span lang="en"><strong>Dead code:</strong> a temporary that is written but never read again, like <code>T4</code> now, is removed.</span><span lang="fr"><strong>Code mort :</strong> un temporaire écrit mais jamais relu, comme <code>T4</code> maintenant, est supprimé.</span><span lang="ar"><strong>الشيفرة الميتة:</strong> المتغير المؤقت الذي يُكتب ولا يُقرأ بعدها، مثل <code>T4</code> الآن، يُحذف.</span></li>
+        </ul>
+        <p><span lang="en">On our program: 9 transformations in 3 rounds, and 14 quadruplets become 11.</span>
+           <span lang="fr">Sur notre programme : 9 transformations en 3 tours, et les 14 quadruplets deviennent 11.</span><span lang="ar">على برنامجنا: 9 تحويلات في 3 جولات، وتصبح الرباعيات الـ 14 إحدى عشرة.</span></p>
+<pre><code> 0  ( =     , 5   ,    , A   )   &lt;- 2 + 3 folded
+ 1  ( =     , A   ,    , B   )   &lt;- A * 1 simplified
+ 2  ( &lt;     , A   , 10 , T2  )
+ 3  ( BZ    , T2  ,    , 10  )   &lt;- was 13
+ 4  ( +     , A   , B  , T3  )
+ 5  ( *     , T3  , T3 , T5  )   &lt;- A + B computed once
+ 6  ( =     , T5  ,    , Res )
+ 7  ( +     , A   , 1  , T6  )
+ 8  ( =     , T6  ,    , A   )
+ 9  ( BR    ,     ,    , 2   )   &lt;- was 4
+10  ( WRITE , Res ,    ,     )</code></pre>
+
+        <h2><span lang="en">The real trap: jump targets</span><span lang="fr">Le vrai piège : les cibles de saut</span><span lang="ar">الفخ الحقيقي: أهداف القفز</span></h2>
+        <p><span lang="en">Look at the jumps above: <code>BZ</code> went from 13 to 10 and <code>BR</code> from 4 to 2. Jumps point to quadruplet <em>numbers</em>, so deleting a single line shifts every target after it. If you forget, the program jumps into the middle of the wrong instruction and nothing tells you.</span>
+           <span lang="fr">Regardez les sauts ci-dessus : <code>BZ</code> est passé de 13 à 10 et <code>BR</code> de 4 à 2. Les sauts pointent vers des <em>numéros</em> de quadruplets, donc supprimer une seule ligne décale toutes les cibles qui suivent. Si on l'oublie, le programme saute au milieu de la mauvaise instruction, sans aucun message d'erreur.</span><span lang="ar">انظر إلى القفزات أعلاه: انتقلت <code>BZ</code> من 13 إلى 10 و<code>BR</code> من 4 إلى 2. تشير القفزات إلى <em>أرقام</em> الرباعيات، لذا فحذف سطر واحد يزيح كل الأهداف التي تليه. وإذا نسينا ذلك، يقفز البرنامج إلى وسط التعليمة الخاطئة دون أي رسالة خطأ.</span></p>
+        <p><span lang="en">So the passes never delete anything directly. They mark dead lines as <code>NOP</code>, and only at the end a compaction step removes them, builds an old-index → new-index map, and rewrites every jump. A jump whose target was deleted moves to the next line that survived:</span>
+           <span lang="fr">Les passes ne suppriment donc jamais rien directement. Elles marquent les lignes mortes comme <code>NOP</code>, et seulement à la fin, une étape de compactage les retire, construit une table ancien numéro → nouveau numéro, et réécrit tous les sauts. Un saut dont la cible a été supprimée passe à la ligne suivante qui a survécu :</span><span lang="ar">لذلك لا تحذف المراحل أي شيء مباشرة. بل تعلّم الأسطر الميتة بـ <code>NOP</code>، وفي النهاية فقط تزيلها خطوة الضغط، وتبني جدول الرقم القديم ← الرقم الجديد، وتعيد كتابة كل القفزات. والقفزة التي حُذف هدفها تنتقل إلى السطر التالي الذي بقي:</span></p>
+<pre><code>for (int i = 0; i &lt; quad_count; i++)
+    map[i] = is_nop(i) ? -1 : new_count++;   /* old index -&gt; new index */
+
+/* for each jump (BZ, BR): */
+int target = atoi(quads[i].result);
+int moved  = map[target];
+while (moved == -1 &amp;&amp; target &lt; quad_count)   /* target was deleted */
+    moved = (++target &lt; quad_count) ? map[target] : new_count;</code></pre>
+        <p><span lang="en">The same reason explains why copy propagation and common subexpression elimination stop scanning as soon as they meet a jump: past a jump, the value of a variable depends on which path the program took.</span>
+           <span lang="fr">C'est aussi pour ça que la propagation de copie et l'élimination des expressions communes arrêtent leur recherche dès qu'elles rencontrent un saut : après un saut, la valeur d'une variable dépend du chemin pris par le programme.</span><span lang="ar">وللسبب نفسه، يتوقف نشر النسخ وحذف التعابير المشتركة عن البحث بمجرد مصادفة قفزة: بعد القفزة، تتوقف قيمة المتغير على المسار الذي سلكه البرنامج.</span></p>
+
+        <h2><span lang="en">Generating 8086 code</span><span lang="fr">Générer le code 8086</span><span lang="ar">توليد شيفرة 8086</span></h2>
+        <p><span lang="en">The last phase writes an assembly file with the three classic segments: stack, data (one word per variable and temporary) and code. Each quadruplet becomes a few instructions, and gets a label so jumps can reach it. Here is <code>T5 = T3 * T3</code>, now that <code>A + B</code> is computed only once:</span>
+           <span lang="fr">La dernière phase écrit un fichier assembleur avec les trois segments classiques : pile, données (un mot par variable et par temporaire) et code. Chaque quadruplet devient quelques instructions, avec une étiquette pour que les sauts puissent l'atteindre. Voici <code>T5 = T3 * T3</code>, maintenant que <code>A + B</code> n'est calculé qu'une fois :</span><span lang="ar">تكتب المرحلة الأخيرة ملف تجميع بالمقاطع الثلاثة الكلاسيكية: المكدس، والبيانات (كلمة لكل متغير ومتغير مؤقت)، والشيفرة. تتحول كل رباعية إلى بضع تعليمات، مع وسم حتى تتمكن القفزات من بلوغها. وهذه <code>T5 = T3 * T3</code>، بعد أن صار <code>A + B</code> يُحسب مرة واحدة فقط:</span></p>
+<pre><code>LBL_5:
+    MOV AX, T3
+    MOV BX, T3
+    IMUL BX        ; DX:AX = AX * BX
+    MOV T5, AX
+...
+LBL_9:
+    JMP LBL_2      ; back to the loop condition
+LBL_10:
+    MOV AX, Res
+    CALL WRITE_INT ; prints AX in decimal (divide by 10, push digits)</code></pre>
+        <p><span lang="en">The 8086 has no instruction to print a number, so the generated file ships a small <code>WRITE_INT</code> routine that divides by 10, pushes each digit on the stack, then prints them in the right order through DOS interrupt 21h.</span>
+           <span lang="fr">Le 8086 n'a pas d'instruction pour afficher un nombre : le fichier généré contient donc une petite routine <code>WRITE_INT</code> qui divise par 10, empile chaque chiffre, puis les affiche dans le bon ordre grâce à l'interruption DOS 21h.</span><span lang="ar">لا يملك 8086 تعليمة لطباعة عدد، لذا يتضمن الملف المولَّد إجراءً صغيراً <code>WRITE_INT</code> يقسم على 10، ويدفع كل رقم في المكدس، ثم يطبعها بالترتيب الصحيح عبر مقاطعة DOS رقم 21h.</span></p>
+
+        <h2><span lang="en">What I would do differently</span><span lang="fr">Ce que je ferais autrement</span><span lang="ar">ما كنت سأفعله بشكل مختلف</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Work on basic blocks.</strong> The passes stop at jumps, but a line can also be the <em>target</em> of a jump, reached from somewhere else. Cutting the code into basic blocks first (a block starts at every jump target and ends at every jump) would make each optimization safe by construction, instead of safe because temporaries happen to be short-lived.</span><span lang="fr"><strong>Travailler sur des blocs de base.</strong> Les passes s'arrêtent aux sauts, mais une ligne peut aussi être la <em>cible</em> d'un saut, atteinte depuis ailleurs. Découper d'abord le code en blocs de base (un bloc commence à chaque cible de saut et se termine à chaque saut) rendrait chaque optimisation sûre par construction, au lieu de sûre parce que les temporaires vivent peu de temps.</span><span lang="ar"><strong>العمل على الكتل الأساسية.</strong> تتوقف المراحل عند القفزات، لكن السطر قد يكون أيضاً <em>هدفاً</em> لقفزة تأتي من مكان آخر. تقطيع الشيفرة أولاً إلى كتل أساسية (تبدأ الكتلة عند كل هدف قفز وتنتهي عند كل قفزة) سيجعل كل تحسين آمناً بطبيعته، بدل أن يكون آمناً لأن المتغيرات المؤقتة قصيرة العمر.</span></li>
+          <li><span lang="en"><strong>Fuse comparisons and jumps.</strong> Today <code>A &lt; 10</code> computes 0 or 1 into <code>T2</code>, then <code>BZ</code> tests <code>T2</code>. A single <code>CMP</code> followed by <code>JGE</code> to the exit would do the same job in two instructions.</span><span lang="fr"><strong>Fusionner comparaisons et sauts.</strong> Aujourd'hui, <code>A &lt; 10</code> calcule 0 ou 1 dans <code>T2</code>, puis <code>BZ</code> teste <code>T2</code>. Un seul <code>CMP</code> suivi d'un <code>JGE</code> vers la sortie ferait le même travail en deux instructions.</span><span lang="ar"><strong>دمج المقارنات والقفزات.</strong> حالياً، تحسب <code>A &lt; 10</code> القيمة 0 أو 1 في <code>T2</code>، ثم تختبر <code>BZ</code> قيمة <code>T2</code>. وتعليمة <code>CMP</code> واحدة تليها <code>JGE</code> نحو المخرج ستؤدي العمل نفسه بتعليمتين.</span></li>
+          <li><span lang="en"><strong>Keep values in registers.</strong> Every temporary goes through memory (<code>MOV T3, AX</code> then <code>MOV AX, T3</code>). Even simple register allocation would remove most of those moves.</span><span lang="fr"><strong>Garder les valeurs dans les registres.</strong> Chaque temporaire passe par la mémoire (<code>MOV T3, AX</code> puis <code>MOV AX, T3</code>). Même une allocation de registres simple supprimerait la plupart de ces transferts.</span><span lang="ar"><strong>إبقاء القيم في السجلات.</strong> كل متغير مؤقت يمر عبر الذاكرة (<code>MOV T3, AX</code> ثم <code>MOV AX, T3</code>). وحتى تخصيص بسيط للسجلات سيزيل معظم هذه التنقلات.</span></li>
+          <li><span lang="en"><strong>Real floats.</strong> MiniAlgo has a <code>FLOAT</code> type, but the 8086 generator stores floats as integers. Supporting them properly would need the 8087 coprocessor or fixed-point arithmetic.</span><span lang="fr"><strong>De vrais réels.</strong> MiniAlgo a un type <code>FLOAT</code>, mais le générateur 8086 stocke les réels comme des entiers. Les gérer vraiment demanderait le coprocesseur 8087 ou de l'arithmétique à virgule fixe.</span><span lang="ar"><strong>أعداد حقيقية فعلية.</strong> في MiniAlgo نوع <code>FLOAT</code>، لكن مولّد 8086 يخزّن الأعداد الحقيقية كأعداد صحيحة. ودعمها فعلاً يتطلب المعالج المساعد 8087 أو حساب الفاصلة الثابتة.</span></li>
+        </ul>
+        <p><span lang="en">One honest number: on the full sample program, written by a human, the optimizer only goes from 463 to 459 quadruplets. People rarely write <code>A * 1</code>. These passes matter most on code that a compiler generates itself, such as array index calculations.</span>
+           <span lang="fr">Un chiffre honnête : sur le programme d'exemple complet, écrit par un humain, l'optimiseur ne passe que de 463 à 459 quadruplets. On écrit rarement <code>A * 1</code> à la main. Ces passes comptent surtout sur le code que le compilateur génère lui-même, comme les calculs d'indices de tableaux.</span><span lang="ar">رقم صريح: على برنامج المثال الكامل، الذي كتبه إنسان، لا ينتقل المحسِّن إلا من 463 إلى 459 رباعية. فنادراً ما يكتب الناس <code>A * 1</code>. وتهم هذه المراحل أكثر في الشيفرة التي يولّدها المترجم نفسه، مثل حسابات فهارس الجداول.</span></p>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">Backpatching solves "jump to a place that does not exist yet": emit now, fill in later.</span><span lang="fr">Le backpatching résout le problème du « saut vers un endroit qui n'existe pas encore » : émettre maintenant, compléter plus tard.</span><span lang="ar">الترقيع الخلفي يحل مشكلة «القفز إلى مكان لم يوجد بعد»: ولّد الآن، وأكمل لاحقاً.</span></li>
+          <li><span lang="en">Small optimizations become powerful when you repeat them until nothing changes.</span><span lang="fr">De petites optimisations deviennent puissantes quand on les répète jusqu'à ce que plus rien ne change.</span><span lang="ar">التحسينات الصغيرة تصبح قوية عندما تُكرَّر حتى لا يتغير شيء.</span></li>
+          <li><span lang="en">Anything that refers to positions (jump targets, indexes) must be remapped after every deletion. Mark first, delete once, remap everything.</span><span lang="fr">Tout ce qui fait référence à des positions (cibles de saut, indices) doit être recalculé après chaque suppression. Marquer d'abord, supprimer une fois, tout recalculer.</span><span lang="ar">كل ما يشير إلى مواقع (أهداف القفز، الفهارس) يجب إعادة حسابه بعد كل حذف. علّم أولاً، واحذف مرة واحدة، وأعد حساب كل شيء.</span></li>
+        </ul>
+        <p><span lang="en">The full source, the sample programs and the build instructions are on <a href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener">GitHub</a>. Open the generated <code>output.asm</code> in emu8086 to watch it run.</span>
+           <span lang="fr">Le code complet, les programmes d'exemple et les instructions de compilation sont sur <a href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener">GitHub</a>. Ouvrez le fichier <code>output.asm</code> généré dans emu8086 pour le voir tourner.</span><span lang="ar">الشيفرة الكاملة وبرامج المثال وتعليمات البناء موجودة على <a href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener">GitHub</a>. افتح الملف المولَّد <code>output.asm</code> في emu8086 لتراه يعمل.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://github.com/adelmerad/compilateur-minialgo" target="_blank" rel="noopener"><span lang="en">Code on GitHub</span><span lang="fr">Code sur GitHub</span><span lang="ar">الشيفرة على GitHub</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
