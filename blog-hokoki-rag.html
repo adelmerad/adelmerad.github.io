@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A RAG over Algerian law: split by article, not by size — Adel Merad</title>
+  <meta name="description" content="How we built the AI behind HOKOKI at the NCS Hackathon: law PDFs turned into one document per article, answers that cite their sources, contract reports validated by a schema, and questions in Arabic and Darija.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-hokoki-rag.html">
+  <meta property="og:title" content="A RAG over Algerian law: split by article, not by size">
+  <meta property="og:description" content="The AI behind HOKOKI: one document per law article, cited answers, structured contract reports, and Arabic questions over French law.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-hokoki-rag.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="A RAG over Algerian law — Adel Merad" data-title-fr="Un RAG sur le droit algérien — Adel Merad" data-title-ar="RAG على القانون الجزائري — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 9 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 9 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 9 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">A RAG over Algerian law: split by article, not by size</span>
+          <span lang="fr">Un RAG sur le droit algérien : découper par article, pas par taille</span><span lang="ar">RAG على القانون الجزائري: التقسيم حسب المادة لا حسب الحجم</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">How we built the AI behind HOKOKI in a hackathon: official law PDFs turned into one document per article, answers that cite their sources, contract reports a front end can display, and questions asked in Arabic or Darija over laws written in French.</span>
+          <span lang="fr">Comment nous avons construit l'IA de HOKOKI pendant un hackathon : des PDF de lois officiels transformés en un document par article, des réponses qui citent leurs sources, des rapports de contrat qu'une interface peut afficher, et des questions posées en arabe ou en darija sur des lois écrites en français.</span><span lang="ar">كيف بنينا الذكاء الاصطناعي في HOKOKI خلال هاكاثون: ملفات PDF رسمية للقوانين تحوّلت إلى وثيقة لكل مادة، وإجابات تذكر مصادرها، وتقارير عقود يمكن للواجهة عرضها، وأسئلة تُطرح بالعربية أو بالدارجة عن قوانين مكتوبة بالفرنسية.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+        <h2><span lang="en">The problem</span><span lang="fr">Le problème</span><span lang="ar">المشكلة</span></h2>
+        <p><span lang="en"><a href="hokoki.html">HOKOKI</a> ("my rights") is a legal assistant for Algeria that we built as a team at the NCS Hackathon in Algiers. Algerian law lives in long PDFs published in the Journal Officiel: hard to search, hard to read, and mostly in French, while many users would rather ask in Arabic or in Darija.</span>
+           <span lang="fr"><a href="hokoki.html">HOKOKI</a> (« mes droits ») est un assistant juridique pour l'Algérie, construit en équipe au hackathon NCS à Alger. Le droit algérien se trouve dans de longs PDF publiés au Journal Officiel : difficiles à chercher, difficiles à lire, et surtout en français, alors que beaucoup d'utilisateurs préfèrent poser leurs questions en arabe ou en darija.</span><span lang="ar"><a href="hokoki.html">HOKOKI</a> («حقوقي») مساعد قانوني للجزائر بنيناه كفريق في هاكاثون NCS بالجزائر العاصمة. يوجد القانون الجزائري في ملفات PDF طويلة تُنشر في الجريدة الرسمية: يصعب البحث فيها وقراءتها، وأغلبها بالفرنسية، بينما يفضّل كثير من المستخدمين السؤال بالعربية أو بالدارجة.</span></p>
+        <p><span lang="en">An AI that answers legal questions from memory is dangerous: it invents articles that sound right. So the rule from the start was simple: <strong>every answer must come from real articles, and say which ones</strong>. That is what retrieval-augmented generation (RAG) is for. A teammate set up the first version of the AI service (embeddings, OCR and search). I then moved it to LangChain.js and added the HTTP API, the RAG chain with conversation history, the agent with one search tool per legal domain, and the translation layer.</span>
+           <span lang="fr">Une IA qui répond à des questions juridiques de mémoire est dangereuse : elle invente des articles qui ont l'air vrais. La règle était donc simple dès le départ : <strong>chaque réponse doit venir de vrais articles, et dire lesquels</strong>. C'est exactement le rôle du RAG (génération augmentée par la recherche). Un coéquipier a posé la première version du service IA (embeddings, OCR et recherche). Je l'ai ensuite passé sur LangChain.js et j'ai ajouté l'API HTTP, la chaîne RAG avec historique de conversation, l'agent avec un outil de recherche par domaine juridique, et la couche de traduction.</span><span lang="ar">الذكاء الاصطناعي الذي يجيب عن الأسئلة القانونية من ذاكرته خطير: يخترع مواد تبدو صحيحة. لذلك كانت القاعدة بسيطة منذ البداية: <strong>كل إجابة يجب أن تأتي من مواد حقيقية، وأن تذكرها</strong>. وهذا بالضبط دور RAG (التوليد المعزَّز بالاسترجاع). أعدّ أحد زملائي النسخة الأولى من خدمة الذكاء الاصطناعي (التضمينات، والتعرّف الضوئي على النصوص، والبحث). ثم نقلتها إلى LangChain.js وأضفت واجهة HTTP، وسلسلة RAG مع سجل المحادثة، والوكيل الذي يملك أداة بحث لكل مجال قانوني، وطبقة الترجمة.</span></p>
+
+        <h2><span lang="en">Why fixed-size chunks fail on law</span><span lang="fr">Pourquoi des morceaux de taille fixe ne marchent pas pour le droit</span><span lang="ar">لماذا لا تصلح المقاطع ذات الحجم الثابت للقانون</span></h2>
+        <p><span lang="en">The usual RAG recipe cuts documents into chunks of, say, 1,000 characters, embeds them and stores them. On a legal code, that breaks the one thing that matters: <strong>the article</strong>. A chunk can end in the middle of article 54 and start article 55 halfway, and the model then answers from half a rule. Worse, the chunk no longer knows which article, chapter or code it came from, so the answer cannot cite it.</span>
+           <span lang="fr">La recette RAG habituelle coupe les documents en morceaux de, disons, 1 000 caractères, les transforme en vecteurs et les stocke. Sur un code juridique, ça casse la seule chose qui compte : <strong>l'article</strong>. Un morceau peut s'arrêter au milieu de l'article 54 et commencer l'article 55 en plein milieu, et le modèle répond alors à partir d'une demi-règle. Pire, le morceau ne sait plus de quel article, chapitre ou code il vient, donc la réponse ne peut pas le citer.</span><span lang="ar">الطريقة المعتادة في RAG تقطّع الوثائق إلى مقاطع من 1000 حرف مثلاً، ثم تحوّلها إلى متجهات وتخزّنها. لكن في نص قانوني، هذا يكسر الشيء الوحيد المهم: <strong>المادة</strong>. قد ينتهي مقطع في منتصف المادة 54 ويبدأ المادة 55 من وسطها، فيجيب النموذج انطلاقاً من نصف قاعدة. والأسوأ أن المقطع لم يعد يعرف من أي مادة أو فصل أو قانون جاء، فلا يمكن للإجابة أن تذكره.</span></p>
+        <p><span lang="en">So we made <strong>one law article = one document</strong> in the vector database, with its number, its place in the code and its keywords as metadata.</span>
+           <span lang="fr">Nous avons donc fait <strong>un article de loi = un document</strong> dans la base vectorielle, avec son numéro, sa place dans le code et ses mots-clés en métadonnées.</span><span lang="ar">لذلك جعلنا <strong>كل مادة قانونية = وثيقة واحدة</strong> في قاعدة المتجهات، مع رقمها وموقعها في القانون وكلماتها المفتاحية كبيانات وصفية.</span></p>
+
+        <h2><span lang="en">Letting the model find the articles</span><span lang="fr">Laisser le modèle trouver les articles</span><span lang="ar">ترك النموذج يجد المواد</span></h2>
+        <p><span lang="en">Splitting on "Article X" with a regular expression sounds easy, until you meet real PDFs: bilingual pages, page headers from the Journal Officiel, "Art." and "Article" broken across two lines, "3 bis" and "1er". The indexing pipeline has three steps:</span>
+           <span lang="fr">Couper sur « Article X » avec une expression régulière paraît facile, jusqu'aux vrais PDF : des pages bilingues, les en-têtes du Journal Officiel, des « Art. » et « Article » coupés sur deux lignes, des « 3 bis » et des « 1er ». L'indexation se fait en trois étapes :</span><span lang="ar">يبدو التقسيم عند «Article X» بتعبير نمطي سهلاً، إلى أن تواجه ملفات PDF الحقيقية: صفحات ثنائية اللغة، وترويسات الجريدة الرسمية، و«Art.» و«Article» مقسومة على سطرين، و«3 bis» و«1er». تمر الفهرسة بثلاث مراحل:</span></p>
+        <figure class="flow" aria-label="Indexing pipeline">
+          <div class="flow-row" style="min-width:700px">
+            <div class="node"><b><span lang="en">Law PDF</span><span lang="fr">PDF de loi</span><span lang="ar">PDF القانون</span></b><small>Journal Officiel</small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b><span lang="en">Clean</span><span lang="fr">Nettoyage</span><span lang="ar">التنظيف</span></b><small>regex · 8,000 chars</small></div>
+            <span class="arrow">→</span>
+            <div class="node core"><b>Llama 3.3 70B</b><small><span lang="en">JSON articles</span><span lang="fr">articles en JSON</span><span lang="ar">مواد بصيغة JSON</span></small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b>Chroma</b><small><span lang="en">1 doc / article</span><span lang="fr">1 doc / article</span><span lang="ar">وثيقة / مادة</span></small></div>
+          </div>
+        </figure>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Clean</strong> the text with a few regular expressions: remove the Arabic half of bilingual pages, the Journal Officiel headers, page numbers, and glue "Article" back to its number.</span><span lang="fr"><strong>Nettoyer</strong> le texte avec quelques expressions régulières : enlever la moitié arabe des pages bilingues, les en-têtes du Journal Officiel, les numéros de page, et recoller « Article » à son numéro.</span><span lang="ar"><strong>تنظيف</strong> النص ببعض التعابير النمطية: حذف النصف العربي من الصفحات ثنائية اللغة، وترويسات الجريدة الرسمية، وأرقام الصفحات، وإعادة لصق «Article» برقمها.</span></li>
+          <li><span lang="en"><strong>Cut</strong> it into large segments of 8,000 characters with a 500-character overlap, ending on a paragraph break when possible, so an article is rarely split.</span><span lang="fr"><strong>Découper</strong> en grands segments de 8 000 caractères qui se chevauchent de 500 caractères, en s'arrêtant si possible sur un saut de paragraphe, pour qu'un article soit rarement coupé.</span><span lang="ar"><strong>التقسيم</strong> إلى أجزاء كبيرة من 8000 حرف تتداخل بـ 500 حرف، مع التوقف عند نهاية فقرة إن أمكن، حتى لا تنقسم المادة إلا نادراً.</span></li>
+          <li><span lang="en"><strong>Extract</strong>: the model reads each segment and returns every article as JSON, validated by a Zod schema: number, book, chapter, section, a short title, the exact text, 3 to 7 keywords, and the other articles it refers to. The prompt includes two worked examples (Civil Code and Penal Code), to keep the output consistent.</span><span lang="fr"><strong>Extraire</strong> : le modèle lit chaque segment et renvoie chaque article en JSON, validé par un schéma Zod : numéro, livre, chapitre, section, un titre court, le texte exact, 3 à 7 mots-clés, et les autres articles qu'il cite. Le prompt contient deux exemples complets (Code civil et Code pénal), pour garder un résultat régulier.</span><span lang="ar"><strong>الاستخراج</strong>: يقرأ النموذج كل جزء ويعيد كل مادة بصيغة JSON يتحقق منها مخطط Zod: الرقم، والكتاب، والفصل، والقسم، وعنوان قصير، والنص الحرفي، ومن 3 إلى 7 كلمات مفتاحية، والمواد الأخرى التي تحيل إليها. ويتضمن الموجّه مثالين كاملين (القانون المدني وقانون العقوبات)، للحفاظ على انتظام النتيجة.</span></li>
+        </ul>
+        <p><span lang="en">Because segments overlap, the same article can come back twice. A simple key removes duplicates, and each article becomes a document. One detail to know: Chroma only accepts plain values in metadata, so arrays have to be stored as JSON strings.</span>
+           <span lang="fr">Comme les segments se chevauchent, un même article peut revenir deux fois. Une simple clé élimine les doublons, et chaque article devient un document. Un détail à connaître : Chroma n'accepte que des valeurs simples en métadonnées, donc les tableaux doivent être stockés en chaînes JSON.</span><span lang="ar">بما أن الأجزاء متداخلة، قد تعود المادة نفسها مرتين. مفتاح بسيط يزيل التكرار، وتتحول كل مادة إلى وثيقة. وهناك تفصيل يجب معرفته: Chroma لا يقبل إلا قيماً بسيطة في البيانات الوصفية، لذا يجب تخزين المصفوفات كنصوص JSON.</span></p>
+<pre><code>const key = `${category}:${article.articleNum.trim().toLowerCase()}`;
+if (seen.has(key)) continue; // same article seen in the overlap
+seen.add(key);
+
+new Document({
+  pageContent: `${article.titleFr}\n\n${article.contentFr}`,
+  metadata: {
+    category,                       // "codeCivil", "codePenal"...
+    articleNum: article.articleNum, // "54", "3 bis"
+    chapter: article.chapter ?? "",
+    // Chroma requires scalar values: serialise arrays as JSON strings
+    keywords: JSON.stringify(article.keywords ?? []),
+    relatedArticles: JSON.stringify(article.relatedArticles ?? []),
+    sourceDocument: sourceUrl,
+  },
+});</code></pre>
+        <p><span lang="en">The segments are sent one after another, not in parallel, to stay under the free Groq rate limit, and a segment that fails is logged and skipped instead of stopping the whole PDF.</span>
+           <span lang="fr">Les segments sont envoyés l'un après l'autre, pas en parallèle, pour rester sous la limite gratuite de Groq, et un segment qui échoue est noté puis ignoré au lieu d'arrêter tout le PDF.</span><span lang="ar">تُرسل الأجزاء واحداً تلو الآخر، لا بالتوازي، للبقاء تحت الحد المجاني لـ Groq، والجزء الذي يفشل يُسجَّل ويُتجاوز بدل إيقاف ملف PDF بأكمله.</span></p>
+
+        <h2><span lang="en">Follow-up questions</span><span lang="fr">Les questions de suivi</span><span lang="ar">أسئلة المتابعة</span></h2>
+        <p><span lang="en">In a real conversation, the second question is often "and if the tenant refuses?". Searching the vector database for that sentence finds nothing useful. So before searching, a first call to the model rewrites the question into a complete, standalone one using the conversation history. Only then do we retrieve the 5 closest articles and answer.</span>
+           <span lang="fr">Dans une vraie conversation, la deuxième question est souvent « et si le locataire refuse ? ». Chercher cette phrase dans la base vectorielle ne trouve rien d'utile. Donc avant la recherche, un premier appel au modèle réécrit la question en une question complète et autonome grâce à l'historique. Ensuite seulement, on récupère les 5 articles les plus proches et on répond.</span><span lang="ar">في محادثة حقيقية، غالباً ما يكون السؤال الثاني «وإذا رفض المستأجر؟». البحث عن هذه الجملة في قاعدة المتجهات لا يجد شيئاً مفيداً. لذلك، قبل البحث، يعيد استدعاء أول للنموذج صياغة السؤال ليصبح كاملاً ومستقلاً بالاعتماد على سجل المحادثة. وبعدها فقط نسترجع أقرب 5 مواد ونجيب.</span></p>
+<pre><code>const ragChain = RunnableSequence.from([
+  {
+    standalone_question: condenseChain, // rewrite using chat history
+    chat_history: (input) =&gt; input.chat_history ?? [],
+  },
+  {
+    context: (input) =&gt;
+      retriever.invoke(input.standalone_question).then(formatDocs), // k = 5
+    question: (input) =&gt; input.standalone_question,
+    chat_history: (input) =&gt; input.chat_history ?? [],
+  },
+  ragAnswerPrompt,
+  llm,
+  new StringOutputParser(),
+]);</code></pre>
+
+        <h2><span lang="en">Answer only from the context</span><span lang="fr">Répondre uniquement à partir du contexte</span><span lang="ar">الإجابة من السياق فقط</span></h2>
+        <p><span lang="en">The answer prompt is strict: answer <strong>only</strong> from the retrieved articles, always cite them ("Under article X of the Civil Code…"), never invent an article, and if the context does not contain the answer, say so and point to the official Journal Officiel website or a lawyer. The answer always has the same parts: the answer, the legal basis, points to watch, and a disclaimer that it is not personal legal advice.</span>
+           <span lang="fr">Le prompt de réponse est strict : répondre <strong>uniquement</strong> à partir des articles récupérés, toujours les citer (« Selon l'article X du Code civil… »), ne jamais inventer d'article, et si le contexte ne contient pas la réponse, le dire et renvoyer vers le site officiel du Journal Officiel ou vers un avocat. La réponse a toujours les mêmes parties : la réponse, les fondements légaux, les points d'attention, et un avertissement rappelant que ce n'est pas un conseil juridique personnalisé.</span><span lang="ar">موجّه الإجابة صارم: الإجابة <strong>فقط</strong> من المواد المسترجعة، وذكرها دائماً («حسب المادة X من القانون المدني…»)، وعدم اختراع أي مادة أبداً، وإذا لم يحتوِ السياق على الإجابة، يقول ذلك ويوجّه إلى الموقع الرسمي للجريدة الرسمية أو إلى محامٍ. وللإجابة دائماً الأجزاء نفسها: الإجابة، والأسس القانونية، ونقاط الانتباه، وتنبيه بأنها ليست استشارة قانونية شخصية.</span></p>
+        <p><span lang="en">"I don't know" is a feature here. A wrong answer about someone's rights is worse than no answer.</span>
+           <span lang="fr">« Je ne sais pas » est une fonctionnalité ici. Une mauvaise réponse sur les droits de quelqu'un est pire que pas de réponse.</span><span lang="ar">«لا أعرف» ميزة هنا. الإجابة الخاطئة عن حقوق شخص ما أسوأ من عدم الإجابة.</span></p>
+
+        <h2><span lang="en">One search tool per legal domain</span><span lang="fr">Un outil de recherche par domaine juridique</span><span lang="ar">أداة بحث لكل مجال قانوني</span></h2>
+        <p><span lang="en">A question about inheritance should not pull articles from the Commercial Code. Since every article carries its category, the chat goes through an agent that has six search tools, one per domain: commercial, civil, penal, family, personal protection, and post-independence land disputes. The model first decides which domains the question touches, can call several tools at once, then answers from what they returned. The API also returns which domains were consulted.</span>
+           <span lang="fr">Une question sur l'héritage ne devrait pas ramener des articles du Code de commerce. Comme chaque article porte sa catégorie, le chat passe par un agent qui a six outils de recherche, un par domaine : commerce, civil, pénal, famille, protection des personnes, et conflits fonciers d'après l'indépendance. Le modèle décide d'abord quels domaines la question touche, peut appeler plusieurs outils à la fois, puis répond à partir de ce qu'ils ont renvoyé. L'API renvoie aussi les domaines consultés.</span><span lang="ar">سؤال عن الميراث لا ينبغي أن يجلب مواد من القانون التجاري. وبما أن كل مادة تحمل تصنيفها، تمر المحادثة عبر وكيل يملك ست أدوات بحث، واحدة لكل مجال: التجاري، والمدني، والعقوبات، والأسرة، وحماية الأشخاص، والنزاعات العقارية بعد الاستقلال. يقرر النموذج أولاً المجالات التي يمسّها السؤال، ويمكنه استدعاء عدة أدوات في الوقت نفسه، ثم يجيب مما أعادته. وتعيد الواجهة البرمجية أيضاً المجالات التي استُشيرت.</span></p>
+
+        <h2><span lang="en">Contracts: a report, not a paragraph</span><span lang="fr">Les contrats : un rapport, pas un paragraphe</span><span lang="ar">العقود: تقرير لا فقرة</span></h2>
+        <p><span lang="en">For contract analysis, free text was useless to the front end: it needed a score to show, a list of problems to highlight, and fixes to suggest. The contract type decides which codes to search (a rental contract → Civil Code, a commercial one → Commercial and Civil Codes), using a metadata filter, and the 8 closest articles are sent with the contract. The model must answer in a shape checked by a Zod schema:</span>
+           <span lang="fr">Pour l'analyse de contrat, un texte libre ne servait à rien côté interface : il fallait un score à afficher, une liste de problèmes à surligner, et des corrections à proposer. Le type de contrat décide des codes à chercher (un bail → Code civil, un contrat commercial → Codes de commerce et civil), grâce à un filtre sur les métadonnées, et les 8 articles les plus proches sont envoyés avec le contrat. Le modèle doit répondre dans une forme vérifiée par un schéma Zod :</span><span lang="ar">في تحليل العقود، لم يكن النص الحر مفيداً للواجهة: كانت تحتاج إلى نتيجة تعرضها، وقائمة مشكلات تبرزها، وتصحيحات تقترحها. نوع العقد يحدد القوانين التي يُبحث فيها (عقد إيجار ← القانون المدني، عقد تجاري ← القانونان التجاري والمدني) عبر مرشّح على البيانات الوصفية، وتُرسل أقرب 8 مواد مع العقد. ويجب أن يجيب النموذج بشكل يتحقق منه مخطط Zod:</span></p>
+<pre><code>const ComplianceIssueSchema = z.object({
+  severity: z.enum(["critical", "warning", "info"]),
+  clauseInContract: z.string(), // exact quote from the contract
+  violatedArticle: z.string(),  // e.g. "Article 467 du Code Civil"
+  explanation: z.string(),
+  suggestion: z.string(),
+});
+
+const ComplianceReportSchema = z.object({
+  overallScore: z.number().min(0).max(100),
+  verdict: z.enum(["compliant", "mostly_compliant", "non_compliant"]),
+  issues: z.array(ComplianceIssueSchema),
+  missingClauses: z.array(z.string()), // mandatory clauses not found
+  recommendedActions: z.array(z.string()),
+  // ...summary, positiveClauses, applicableLaws
+});</code></pre>
+        <p><span lang="en">If the model returns something that does not match, parsing fails loudly instead of showing the user a broken report. Asking for a quote of the exact clause also made the issues easier to check by a human.</span>
+           <span lang="fr">Si le modèle renvoie quelque chose qui ne correspond pas, la lecture échoue clairement au lieu d'afficher un rapport cassé. Demander la citation exacte de la clause a aussi rendu les problèmes plus faciles à vérifier par un humain.</span><span lang="ar">إذا أعاد النموذج شيئاً لا يطابق المخطط، تفشل القراءة بوضوح بدل أن يُعرض على المستخدم تقرير معطوب. كما أن طلب الاقتباس الحرفي للبند جعل المشكلات أسهل في التحقق من طرف إنسان.</span></p>
+
+        <h2><span lang="en">Arabic and Darija questions, French law</span><span lang="fr">Des questions en arabe et en darija, un droit en français</span><span lang="ar">أسئلة بالعربية والدارجة، وقانون بالفرنسية</span></h2>
+        <p><span lang="en">The indexed articles are in French, but the app is in Arabic. Before anything else, the question's language is detected with <code>franc</code>. A French question goes straight through. Standard languages are translated to French with a translation API, and Darija or another dialect goes to the model itself, because classic translators handle dialects badly. The answer is then translated back into the user's language, while article numbers and code names stay as they are.</span>
+           <span lang="fr">Les articles indexés sont en français, mais l'appli est en arabe. Avant tout, la langue de la question est détectée avec <code>franc</code>. Une question en français passe directement. Les langues standard sont traduites en français par une API de traduction, et la darija ou un autre dialecte passe par le modèle lui-même, parce que les traducteurs classiques gèrent mal les dialectes. La réponse est ensuite retraduite dans la langue de l'utilisateur, en gardant tels quels les numéros d'articles et les noms des codes.</span><span lang="ar">المواد المفهرسة بالفرنسية، لكن التطبيق بالعربية. قبل أي شيء، تُكتشف لغة السؤال بمكتبة <code>franc</code>. السؤال بالفرنسية يمر مباشرة. اللغات القياسية تُترجم إلى الفرنسية بواجهة ترجمة، أما الدارجة أو أي لهجة أخرى فتمر عبر النموذج نفسه، لأن المترجمات التقليدية لا تتعامل جيداً مع اللهجات. ثم تُترجم الإجابة إلى لغة المستخدم، مع إبقاء أرقام المواد وأسماء القوانين كما هي.</span></p>
+<pre><code>const lang = detectLanguage(question); // franc: "fra", "ara", "arq" (Darija)...
+
+if (lang.isArabicDialect) {
+  text = await llmTranslate(question, lang.name, "français formel");
+} else if (lang.googleCode) {
+  text = (await translate(question, { to: "fr" })).text; // falls back to the LLM on error
+}</code></pre>
+
+        <h2><span lang="en">What I would do differently</span><span lang="fr">Ce que je ferais autrement</span><span lang="ar">ما كنت سأفعله بشكل مختلف</span></h2>
+        <p><span lang="en">A hackathon rewards a working demo, not perfect choices. Looking back at the code, here is what I would change first:</span>
+           <span lang="fr">Un hackathon récompense une démo qui marche, pas des choix parfaits. En relisant le code, voici ce que je changerais en premier :</span><span lang="ar">الهاكاثون يكافئ عرضاً يعمل، لا اختيارات مثالية. وعند مراجعة الشيفرة، هذا ما كنت سأغيّره أولاً:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><strong>A multilingual embedding model.</strong> We used <code>bge-base-en-v1.5</code>, an English model, on French legal text. It works, but a multilingual model would retrieve better, and could even search Arabic questions directly.</span><span lang="fr"><strong>Un modèle d'embeddings multilingue.</strong> Nous avons utilisé <code>bge-base-en-v1.5</code>, un modèle anglais, sur des textes juridiques français. Ça marche, mais un modèle multilingue trouverait de meilleurs articles, et pourrait même chercher directement à partir des questions en arabe.</span><span lang="ar"><strong>نموذج تضمين متعدد اللغات.</strong> استعملنا <code>bge-base-en-v1.5</code>، وهو نموذج إنجليزي، على نصوص قانونية فرنسية. يعمل، لكن نموذجاً متعدد اللغات سيسترجع مواد أفضل، بل ويمكنه البحث مباشرة انطلاقاً من الأسئلة بالعربية.</span></li>
+          <li><span lang="en"><strong>Search clause by clause.</strong> For contracts, retrieval uses only the first 600 characters as the query, so a problem at the end of a long contract may get no relevant article. Searching once per clause would fix that.</span><span lang="fr"><strong>Chercher clause par clause.</strong> Pour les contrats, la recherche n'utilise que les 600 premiers caractères comme requête : un problème à la fin d'un long contrat peut donc n'avoir aucun article pertinent. Chercher une fois par clause réglerait ça.</span><span lang="ar"><strong>البحث بنداً بنداً.</strong> في العقود، لا يستعمل البحث إلا أول 600 حرف كاستعلام، لذا قد لا تجد مشكلة في آخر عقد طويل أي مادة مناسبة. البحث مرة لكل بند سيحل ذلك.</span></li>
+          <li><span lang="en"><strong>Persist conversations.</strong> Chat history lives in memory, so a server restart forgets every conversation. Storing it in the main PostgreSQL database would be easy.</span><span lang="fr"><strong>Garder les conversations.</strong> L'historique est en mémoire : un redémarrage du serveur oublie toutes les conversations. Le stocker dans la base PostgreSQL principale serait simple.</span><span lang="ar"><strong>حفظ المحادثات.</strong> السجل في الذاكرة، فإعادة تشغيل الخادم تُنسي كل المحادثات. وتخزينه في قاعدة PostgreSQL الرئيسية سيكون سهلاً.</span></li>
+          <li><span lang="en"><strong>Measure retrieval.</strong> We tested by asking questions and reading answers. A small set of questions with the articles they should find would show, with a number, whether a change makes retrieval better or worse.</span><span lang="fr"><strong>Mesurer la recherche.</strong> Nous avons testé en posant des questions et en lisant les réponses. Un petit jeu de questions avec les articles qu'elles devraient trouver montrerait, chiffres à l'appui, si un changement améliore ou dégrade la recherche.</span><span lang="ar"><strong>قياس الاسترجاع.</strong> اختبرنا بطرح الأسئلة وقراءة الإجابات. ومجموعة صغيرة من الأسئلة مع المواد التي يجب أن تجدها ستبيّن بالأرقام هل يحسّن التغيير الاسترجاع أم يسيء إليه.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">Split documents along their natural unit. For law, that is the article, not a number of characters.</span><span lang="fr">Découper les documents selon leur unité naturelle. Pour le droit, c'est l'article, pas un nombre de caractères.</span><span lang="ar">قسّم الوثائق حسب وحدتها الطبيعية. في القانون، هي المادة لا عدد الحروف.</span></li>
+          <li><span lang="en">Metadata is what makes citations and per-domain search possible. Extract it when you index.</span><span lang="fr">Ce sont les métadonnées qui rendent possibles les citations et la recherche par domaine. Il faut les extraire dès l'indexation.</span><span lang="ar">البيانات الوصفية هي ما يجعل الاستشهاد والبحث حسب المجال ممكنين. استخرجها عند الفهرسة.</span></li>
+          <li><span lang="en">When a front end has to display the result, ask the model for JSON validated by a schema, not prose.</span><span lang="fr">Quand une interface doit afficher le résultat, demander au modèle du JSON validé par un schéma, pas du texte.</span><span lang="ar">عندما يجب على الواجهة عرض النتيجة، اطلب من النموذج JSON يتحقق منه مخطط، لا نصاً حراً.</span></li>
+          <li><span lang="en">In a legal assistant, "the indexed texts don't cover this" is a correct answer.</span><span lang="fr">Dans un assistant juridique, « les textes indexés ne couvrent pas ce point » est une bonne réponse.</span><span lang="ar">في مساعد قانوني، «النصوص المفهرسة لا تغطي هذه النقطة» إجابة صحيحة.</span></li>
+        </ul>
+        <p><span lang="en">Try the <a href="https://hokoki.vercel.app" target="_blank" rel="noopener">live demo</a> (the public demo runs without the AI service and uses labelled sample answers), or read the code on <a href="https://github.com/adelmerad/HOKOKI" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Essayez la <a href="https://hokoki.vercel.app" target="_blank" rel="noopener">démo en ligne</a> (la démo publique tourne sans le service IA et utilise des réponses d'exemple signalées comme telles), ou lisez le code sur <a href="https://github.com/adelmerad/HOKOKI" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">جرّب <a href="https://hokoki.vercel.app" target="_blank" rel="noopener">العرض المباشر</a> (يعمل العرض العام دون خدمة الذكاء الاصطناعي ويستعمل إجابات نموذجية موسومة بذلك)، أو اقرأ الشيفرة على <a href="https://github.com/adelmerad/HOKOKI" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="hokoki.html"><span lang="en">HOKOKI case study</span><span lang="fr">Étude de cas HOKOKI</span><span lang="ar">دراسة حالة HOKOKI</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

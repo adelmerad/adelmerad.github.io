@@ -37,7 +37,7 @@
   </url>
   <url>
     <loc>https://adelmerad.github.io/blog.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -53,6 +53,11 @@
   <url>
     <loc>https://adelmerad.github.io/blog-presence.html</loc>
     <lastmod>2026-11-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://adelmerad.github.io/blog-hokoki-rag.html</loc>
+    <lastmod>2026-11-20</lastmod>
     <priority>0.7</priority>
   </url>
 </urlset>
