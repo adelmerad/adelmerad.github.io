@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A website for a medical imaging center: what local SEO really takes — Adel Merad</title>
+  <meta name="description" content="How I built the website of a radiology center in Algiers with plain HTML: two real languages, schema.org structured data, appointments through WhatsApp with no backend, a rule-based assistant, lead tracking and speed on cheap phones.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-cim-seo.html">
+  <meta property="og:title" content="A website for a medical imaging center: what local SEO really takes">
+  <meta property="og:description" content="French and Arabic pages, structured data, WhatsApp appointments with no backend, a rule-based assistant and lead tracking.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-cim-seo.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="A website for a medical imaging center — Adel Merad" data-title-fr="Le site d'un centre d'imagerie médicale — Adel Merad" data-title-ar="موقع لمركز تصوير طبي — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 8 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 8 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">A website for a medical imaging center: what local SEO really takes</span>
+          <span lang="fr">Le site d'un centre d'imagerie médicale : ce que demande vraiment le SEO local</span><span lang="ar">موقع لمركز تصوير طبي: ما يتطلبه فعلاً الظهور المحلي في محركات البحث</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">No framework, no backend, 36 pages in French and Arabic. What mattered was not the code: it was telling Google exactly what the center is, speaking the patients' language, and making the path to an appointment as short as possible.</span>
+          <span lang="fr">Aucun framework, aucun backend, 36 pages en français et en arabe. Ce qui a compté, ce n'est pas le code : c'est dire exactement à Google ce qu'est le centre, parler la langue des patients, et rendre le chemin vers un rendez-vous le plus court possible.</span><span lang="ar">بلا إطار عمل ولا خادم خلفي، 36 صفحة بالفرنسية والعربية. لم يكن المهم هو الشيفرة: بل أن نقول لـ Google بدقة ما هو المركز، وأن نتكلم لغة المرضى، وأن نجعل الطريق إلى الموعد أقصر ما يمكن.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+        <h2><span lang="en">The context</span><span lang="fr">Le contexte</span><span lang="ar">السياق</span></h2>
+        <p><span lang="en">I manage the <a href="cim.html">CIM Dr MERAD</a>, a radiology center in Birtouta, south of Algiers: CT scan, ultrasound, mammography, X-ray. Patients look for a center on their phone, usually on Google or Google Maps, and want three answers fast: do you do this exam, where are you, and how do I come. Most prefer WhatsApp to a phone call, and many read Arabic more easily than French.</span>
+           <span lang="fr">Je gère le <a href="cim.html">CIM Dr MERAD</a>, un centre de radiologie à Birtouta, au sud d'Alger : scanner, échographie, mammographie, radiologie. Les patients cherchent un centre sur leur téléphone, souvent sur Google ou Google Maps, et veulent trois réponses vite : faites-vous cet examen, où êtes-vous, et comment venir. La plupart préfèrent WhatsApp à un appel, et beaucoup lisent plus facilement l'arabe que le français.</span><span lang="ar">أدير <a href="cim.html">مركز CIM الدكتور مراد</a>، وهو مركز أشعة في بئر توتة جنوب الجزائر العاصمة: سكانير، وتصوير بالصدى، وماموغرافيا، وأشعة. يبحث المرضى عن مركز من هواتفهم، غالباً على Google أو خرائط Google، ويريدون ثلاث إجابات بسرعة: هل تقومون بهذا الفحص، وأين أنتم، وكيف آتي. ويفضّل أغلبهم واتساب على المكالمة، ويقرأ كثير منهم العربية أسهل من الفرنسية.</span></p>
+        <p><span lang="en">So the site is plain HTML, CSS and JavaScript on GitHub Pages with the center's own domain. No build step, no server, nothing to maintain or pay for, and no patient data stored anywhere.</span>
+           <span lang="fr">Le site est donc en HTML, CSS et JavaScript simples, sur GitHub Pages avec le domaine du centre. Pas d'étape de build, pas de serveur, rien à maintenir ni à payer, et aucune donnée de patient stockée nulle part.</span><span lang="ar">لذلك الموقع مكتوب بـ HTML وCSS وJavaScript بسيطة، على GitHub Pages مع نطاق المركز الخاص. بلا مرحلة بناء، ولا خادم، ولا شيء يحتاج صيانة أو دفعاً، ولا تُخزَّن أي بيانات مرضى في أي مكان.</span></p>
+
+        <h2><span lang="en">Two real languages, not a translation button</span><span lang="fr">Deux vraies langues, pas un bouton de traduction</span><span lang="ar">لغتان حقيقيتان، لا زر ترجمة</span></h2>
+        <p><span lang="en">Every page exists twice: <code>/scanner/</code> in French and <code>/ar/scanner/</code> in Arabic, written right to left. Separate URLs matter for search: Google can index and show the Arabic page to someone searching in Arabic. The pages point to each other with <code>hreflang</code>:</span>
+           <span lang="fr">Chaque page existe deux fois : <code>/scanner/</code> en français et <code>/ar/scanner/</code> en arabe, écrite de droite à gauche. Des URL séparées comptent pour la recherche : Google peut indexer la page arabe et la montrer à quelqu'un qui cherche en arabe. Les pages se désignent l'une l'autre avec <code>hreflang</code> :</span><span lang="ar">كل صفحة موجودة مرتين: <code>/scanner/</code> بالفرنسية و<code>/ar/scanner/</code> بالعربية، مكتوبة من اليمين إلى اليسار. والروابط المنفصلة مهمة للبحث: يستطيع Google فهرسة الصفحة العربية وعرضها لمن يبحث بالعربية. وتشير الصفحتان إلى بعضهما بـ <code>hreflang</code>:</span></p>
+<pre><code>&lt;link rel="alternate" hreflang="fr" href="https://cimdrmerad.com/"&gt;
+&lt;link rel="alternate" hreflang="ar" href="https://cimdrmerad.com/ar/"&gt;
+&lt;link rel="alternate" hreflang="x-default" href="https://cimdrmerad.com/"&gt;</code></pre>
+        <p><span lang="en">Two small details made the Arabic pages feel native. Phone numbers are wrapped in <code>&lt;span dir="ltr"&gt;</code>, otherwise the browser reorders the digit groups in right-to-left text. And the words come from the patients: for fine-needle aspiration, I replaced the dictionary term with the word patients actually say at the front desk, on every page and in the assistant.</span>
+           <span lang="fr">Deux petits détails ont rendu les pages arabes naturelles. Les numéros de téléphone sont entourés d'un <code>&lt;span dir="ltr"&gt;</code>, sinon le navigateur réordonne les groupes de chiffres dans un texte de droite à gauche. Et les mots viennent des patients : pour la cytoponction, j'ai remplacé le terme du dictionnaire par le mot que les patients disent vraiment à l'accueil, sur toutes les pages et dans l'assistant.</span><span lang="ar">جعل تفصيلان صغيران الصفحات العربية طبيعية. أرقام الهاتف محاطة بـ <code>&lt;span dir="ltr"&gt;</code>، وإلا أعاد المتصفح ترتيب مجموعات الأرقام في نص من اليمين إلى اليسار. والكلمات مأخوذة من المرضى: في الخزعة بالإبرة الدقيقة، عوّضت مصطلح القاموس «البزل» بالكلمة التي يقولها المرضى فعلاً في الاستقبال، «السيتوبونكسيون»، في كل الصفحات وفي المساعد.</span></p>
+
+        <h2><span lang="en">Telling Google what the center is</span><span lang="fr">Dire à Google ce qu'est le centre</span><span lang="ar">أن نقول لـ Google ما هو المركز</span></h2>
+        <p><span lang="en">A search engine reads text, but it understands structured data much better. Each page carries schema.org JSON-LD: the center as a <code>MedicalClinic</code> with its exact location, opening hours, social profiles and the exams it offers.</span>
+           <span lang="fr">Un moteur de recherche lit du texte, mais il comprend beaucoup mieux des données structurées. Chaque page contient du JSON-LD schema.org : le centre comme <code>MedicalClinic</code>, avec sa position exacte, ses horaires, ses réseaux sociaux et les examens proposés.</span><span lang="ar">يقرأ محرك البحث النص، لكنه يفهم البيانات المنظَّمة أفضل بكثير. تحمل كل صفحة بيانات JSON-LD من schema.org: المركز كـ <code>MedicalClinic</code> مع موقعه الدقيق، وأوقات عمله، وحساباته على الشبكات الاجتماعية، والفحوصات التي يقدمها.</span></p>
+<pre><code>{
+  "@context": "https://schema.org",
+  "@type": "MedicalClinic",
+  "name": "Centre d'Imagerie Médicale et de Radiologie CIM Dr MERAD",
+  "geo": { "@type": "GeoCoordinates", "latitude": 36.6447298, "longitude": 2.9938945 },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+    "opens": "08:30", "closes": "16:30"
+  },
+  "sameAs": ["https://www.instagram.com/cimdrmerad/", "..."],
+  "hasOfferCatalog": { "@type": "OfferCatalog", "itemListElement": [
+    { "@type": "Offer", "itemOffered": { "@type": "MedicalProcedure", "name": "Scanner multibarrettes 64 coupes" } }
+  ] }
+}</code></pre>
+        <p><span lang="en">Note the opening days: Saturday to Thursday, the Algerian week. Copying a European template would have told Google the center is open on Friday. Other pages add their own types: <code>MedicalWebPage</code> and <code>FAQPage</code> for each exam, <code>Physician</code> for the radiologist, <code>Article</code> for health tips, <code>JobPosting</code> for hiring, and <code>BreadcrumbList</code> everywhere.</span>
+           <span lang="fr">Remarquez les jours d'ouverture : du samedi au jeudi, la semaine algérienne. Copier un modèle européen aurait dit à Google que le centre est ouvert le vendredi. Les autres pages ajoutent leurs propres types : <code>MedicalWebPage</code> et <code>FAQPage</code> pour chaque examen, <code>Physician</code> pour le radiologue, <code>Article</code> pour les conseils santé, <code>JobPosting</code> pour le recrutement, et <code>BreadcrumbList</code> partout.</span><span lang="ar">لاحظ أيام العمل: من السبت إلى الخميس، أسبوع العمل الجزائري. لو نسخنا نموذجاً أوروبياً لأخبرنا Google أن المركز مفتوح يوم الجمعة. وتضيف الصفحات الأخرى أنواعها الخاصة: <code>MedicalWebPage</code> و<code>FAQPage</code> لكل فحص، و<code>Physician</code> للطبيب المختص في الأشعة، و<code>Article</code> للنصائح الصحية، و<code>JobPosting</code> للتوظيف، و<code>BreadcrumbList</code> في كل مكان.</span></p>
+
+        <h2><span lang="en">One page per question patients ask</span><span lang="fr">Une page par question que se posent les patients</span><span lang="ar">صفحة لكل سؤال يطرحه المرضى</span></h2>
+        <p><span lang="en">Nobody searches for "imaging center website". They search "scanner Birtouta", "how to prepare for a CT scan" or "do I need a prescription for an ultrasound". So each exam has its own page (the machine, the preparation, the FAQ, a WhatsApp button), and a "Conseils" section answers common questions in plain words: the difference between CT, MRI and ultrasound, at what age to start mammograms, whether X-rays are dangerous. Every article links to the exam pages, in both languages.</span>
+           <span lang="fr">Personne ne cherche « site de centre d'imagerie ». On cherche « scanner Birtouta », « comment se préparer à un scanner » ou « faut-il une ordonnance pour une échographie ». Chaque examen a donc sa page (l'appareil, la préparation, la FAQ, un bouton WhatsApp), et une rubrique « Conseils » répond aux questions courantes avec des mots simples : la différence entre scanner, IRM et échographie, à quel âge commencer la mammographie, les rayons X sont-ils dangereux. Chaque article renvoie vers les pages d'examens, dans les deux langues.</span><span lang="ar">لا أحد يبحث عن «موقع مركز تصوير». بل يبحثون عن «سكانير بئر توتة» أو «كيف أستعد للسكانير» أو «هل أحتاج وصفة للتصوير بالصدى». لذلك لكل فحص صفحته (الجهاز، والتحضير، والأسئلة الشائعة، وزر واتساب)، وقسم «نصائح» يجيب عن الأسئلة الشائعة بكلمات بسيطة: الفرق بين السكانير والرنين المغناطيسي والتصوير بالصدى، والسن المناسبة لبدء الماموغرافيا، وهل الأشعة السينية خطيرة. وكل مقال يحيل إلى صفحات الفحوصات، باللغتين.</span></p>
+
+        <h2><span lang="en">Appointments through WhatsApp, with no backend</span><span lang="fr">Des rendez-vous par WhatsApp, sans backend</span><span lang="ar">مواعيد عبر واتساب، دون خادم خلفي</span></h2>
+        <p><span lang="en">The contact form does not send anything to a server. It validates the fields, builds a ready-to-send message, and opens WhatsApp with it. The patient just presses send, and the reception team answers in the app they already use all day.</span>
+           <span lang="fr">Le formulaire de contact n'envoie rien à un serveur. Il valide les champs, construit un message prêt à envoyer, et ouvre WhatsApp avec. Le patient n'a qu'à appuyer sur envoyer, et l'accueil répond dans l'appli qu'il utilise déjà toute la journée.</span><span lang="ar">لا ترسل استمارة الاتصال أي شيء إلى خادم. بل تتحقق من الحقول، وتبني رسالة جاهزة للإرسال، وتفتح بها واتساب. ما على المريض إلا الضغط على إرسال، ويجيب فريق الاستقبال في التطبيق الذي يستعمله أصلاً طوال اليوم.</span></p>
+<pre><code>var lines = [L.waGreeting, L.waName + name];
+if (service) lines.push(L.waService + service);
+if (apptDate) lines.push(L.waDateLabel + formatDate(apptDate));
+if (message) lines.push(L.waMessage + message);
+
+var url = 'https://wa.me/213552055077?text=' + encodeURIComponent(lines.join('\n'));
+window.open(url, '_blank', 'noopener');</code></pre>
+        <p><span lang="en">The labels (<code>L</code>) switch to Arabic on Arabic pages, so the message arrives in the patient's language. Keeping no data is also the simplest privacy policy for a medical business: there is nothing to leak.</span>
+           <span lang="fr">Les libellés (<code>L</code>) passent en arabe sur les pages arabes, donc le message arrive dans la langue du patient. Ne garder aucune donnée, c'est aussi la politique de confidentialité la plus simple pour un établissement médical : il n'y a rien à divulguer.</span><span lang="ar">تتحول العبارات (<code>L</code>) إلى العربية في الصفحات العربية، فتصل الرسالة بلغة المريض. وعدم الاحتفاظ بأي بيانات هو أيضاً أبسط سياسة خصوصية لمؤسسة طبية: لا يوجد شيء يمكن أن يتسرب.</span></p>
+
+        <h2><span lang="en">An assistant that cannot make things up</span><span lang="fr">Un assistant qui ne peut rien inventer</span><span lang="ar">مساعد لا يستطيع أن يخترع شيئاً</span></h2>
+        <p><span lang="en">The site has a chat assistant, and it is deliberately <strong>not</strong> an AI. It is a small decision tree in JavaScript: each node has a message and buttons that lead to another node or to an action (WhatsApp, phone, Google Maps). On a medical site, a wrong opening time or a wrong preparation instruction is a real problem, so every answer is written by hand, in both languages.</span>
+           <span lang="fr">Le site a un assistant de discussion, et ce n'est volontairement <strong>pas</strong> une IA. C'est un petit arbre de décision en JavaScript : chaque nœud a un message et des boutons qui mènent à un autre nœud ou à une action (WhatsApp, téléphone, Google Maps). Sur un site médical, un mauvais horaire ou une mauvaise consigne de préparation est un vrai problème : chaque réponse est donc écrite à la main, dans les deux langues.</span><span lang="ar">في الموقع مساعد محادثة، وهو عمداً <strong>ليس</strong> ذكاءً اصطناعياً. إنه شجرة قرار صغيرة بـ JavaScript: لكل عقدة رسالة وأزرار تقود إلى عقدة أخرى أو إلى فعل (واتساب، الهاتف، خرائط Google). في موقع طبي، الخطأ في أوقات العمل أو في تعليمات التحضير مشكلة حقيقية، لذلك كل إجابة مكتوبة يدوياً، باللغتين.</span></p>
+<pre><code>horaires: {
+  bot: 'Nous vous accueillons du samedi au jeudi, de 8h30 à 16h30.',
+  replies: [
+    { label: '📅 Prendre rendez-vous', to: 'rdv' },
+    { label: '📍 Adresse et accès', to: 'adresse' },
+    { label: '↩︎ Menu', to: 'menu' }
+  ]
+},</code></pre>
+        <p><span lang="en">Every branch ends in the same place: a real person on WhatsApp or on the phone. The assistant's job is to answer the easy questions and hand over the rest.</span>
+           <span lang="fr">Chaque branche finit au même endroit : une vraie personne sur WhatsApp ou au téléphone. Le rôle de l'assistant est de répondre aux questions faciles et de passer la main pour le reste.</span><span lang="ar">كل فرع ينتهي في المكان نفسه: شخص حقيقي على واتساب أو على الهاتف. ودور المساعد هو الإجابة عن الأسئلة السهلة وتحويل البقية.</span></p>
+
+        <h2><span lang="en">Measuring what brings patients</span><span lang="fr">Mesurer ce qui amène des patients</span><span lang="ar">قياس ما يجلب المرضى</span></h2>
+        <p><span lang="en">Page views say little. What matters is how many people contact the center, and through which path. One delegated click listener sends a Google Analytics 4 <code>generate_lead</code> event for every WhatsApp or phone link on any page, and the form and the assistant send the same event with their own <code>method</code>:</span>
+           <span lang="fr">Le nombre de pages vues dit peu de chose. Ce qui compte, c'est combien de personnes contactent le centre, et par quel chemin. Un seul écouteur de clics délégué envoie un événement Google Analytics 4 <code>generate_lead</code> pour chaque lien WhatsApp ou téléphone de n'importe quelle page, et le formulaire comme l'assistant envoient le même événement avec leur propre <code>method</code> :</span><span lang="ar">عدد مشاهدات الصفحات لا يقول الكثير. المهم هو كم شخصاً يتصل بالمركز، وعبر أي مسار. مستمع نقرات واحد مفوَّض يرسل حدث Google Analytics 4 باسم <code>generate_lead</code> لكل رابط واتساب أو هاتف في أي صفحة، وترسل الاستمارة والمساعد الحدث نفسه مع قيمة <code>method</code> خاصة بهما:</span></p>
+<pre><code>document.addEventListener('click', function (e) {
+  var link = e.target.closest('a[href]');
+  if (!link || typeof gtag !== 'function') return;
+  var href = link.getAttribute('href');
+  if (href.indexOf('wa.me') !== -1) {
+    gtag('event', 'generate_lead', { method: 'whatsapp' });
+  } else if (href.indexOf('tel:') === 0) {
+    gtag('event', 'generate_lead', { method: 'telephone' });
+  }
+});
+// the form sends { method: 'form_whatsapp' }</code></pre>
+        <p><span lang="en">With one event name and a <code>method</code> parameter, a single report shows which channel works, without adding tracking code to each of the 36 pages.</span>
+           <span lang="fr">Avec un seul nom d'événement et un paramètre <code>method</code>, un seul rapport montre quel canal fonctionne, sans ajouter de code de suivi sur chacune des 36 pages.</span><span lang="ar">باسم حدث واحد ومعامل <code>method</code>، يُظهر تقرير واحد أي قناة تنجح، دون إضافة شيفرة تتبّع إلى كل صفحة من الصفحات الـ 36.</span></p>
+
+        <h2><span lang="en">Fast on a cheap phone</span><span lang="fr">Rapide sur un téléphone d'entrée de gamme</span><span lang="ar">سريع على هاتف بسيط</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">Every photo exists in WebP and JPEG, served with <code>&lt;picture&gt;</code>, with explicit width and height so nothing jumps while loading, and <code>loading="lazy"</code> below the fold.</span><span lang="fr">Chaque photo existe en WebP et en JPEG, servie avec <code>&lt;picture&gt;</code>, avec une largeur et une hauteur explicites pour que rien ne saute pendant le chargement, et <code>loading="lazy"</code> sous la ligne de flottaison.</span><span lang="ar">كل صورة موجودة بصيغتي WebP وJPEG، تُقدَّم عبر <code>&lt;picture&gt;</code>، مع عرض وارتفاع محددين حتى لا يقفز شيء أثناء التحميل، و<code>loading="lazy"</code> للصور أسفل الشاشة.</span></li>
+          <li><span lang="en">Google Fonts load without blocking the first paint (<code>media="print"</code>, switched to <code>all</code> once loaded).</span><span lang="fr">Les polices Google se chargent sans bloquer le premier affichage (<code>media="print"</code>, passé à <code>all</code> une fois chargé).</span><span lang="ar">تُحمَّل خطوط Google دون أن تعطّل العرض الأول (<code>media="print"</code>، ثم تتحول إلى <code>all</code> بعد التحميل).</span></li>
+          <li><span lang="en">The largest element at the top of the home page gets <code>fetchpriority="high"</code>, and the hero no longer waits for JavaScript to become visible.</span><span lang="fr">Le plus grand élément en haut de l'accueil reçoit <code>fetchpriority="high"</code>, et le haut de page n'attend plus le JavaScript pour s'afficher.</span><span lang="ar">أكبر عنصر في أعلى الصفحة الرئيسية يحصل على <code>fetchpriority="high"</code>، ولم يعد أعلى الصفحة ينتظر JavaScript ليظهر.</span></li>
+          <li><span lang="en">On mobile, I cut section spacing from 100 to 56 pixels: about 800 pixels less scrolling on the home page, so the contact block comes sooner.</span><span lang="fr">Sur mobile, j'ai réduit l'espacement des sections de 100 à 56 pixels : environ 800 pixels de défilement en moins sur l'accueil, donc le bloc contact arrive plus tôt.</span><span lang="ar">على الهاتف، قلّصت المسافة بين الأقسام من 100 إلى 56 بكسل: نحو 800 بكسل أقل من التمرير في الصفحة الرئيسية، فيظهر قسم الاتصال أبكر.</span></li>
+        </ul>
+
+        <h2><span lang="en">What I would do differently</span><span lang="fr">Ce que je ferais autrement</span><span lang="ar">ما كنت سأفعله بشكل مختلف</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><strong>A static site generator.</strong> "No build step" was simple when the site was a single page. At 36 pages, the header, footer and font tags are copied in every file, and one footer change means editing 36 files. A generator like Eleventy would keep the same static output with shared templates.</span><span lang="fr"><strong>Un générateur de site statique.</strong> « Pas d'étape de build », c'était simple quand le site tenait sur une page. À 36 pages, l'en-tête, le pied de page et les balises de polices sont copiés dans chaque fichier, et un changement du pied de page veut dire modifier 36 fichiers. Un générateur comme Eleventy garderait le même résultat statique avec des gabarits partagés.</span><span lang="ar"><strong>مولّد مواقع ثابتة.</strong> كان «بلا مرحلة بناء» بسيطاً عندما كان الموقع صفحة واحدة. أما مع 36 صفحة، فالترويسة والتذييل ووسوم الخطوط منسوخة في كل ملف، وتغيير واحد في التذييل يعني تعديل 36 ملفاً. ومولّد مثل Eleventy سيحافظ على النتيجة الثابتة نفسها مع قوالب مشتركة.</span></li>
+          <li><span lang="en"><strong>One source for the answers.</strong> Opening hours and preparation rules live in the page text, the FAQ structured data and the assistant. Generating all three from one data file would make it impossible for them to disagree.</span><span lang="fr"><strong>Une seule source pour les réponses.</strong> Les horaires et les consignes de préparation se trouvent dans le texte des pages, les données structurées de la FAQ et l'assistant. Générer les trois à partir d'un seul fichier de données rendrait impossible qu'ils se contredisent.</span><span lang="ar"><strong>مصدر واحد للإجابات.</strong> أوقات العمل وتعليمات التحضير موجودة في نص الصفحات، وفي البيانات المنظَّمة للأسئلة الشائعة، وفي المساعد. وتوليد الثلاثة من ملف بيانات واحد سيجعل تناقضها مستحيلاً.</span></li>
+          <li><span lang="en"><strong>Leads are clicks, not messages.</strong> The event fires when someone opens WhatsApp, not when they actually send the message. Asking new patients at the front desk how they found the center is still the most reliable measure.</span><span lang="fr"><strong>Un contact, c'est un clic, pas un message.</strong> L'événement part quand quelqu'un ouvre WhatsApp, pas quand il envoie vraiment le message. Demander aux nouveaux patients à l'accueil comment ils ont connu le centre reste la mesure la plus fiable.</span><span lang="ar"><strong>الاتصال نقرة لا رسالة.</strong> يُرسَل الحدث عندما يفتح شخص واتساب، لا عندما يرسل الرسالة فعلاً. وسؤال المرضى الجدد في الاستقبال عن كيفية معرفتهم بالمركز يبقى القياس الأكثر موثوقية.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">For a local business, structured data and one page per real question do more than any design trick.</span><span lang="fr">Pour un commerce local, les données structurées et une page par vraie question font plus que n'importe quel effet de design.</span><span lang="ar">لنشاط محلي، البيانات المنظَّمة وصفحة لكل سؤال حقيقي تفعل أكثر من أي حيلة تصميم.</span></li>
+          <li><span lang="en">A second language is a second set of pages, written with the words people really use.</span><span lang="fr">Une deuxième langue, c'est un deuxième ensemble de pages, écrit avec les mots que les gens utilisent vraiment.</span><span lang="ar">اللغة الثانية مجموعة ثانية من الصفحات، مكتوبة بالكلمات التي يستعملها الناس فعلاً.</span></li>
+          <li><span lang="en">Meet users where they already are: here, that was WhatsApp, not a booking system.</span><span lang="fr">Aller là où sont déjà les utilisateurs : ici, c'était WhatsApp, pas un système de réservation.</span><span lang="ar">اذهب إلى حيث يوجد المستخدمون أصلاً: هنا كان ذلك واتساب، لا نظام حجز.</span></li>
+          <li><span lang="en">When answers must be exact, a hand-written decision tree beats a chatbot that improvises.</span><span lang="fr">Quand les réponses doivent être exactes, un arbre de décision écrit à la main vaut mieux qu'un chatbot qui improvise.</span><span lang="ar">عندما يجب أن تكون الإجابات دقيقة، شجرة قرار مكتوبة يدوياً أفضل من روبوت محادثة يرتجل.</span></li>
+        </ul>
+        <p><span lang="en">Visit the site at <a href="https://cimdrmerad.com" target="_blank" rel="noopener">cimdrmerad.com</a>, or read the code on <a href="https://github.com/adelmerad/CIM-Dr-MERAD" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Visitez le site sur <a href="https://cimdrmerad.com" target="_blank" rel="noopener">cimdrmerad.com</a>, ou lisez le code sur <a href="https://github.com/adelmerad/CIM-Dr-MERAD" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">زر الموقع على <a href="https://cimdrmerad.com" target="_blank" rel="noopener">cimdrmerad.com</a>، أو اقرأ الشيفرة على <a href="https://github.com/adelmerad/CIM-Dr-MERAD" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="cim.html"><span lang="en">CIM case study</span><span lang="fr">Étude de cas CIM</span><span lang="ar">دراسة حالة CIM</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
