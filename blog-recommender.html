@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recommending products three ways, and the bugs I found a year later — Adel Merad</title>
+  <meta name="description" content="The recommender of ShopO, our bachelor's final project: popularity, content-based with cosine similarity, collaborative filtering with K-Means, and six problems I found rereading the code more than a year later.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-recommender.html">
+  <meta property="og:title" content="Recommending products three ways, and the bugs I found a year later">
+  <meta property="og:description" content="Popularity, cosine similarity and K-Means in a Flask microservice, and an honest code review of my own bachelor's project.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-recommender.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="Recommending products three ways — Adel Merad" data-title-fr="Recommander des produits de trois façons — Adel Merad" data-title-ar="التوصية بالمنتجات بثلاث طرق — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 9 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 9 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 9 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">Recommending products three ways, and the bugs I found a year later</span>
+          <span lang="fr">Recommander des produits de trois façons, et les bugs trouvés un an plus tard</span><span lang="ar">التوصية بالمنتجات بثلاث طرق، والأخطاء التي وجدتها بعد عام</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">ShopO, our bachelor's final project, recommends products with popularity, cosine similarity and K-Means clustering. It worked on defense day. Rereading the code more than a year later, I found six problems, some of them invisible in a demo.</span>
+          <span lang="fr">ShopO, notre projet de fin de Licence, recommande des produits par popularité, par similarité cosinus et par clustering K-Means. Ça marchait le jour de la soutenance. En relisant le code plus d'un an après, j'ai trouvé six problèmes, dont certains invisibles pendant une démo.</span><span lang="ar">ShopO، مشروع تخرجنا في الليسانس، يوصي بالمنتجات حسب الشعبية، والتشابه بجيب التمام، والتجميع بـ K-Means. كان يعمل يوم المناقشة. وعند إعادة قراءة الشيفرة بعد أكثر من عام، وجدت ست مشكلات، بعضها لا يظهر أثناء العرض.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en"><a href="shopo.html">ShopO</a> is a multi-seller marketplace for electronics that we built as a team for our bachelor's degree at USTHB, defended in June 2025: React and TypeScript on the front, a Laravel API, MySQL, PayPal. Two places show recommendations: "similar products" on a product page, and "for you" on the customer's page.</span>
+           <span lang="fr"><a href="shopo.html">ShopO</a> est une marketplace multi-vendeurs d'électronique, construite en équipe pour notre Licence à l'USTHB et soutenue en juin 2025 : React et TypeScript côté interface, une API Laravel, MySQL, PayPal. Deux endroits affichent des recommandations : les « produits similaires » sur la page d'un produit, et « pour vous » sur la page du client.</span><span lang="ar"><a href="shopo.html">ShopO</a> سوق إلكترونية متعددة البائعين للأجهزة الإلكترونية، بنيناها كفريق لشهادة الليسانس في جامعة هواري بومدين، ونوقشت في جوان 2025: React وTypeScript في الواجهة، وواجهة برمجية بـ Laravel، وMySQL، وPayPal. ويعرض مكانان التوصيات: «منتجات مشابهة» في صفحة المنتج، و«مقترحة لك» في صفحة الزبون.</span></p>
+        <p><span lang="en">A new marketplace has no users and no ratings, so we seeded it with a public Kaggle dataset of electronics products: 965 products and 35,642 ratings from 351 users. The three approaches were explored in Jupyter notebooks first, then moved into a Flask service.</span>
+           <span lang="fr">Une nouvelle marketplace n'a ni utilisateurs ni notes : nous l'avons donc remplie avec un jeu de données Kaggle public de produits électroniques, soit 965 produits et 35 642 notes données par 351 utilisateurs. Les trois approches ont d'abord été explorées dans des notebooks Jupyter, puis intégrées dans un service Flask.</span><span lang="ar">السوق الجديدة لا مستخدمين لها ولا تقييمات، لذلك ملأناها بمجموعة بيانات عامة من Kaggle لمنتجات إلكترونية: 965 منتجاً و35642 تقييماً من 351 مستخدماً. استكشفنا الطرق الثلاث أولاً في دفاتر Jupyter، ثم نقلناها إلى خدمة Flask.</span></p>
+        <figure class="flow" aria-label="Recommendation flow">
+          <div class="flow-row" style="min-width:700px">
+            <div class="node"><b>React</b><small>/api/recommendations</small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b>Laravel</b><small>MySQL → CSV</small></div>
+            <span class="arrow">→</span>
+            <div class="node core"><b>Flask</b><small>pandas · scikit-learn</small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b><span lang="en">Product ids</span><span lang="fr">Identifiants</span><span lang="ar">المعرّفات</span></b><small>→ Product::whereIn</small></div>
+          </div>
+        </figure>
+        <p><span lang="en">Laravel exports products and ratings to CSV with Artisan commands. The Flask service trains on those files and returns product ids; Laravel then loads the full products from MySQL and sends them to the front end.</span>
+           <span lang="fr">Laravel exporte les produits et les notes en CSV avec des commandes Artisan. Le service Flask s'entraîne sur ces fichiers et renvoie des identifiants de produits ; Laravel charge ensuite les produits complets depuis MySQL et les envoie à l'interface.</span><span lang="ar">يصدّر Laravel المنتجات والتقييمات إلى ملفات CSV بأوامر Artisan. وتتدرب خدمة Flask على هذه الملفات وتعيد معرّفات المنتجات؛ ثم يحمّل Laravel المنتجات كاملة من MySQL ويرسلها إلى الواجهة.</span></p>
+
+        <h2><span lang="en">1. Popularity, for people we know nothing about</span><span lang="fr">1. La popularité, pour ceux qu'on ne connaît pas</span><span lang="ar">1. الشعبية، لمن لا نعرف عنهم شيئاً</span></h2>
+        <p><span lang="en">A visitor with no history gets the classic answer: the best-rated products. To avoid a product with one 5-star rating topping the list, we kept only products with an average above 3 and more than 100 ratings, then took the top 15.</span>
+           <span lang="fr">Un visiteur sans historique reçoit la réponse classique : les produits les mieux notés. Pour éviter qu'un produit avec une seule note de 5 étoiles arrive en tête, nous avons gardé seulement les produits avec une moyenne supérieure à 3 et plus de 100 notes, puis pris les 15 premiers.</span><span lang="ar">الزائر الذي لا تاريخ له يحصل على الإجابة الكلاسيكية: المنتجات الأعلى تقييماً. ولتجنب أن يتصدر القائمة منتج له تقييم واحد بخمس نجوم، أبقينا فقط المنتجات التي يتجاوز متوسطها 3 ولها أكثر من 100 تقييم، ثم أخذنا أول 15.</span></p>
+
+        <h2><span lang="en">2. Content-based: products that look alike</span><span lang="fr">2. Par contenu : des produits qui se ressemblent</span><span lang="ar">2. حسب المحتوى: منتجات متشابهة</span></h2>
+        <p><span lang="en">On a product page, "similar" means similar description. Each product's description and category become a bag of words (the 3,000 most frequent English words, without stop words), and cosine similarity measures the angle between two products' word vectors: 1 means the same words in the same proportions.</span>
+           <span lang="fr">Sur la page d'un produit, « similaire » veut dire une description similaire. La description et la catégorie de chaque produit deviennent un sac de mots (les 3 000 mots anglais les plus fréquents, sans les mots vides), et la similarité cosinus mesure l'angle entre les vecteurs de mots de deux produits : 1 veut dire les mêmes mots dans les mêmes proportions.</span><span lang="ar">في صفحة المنتج، «مشابه» يعني وصفاً مشابهاً. يتحول وصف كل منتج وفئته إلى حقيبة كلمات (أكثر 3000 كلمة إنجليزية تكراراً، دون الكلمات الشائعة الفارغة)، ويقيس التشابه بجيب التمام الزاوية بين متجهي كلمات منتجين: القيمة 1 تعني الكلمات نفسها بالنسب نفسها.</span></p>
+<pre><code>product_dataset["tags"] = product_dataset["about"] + product_dataset["category_name"]
+
+cv = CountVectorizer(max_features=3000, stop_words="english")
+vector = cv.fit_transform(product_dataset["tags"].values.astype("U")).toarray()
+similarity = cosine_similarity(vector)   # 965 x 965 matrix
+
+# for a product: sort its row, skip itself, keep the next 9
+distance = sorted(enumerate(similarity[index]), key=lambda x: x[1], reverse=True)
+recommended = [products.iloc[i]["id"] for i, _ in distance[1:10]]</code></pre>
+
+        <h2><span lang="en">3. Collaborative filtering: people like you</span><span lang="fr">3. Le filtrage collaboratif : les gens comme vous</span><span lang="ar">3. التصفية التعاونية: أشخاص يشبهونك</span></h2>
+        <p><span lang="en">For a customer with a history, we look at what similar customers liked. First we drop the noise: products with 5 ratings or fewer, then users with 10 ratings or fewer. Then a user × product table of ratings is grouped with K-Means. The number of groups is not hard-coded: the service tries k from 1 to 20 and picks the "elbow" of the error curve with <code>KneeLocator</code>, with a minimum of 5.</span>
+           <span lang="fr">Pour un client avec un historique, on regarde ce qu'ont aimé les clients qui lui ressemblent. D'abord, on retire le bruit : les produits avec 5 notes ou moins, puis les utilisateurs avec 10 notes ou moins. Ensuite, un tableau utilisateurs × produits des notes est regroupé avec K-Means. Le nombre de groupes n'est pas fixé dans le code : le service essaie k de 1 à 20 et choisit le « coude » de la courbe d'erreur avec <code>KneeLocator</code>, avec un minimum de 5.</span><span lang="ar">للزبون الذي له تاريخ، ننظر إلى ما أحبه الزبائن المشابهون له. أولاً نزيل الضجيج: المنتجات التي لها 5 تقييمات أو أقل، ثم المستخدمون الذين لهم 10 تقييمات أو أقل. ثم يُجمَّع جدول تقييمات المستخدمين × المنتجات بخوارزمية K-Means. وعدد المجموعات غير مثبّت في الشيفرة: تجرّب الخدمة k من 1 إلى 20 وتختار «المرفق» في منحنى الخطأ بـ <code>KneeLocator</code>، بحد أدنى 5.</span></p>
+<pre><code>pivot = filtered.pivot_table(index="User ID", columns="Product ID", values="Rating").fillna(0)
+
+sse = [KMeans(n_clusters=k, n_init=5, random_state=42).fit(pivot).inertia_ for k in range(1, 21)]
+elbow = KneeLocator(range(1, 21), sse, curve="convex", direction="decreasing").elbow
+best_k = max(elbow or 5, 5)
+
+pivot["cluster"] = KMeans(n_clusters=best_k, n_init=5, random_state=0).fit_predict(pivot)
+# for a user: average rating of each product inside their cluster,
+# minus what they already rated, top 9</code></pre>
+
+        <h2><span lang="en">What I found rereading it</span><span lang="fr">Ce que j'ai trouvé en le relisant</span><span lang="ar">ما وجدته عند إعادة القراءة</span></h2>
+        <p><span lang="en">The demo looked right: products appeared, they seemed related, the jury was happy. Reading the code again with more experience, here is what was wrong, from the most visible to the most subtle.</span>
+           <span lang="fr">La démo avait l'air juste : des produits apparaissaient, ils semblaient liés, le jury était content. En relisant le code avec plus d'expérience, voici ce qui n'allait pas, du plus visible au plus subtil.</span><span lang="ar">بدا العرض صحيحاً: ظهرت منتجات، وبدت مترابطة، وكانت اللجنة راضية. وعند إعادة قراءة الشيفرة بخبرة أكبر، هذا ما كان خاطئاً، من الأوضح إلى الأدق.</span></p>
+
+        <h3><span lang="en">Bug 1: popular products returned row numbers, not product ids</span><span lang="fr">Bug 1 : les produits populaires renvoyaient des numéros de ligne, pas des identifiants</span><span lang="ar">الخطأ 1: المنتجات الشائعة أعادت أرقام أسطر لا معرّفات منتجات</span></h3>
+        <p><span lang="en">After a <code>reset_index()</code>, the DataFrame index is just 0, 1, 2… and the product id becomes a normal column. The loop used the index:</span>
+           <span lang="fr">Après un <code>reset_index()</code>, l'index du DataFrame vaut simplement 0, 1, 2… et l'identifiant du produit devient une colonne normale. La boucle utilisait l'index :</span><span lang="ar">بعد <code>reset_index()</code>، يصبح فهرس DataFrame مجرد 0، 1، 2… ويتحول معرّف المنتج إلى عمود عادي. لكن الحلقة استعملت الفهرس:</span></p>
+<pre><code>for product_id, row in top_products.iterrows():   # product_id = row position
+    recommended.append({"id": product_id, ...})
+
+# fix
+    recommended.append({"id": int(row["Product ID"]), ...})</code></pre>
+        <p><span lang="en">The names in the JSON were right, so testing the endpoint alone looked fine. But Laravel only uses the ids, so the "popular" section showed products whose ids happened to equal those row positions: unrelated products.</span>
+           <span lang="fr">Les noms dans le JSON étaient justes, donc tester l'endpoint seul semblait correct. Mais Laravel n'utilise que les identifiants : la section « populaires » affichait les produits dont l'identifiant tombait par hasard sur ces numéros de ligne : des produits sans rapport.</span><span lang="ar">كانت الأسماء في JSON صحيحة، لذا بدا اختبار نقطة الوصول وحدها سليماً. لكن Laravel لا يستعمل إلا المعرّفات، فكان قسم «الشائعة» يعرض المنتجات التي صادف أن معرّفاتها تساوي أرقام تلك الأسطر: منتجات لا علاقة لها بالشعبية.</span></p>
+
+        <h3><span lang="en">Bug 2: the ranking was lost on the way back</span><span lang="fr">Bug 2 : le classement se perdait au retour</span><span lang="ar">الخطأ 2: ضاع الترتيب في طريق العودة</span></h3>
+        <p><span lang="en">Flask carefully sorts products from most to least similar. Then Laravel runs <code>Product::whereIn('id', $ids)</code>, and MySQL returns them in its own order, usually by id. The best recommendation could end up last. The fix is to sort the collection by the position in the list Flask sent:</span>
+           <span lang="fr">Flask trie soigneusement les produits du plus au moins similaire. Puis Laravel exécute <code>Product::whereIn('id', $ids)</code>, et MySQL les renvoie dans son propre ordre, en général par identifiant. La meilleure recommandation pouvait finir dernière. La correction consiste à trier la collection selon la position dans la liste envoyée par Flask :</span><span lang="ar">يرتّب Flask المنتجات بعناية من الأكثر إلى الأقل تشابهاً. ثم ينفّذ Laravel <code>Product::whereIn('id', $ids)</code>، فيعيدها MySQL بترتيبه الخاص، غالباً حسب المعرّف. وقد تصبح أفضل توصية في الأخير. والتصحيح هو ترتيب المجموعة حسب الموقع في القائمة التي أرسلها Flask:</span></p>
+<pre><code>$order = $ids-&gt;flip();   // id =&gt; position
+$products = Product::whereIn('id', $ids)-&gt;get()
+    -&gt;sortBy(fn ($p) =&gt; $order[$p-&gt;id])-&gt;values();</code></pre>
+
+        <h3><span lang="en">Bug 3: two words glued together</span><span lang="fr">Bug 3 : deux mots collés</span><span lang="ar">الخطأ 3: كلمتان ملتصقتان</span></h3>
+        <p><span lang="en"><code>about + category_name</code> concatenates two strings with no space, so the last word of the description and the first word of the category become one invented word, like "purchaseAccessories" (from "…date of purchase" + "Accessories&amp;Peripherals"). The category, the most useful signal, was partly lost. One space fixes it: <code>about + " " + category_name</code>.</span>
+           <span lang="fr"><code>about + category_name</code> colle deux chaînes sans espace : le dernier mot de la description et le premier mot de la catégorie deviennent un seul mot inventé, comme « purchaseAccessories » (de « …date of purchase » + « Accessories&amp;Peripherals »). La catégorie, l'indice le plus utile, était en partie perdue. Un espace suffit : <code>about + " " + category_name</code>.</span><span lang="ar"><code>about + category_name</code> تلصق نصين دون مسافة، فتصبح آخر كلمة في الوصف وأول كلمة في الفئة كلمة واحدة مخترعة، مثل «purchaseAccessories» (من «…date of purchase» و«Accessories&amp;Peripherals»). وضاعت الفئة جزئياً، مع أنها أكثر المؤشرات فائدة. ومسافة واحدة تكفي: <code>about + " " + category_name</code>.</span></p>
+
+        <h3><span lang="en">Problem 4: "not rated" was treated as "rated 0"</span><span lang="fr">Problème 4 : « pas noté » était traité comme « noté 0 »</span><span lang="ar">المشكلة 4: «غير مقيَّم» عومل كأنه «مقيَّم بصفر»</span></h3>
+        <p><span lang="en"><code>fillna(0)</code> fills every missing rating with 0, on a 1 to 5 scale. For K-Means, a user who never saw a product "hated" it. And the cluster average of a product rated 5 by two people out of fifty becomes 0.2, so the recommender mostly pushes products that many people rated, not products people loved. Averaging only real ratings, or using a method built for sparse data like matrix factorization, would be more honest.</span>
+           <span lang="fr"><code>fillna(0)</code> remplace chaque note manquante par 0, sur une échelle de 1 à 5. Pour K-Means, un utilisateur qui n'a jamais vu un produit l'a « détesté ». Et la moyenne dans un groupe d'un produit noté 5 par deux personnes sur cinquante devient 0,2 : le système pousse surtout les produits que beaucoup de gens ont notés, pas ceux que les gens ont adorés. Faire la moyenne des vraies notes seulement, ou utiliser une méthode faite pour les données creuses comme la factorisation de matrice, serait plus juste.</span><span lang="ar"><code>fillna(0)</code> يملأ كل تقييم ناقص بصفر، على سلّم من 1 إلى 5. فبالنسبة لـ K-Means، المستخدم الذي لم يرَ المنتج قط «كرهه». ومتوسط منتج داخل مجموعة، قيّمه شخصان من خمسين بخمس نجوم، يصبح 0.2، فيدفع النظام أساساً المنتجات التي قيّمها كثيرون، لا تلك التي أحبها الناس. وحساب متوسط التقييمات الحقيقية فقط، أو استعمال طريقة مصممة للبيانات المتناثرة مثل تحليل المصفوفات، سيكون أكثر إنصافاً.</span></p>
+
+        <h3><span lang="en">Problem 5: the model never learned anything new</span><span lang="fr">Problème 5 : le modèle n'apprenait jamais rien de nouveau</span><span lang="ar">المشكلة 5: لم يتعلم النموذج شيئاً جديداً قط</span></h3>
+        <p><span lang="en">A background thread asked Laravel to re-export the CSV files every 60 seconds. But all the training (vectors, similarity matrix, clusters) ran once, when the service started. The files on disk were always fresh; the model in memory was frozen. A product added after startup could never be recommended until someone restarted the service. Retraining after each export, or on a schedule, closes the loop.</span>
+           <span lang="fr">Un thread en arrière-plan demandait à Laravel de réexporter les fichiers CSV toutes les 60 secondes. Mais tout l'entraînement (vecteurs, matrice de similarité, groupes) ne tournait qu'une fois, au démarrage du service. Les fichiers sur le disque étaient toujours à jour ; le modèle en mémoire, lui, était figé. Un produit ajouté après le démarrage ne pouvait jamais être recommandé, jusqu'à ce que quelqu'un redémarre le service. Réentraîner après chaque export, ou à intervalle régulier, ferme la boucle.</span><span lang="ar">كان خيط في الخلفية يطلب من Laravel إعادة تصدير ملفات CSV كل 60 ثانية. لكن التدريب كله (المتجهات، ومصفوفة التشابه، والمجموعات) كان يعمل مرة واحدة عند تشغيل الخدمة. فالملفات على القرص كانت دائماً محدّثة، أما النموذج في الذاكرة فكان جامداً. والمنتج المضاف بعد التشغيل لا يمكن التوصية به أبداً حتى يعيد أحدهم تشغيل الخدمة. وإعادة التدريب بعد كل تصدير، أو بشكل دوري، تغلق الحلقة.</span></p>
+
+        <h3><span lang="en">Problem 6: thresholds made for Kaggle, not for a new shop</span><span lang="fr">Problème 6 : des seuils faits pour Kaggle, pas pour une nouvelle boutique</span><span lang="ar">المشكلة 6: عتبات مصنوعة لـ Kaggle، لا لمتجر جديد</span></h3>
+        <p><span lang="en">"More than 100 ratings" works on a dataset where 64 products have that many. On a real new marketplace, no product would have 100 ratings for months, so the popularity list, the one meant for new visitors, would be empty exactly when it is needed most. A weighted average that pulls products with few ratings toward the global average, plus a fallback to recent best-sellers, would work from the first day.</span>
+           <span lang="fr">« Plus de 100 notes », ça marche sur un jeu de données où 64 produits en ont autant. Sur une vraie nouvelle marketplace, aucun produit n'aurait 100 notes avant des mois : la liste des populaires, celle prévue pour les nouveaux visiteurs, serait vide justement quand on en a le plus besoin. Une moyenne pondérée qui rapproche les produits peu notés de la moyenne générale, avec un repli sur les meilleures ventes récentes, marcherait dès le premier jour.</span><span lang="ar">«أكثر من 100 تقييم» تنجح في مجموعة بيانات فيها 64 منتجاً لها هذا العدد. أما في سوق جديدة حقيقية، فلن يصل أي منتج إلى 100 تقييم قبل أشهر، فتكون قائمة الشائعة، وهي المخصصة للزوار الجدد، فارغة بالضبط حين نحتاجها أكثر. ومتوسط مرجّح يقرّب المنتجات قليلة التقييم من المتوسط العام، مع اللجوء إلى الأكثر مبيعاً مؤخراً، سيعمل من اليوم الأول.</span></p>
+
+        <h2><span lang="en">What I would build today</span><span lang="fr">Ce que je construirais aujourd'hui</span><span lang="ar">ما كنت سأبنيه اليوم</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Tests on the contract, not just the model.</strong> Bugs 1 and 2 were not machine learning bugs: they lived at the boundary between Python and PHP. One test checking "the first id Flask returns is the first product Laravel shows" would have caught both.</span><span lang="fr"><strong>Tester le contrat, pas seulement le modèle.</strong> Les bugs 1 et 2 n'étaient pas des bugs d'apprentissage automatique : ils vivaient à la frontière entre Python et PHP. Un seul test vérifiant « le premier identifiant renvoyé par Flask est le premier produit affiché par Laravel » les aurait attrapés tous les deux.</span><span lang="ar"><strong>اختبار العقد بين الخدمتين، لا النموذج فقط.</strong> لم يكن الخطآن 1 و2 خطأي تعلم آلي: كانا على الحدود بين Python وPHP. واختبار واحد يتحقق من أن «أول معرّف يعيده Flask هو أول منتج يعرضه Laravel» كان سيلتقطهما معاً.</span></li>
+          <li><span lang="en"><strong>An offline evaluation.</strong> Hide some of each user's ratings, recommend, and count how many hidden products show up. Without a number, "the recommendations look good" is an opinion.</span><span lang="fr"><strong>Une évaluation hors ligne.</strong> Cacher une partie des notes de chaque utilisateur, recommander, et compter combien de produits cachés apparaissent. Sans chiffre, « les recommandations ont l'air bonnes » reste une opinion.</span><span lang="ar"><strong>تقييم دون اتصال.</strong> إخفاء جزء من تقييمات كل مستخدم، ثم التوصية، وعدّ كم منتجاً مخفياً يظهر. فبدون رقم، تبقى عبارة «التوصيات تبدو جيدة» مجرد رأي.</span></li>
+          <li><span lang="en"><strong>Something that scales.</strong> A full similarity matrix is fine for 965 products (under a million values), but it grows with the square of the catalog. TF-IDF vectors with a nearest-neighbors index would keep working with a much larger catalog.</span><span lang="fr"><strong>Quelque chose qui passe à l'échelle.</strong> Une matrice de similarité complète va bien pour 965 produits (moins d'un million de valeurs), mais elle grandit avec le carré du catalogue. Des vecteurs TF-IDF avec un index des plus proches voisins continueraient de marcher avec un catalogue beaucoup plus grand.</span><span lang="ar"><strong>حل قابل للتوسع.</strong> مصفوفة التشابه الكاملة مناسبة لـ 965 منتجاً (أقل من مليون قيمة)، لكنها تكبر بمربع حجم الكتالوج. ومتجهات TF-IDF مع فهرس لأقرب الجيران ستبقى تعمل مع كتالوج أكبر بكثير.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">Each approach covers a different moment: popularity for strangers, content for a product page, collaborative filtering for known customers.</span><span lang="fr">Chaque approche couvre un moment différent : la popularité pour les inconnus, le contenu pour la page d'un produit, le filtrage collaboratif pour les clients connus.</span><span lang="ar">كل طريقة تغطي لحظة مختلفة: الشعبية للغرباء، والمحتوى لصفحة المنتج، والتصفية التعاونية للزبائن المعروفين.</span></li>
+          <li><span lang="en">In a recommender, a missing value is information. Turning it into a zero changes what the model learns.</span><span lang="fr">Dans un système de recommandation, une valeur manquante est une information. La transformer en zéro change ce que le modèle apprend.</span><span lang="ar">في نظام التوصية، القيمة الناقصة معلومة في حد ذاتها. وتحويلها إلى صفر يغيّر ما يتعلمه النموذج.</span></li>
+          <li><span lang="en">The riskiest code is often the glue between two services, not the algorithm.</span><span lang="fr">Le code le plus risqué est souvent la colle entre deux services, pas l'algorithme.</span><span lang="ar">أخطر شيفرة غالباً هي الرابط بين خدمتين، لا الخوارزمية.</span></li>
+          <li><span lang="en">Rereading your old code is one of the best ways to see how much you have learned.</span><span lang="fr">Relire son ancien code est une des meilleures façons de voir tout ce qu'on a appris.</span><span lang="ar">إعادة قراءة شيفرتك القديمة من أفضل الطرق لترى كم تعلمت.</span></li>
+        </ul>
+        <p><span lang="en">The code, the notebooks and the UML diagrams are on <a href="https://github.com/adelmerad/multi-seller-marketplace" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Le code, les notebooks et les diagrammes UML sont sur <a href="https://github.com/adelmerad/multi-seller-marketplace" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">الشيفرة ودفاتر Jupyter ومخططات UML موجودة على <a href="https://github.com/adelmerad/multi-seller-marketplace" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="shopo.html"><span lang="en">ShopO case study</span><span lang="fr">Étude de cas ShopO</span><span lang="ar">دراسة حالة ShopO</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
