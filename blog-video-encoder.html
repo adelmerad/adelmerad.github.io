@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inside a video encoder: DCT, motion vectors and a one-word bug — Adel Merad</title>
+  <meta name="description" content="How a simplified MPEG-4 encoder in Python makes a video 26 times smaller: YCbCr and 4:2:0, DCT and quantisation, motion estimation, and how replacing floor with round gave both better quality and almost twice the compression.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-video-encoder.html">
+  <meta property="og:title" content="Inside a video encoder: DCT, motion vectors and a one-word bug">
+  <meta property="og:description" content="YCbCr, DCT, motion estimation, and the floor-vs-round bug that cost half the compression.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-video-encoder.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+  <style>
+    .post-body table.data { width: 100%; border-collapse: collapse; margin: 6px 0 22px; font-size: 15px; }
+    .post-body table.data th, .post-body table.data td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: start; }
+    .post-body table.data th { font-weight: 600; }
+    .post-body table.data td.num, .post-body table.data th.num { font-family: var(--mono); font-size: 13.5px; }
+    .post-body table.data td.num { direction: ltr; unicode-bidi: isolate; }
+    html[dir="rtl"] .post-body table.data td.num { text-align: right; }
+    .post-body .table-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body class="case" data-title-en="Inside a video encoder — Adel Merad" data-title-fr="Dans un encodeur vidéo — Adel Merad" data-title-ar="داخل مشفّر فيديو — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 9 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 9 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 9 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">Inside a video encoder: DCT, motion vectors and a one-word bug</span>
+          <span lang="fr">Dans un encodeur vidéo : DCT, vecteurs de mouvement et un bug d'un seul mot</span><span lang="ar">داخل مشفّر فيديو: DCT ومتجهات الحركة، وخطأ من كلمة واحدة</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">A simplified MPEG-4 encoder in Python, step by step: how 20 frames go from 1,620 KB to 62 KB. And how changing a single word, <code>floor</code> to <code>round</code>, gave better quality and almost twice the compression at the same time.</span>
+          <span lang="fr">Un encodeur MPEG-4 simplifié en Python, étape par étape : comment 20 images passent de 1 620 Ko à 62 Ko. Et comment changer un seul mot, <code>floor</code> en <code>round</code>, a donné à la fois une meilleure qualité et presque deux fois plus de compression.</span><span lang="ar">مشفّر MPEG-4 مبسّط بلغة Python، خطوة بخطوة: كيف تنتقل 20 صورة من 1620 كيلوبايت إلى 62 كيلوبايت. وكيف أعطى تغيير كلمة واحدة، <code>floor</code> إلى <code>round</code>، جودة أفضل وضغطاً يقارب الضعف في الوقت نفسه.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en">For the multimedia course of my Master's at USTHB, a classmate and I wrote a <a href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener">simplified MPEG-4-like encoder</a> in Python with NumPy and SciPy: frames in, a compressed <code>.bin</code> file out, and a decoder that rebuilds the frames. The test video is 20 synthetic frames of 192 × 144 pixels: a gradient background with a square moving right and a circle moving down. Raw, that is 1,620 KB.</span>
+           <span lang="fr">Pour le module Multimédia de mon Master à l'USTHB, nous avons écrit à deux un <a href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener">encodeur simplifié de type MPEG-4</a> en Python avec NumPy et SciPy : des images en entrée, un fichier <code>.bin</code> compressé en sortie, et un décodeur qui reconstruit les images. La vidéo de test fait 20 images synthétiques de 192 × 144 pixels : un fond en dégradé, un carré qui se déplace vers la droite et un cercle qui descend. Brute, elle pèse 1 620 Ko.</span><span lang="ar">في مقياس الوسائط المتعددة ضمن الماستر في جامعة هواري بومدين، كتبت مع زميل <a href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener">مشفّراً مبسّطاً شبيهاً بـ MPEG-4</a> بلغة Python مع NumPy وSciPy: صور في المدخل، وملف <code>.bin</code> مضغوط في المخرج، ومفكّك يعيد بناء الصور. فيديو الاختبار 20 صورة اصطناعية بحجم 192 × 144 بكسل: خلفية متدرجة، ومربع يتحرك نحو اليمين، ودائرة تنزل. وحجمه الخام 1620 كيلوبايت.</span></p>
+        <figure class="flow" aria-label="Encoder pipeline">
+          <div class="flow-row" style="min-width:760px">
+            <div class="node"><b>YCbCr</b><small>4:2:0</small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b>DCT 8×8</b><small><span lang="en">I-frames</span><span lang="fr">images I</span><span lang="ar">صور I</span></small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b><span lang="en">Motion</span><span lang="fr">Mouvement</span><span lang="ar">الحركة</span></b><small><span lang="en">P-frames</span><span lang="fr">images P</span><span lang="ar">صور P</span></small></div>
+            <span class="arrow">→</span>
+            <div class="node core"><b><span lang="en">Quantise</span><span lang="fr">Quantifier</span><span lang="ar">التكميم</span></b><small>Q(i, j)</small></div>
+            <span class="arrow">→</span>
+            <div class="node"><b>zlib</b><small>video.bin</small></div>
+          </div>
+        </figure>
+
+        <h2><span lang="en">Step 1: throw away colour the eye does not see</span><span lang="fr">Étape 1 : jeter la couleur que l'œil ne voit pas</span><span lang="ar">الخطوة 1: التخلص من الألوان التي لا تراها العين</span></h2>
+        <p><span lang="en">Our eyes are much more sensitive to brightness than to colour. So the first step converts each frame from BGR to YCbCr (brightness Y, plus two colour channels), then keeps the colour channels at half width and half height: 4:2:0 subsampling. Each colour channel shrinks to a quarter, so the frame goes from 3 values per pixel to 1.5. Half the data is gone before any real compression, and nobody notices.</span>
+           <span lang="fr">Nos yeux sont beaucoup plus sensibles à la luminosité qu'à la couleur. La première étape convertit donc chaque image de BGR en YCbCr (la luminance Y, plus deux canaux de couleur), puis garde les canaux de couleur à demi-largeur et demi-hauteur : c'est le sous-échantillonnage 4:2:0. Chaque canal de couleur tombe au quart, donc l'image passe de 3 valeurs par pixel à 1,5. La moitié des données disparaît avant toute vraie compression, sans que personne ne le remarque.</span><span lang="ar">أعيننا أكثر حساسية للإضاءة منها للألوان بكثير. لذلك تحوّل الخطوة الأولى كل صورة من BGR إلى YCbCr (الإضاءة Y، مع قناتين للألوان)، ثم تُبقي قناتي الألوان بنصف العرض ونصف الارتفاع: إنه الاختزال 4:2:0. تنكمش كل قناة لون إلى الربع، فتنتقل الصورة من 3 قيم لكل بكسل إلى 1.5. يختفي نصف البيانات قبل أي ضغط حقيقي، دون أن يلاحظ أحد.</span></p>
+
+        <h2><span lang="en">Step 2: I-frames, from pixels to frequencies</span><span lang="fr">Étape 2 : les images I, des pixels aux fréquences</span><span lang="ar">الخطوة 2: صور I، من البكسلات إلى الترددات</span></h2>
+        <p><span lang="en">An I-frame is compressed on its own, like a JPEG. Each channel is cut into 8 × 8 blocks, shifted by −128, and transformed with the discrete cosine transform (DCT). The DCT does not compress anything by itself; it rewrites the block as a mix of patterns, from flat (top-left) to fine detail (bottom-right). In a natural image, almost all the energy ends up in the few top-left coefficients.</span>
+           <span lang="fr">Une image I est compressée seule, comme un JPEG. Chaque canal est découpé en blocs de 8 × 8, décalé de −128, puis transformé avec la transformée en cosinus discrète (DCT). La DCT ne compresse rien toute seule : elle réécrit le bloc comme un mélange de motifs, du plat (en haut à gauche) aux détails fins (en bas à droite). Dans une image naturelle, presque toute l'énergie se retrouve dans les quelques coefficients en haut à gauche.</span><span lang="ar">تُضغط صورة I وحدها، مثل JPEG. تُقطَّع كل قناة إلى كتل 8 × 8، وتُزاح بـ −128، ثم تُحوَّل بتحويل جيب التمام المتقطع (DCT). لا يضغط DCT أي شيء وحده؛ بل يعيد كتابة الكتلة كمزيج من الأنماط، من المسطّح (أعلى اليسار) إلى التفاصيل الدقيقة (أسفل اليمين). وفي صورة طبيعية، تتجمع كل الطاقة تقريباً في المعاملات القليلة أعلى اليسار.</span></p>
+        <p><span lang="en">The real loss happens next, in <strong>quantisation</strong>: each coefficient is divided by a step from a matrix, and only the integer is kept. The course formula makes the step grow with frequency, so fine details are divided by bigger numbers and mostly become 0. The factor <code>Fq</code> is the quality knob.</span>
+           <span lang="fr">La vraie perte arrive ensuite, à la <strong>quantification</strong> : chaque coefficient est divisé par un pas tiré d'une matrice, et on ne garde que l'entier. La formule du cours fait grandir le pas avec la fréquence : les détails fins sont divisés par de plus grands nombres et deviennent surtout des 0. Le facteur <code>Fq</code> est le bouton de qualité.</span><span lang="ar">تحدث الخسارة الحقيقية بعد ذلك، في <strong>التكميم</strong>: يُقسم كل معامل على خطوة مأخوذة من مصفوفة، ولا يُحتفظ إلا بالعدد الصحيح. وصيغة المقياس تجعل الخطوة تكبر مع التردد، فتُقسم التفاصيل الدقيقة على أعداد أكبر وتصبح في الغالب أصفاراً. والمعامل <code>Fq</code> هو زر الجودة.</span></p>
+<pre><code>def get_q_matrix(fq=1.0):
+    # Q(i, j) = 1 + (1 + i + j) * Fq : bigger steps for higher frequencies
+    return np.fromfunction(lambda i, j: 1 + (1 + i + j) * fq, (8, 8)).astype(np.float32)
+
+block  = padded[i*8:(i+1)*8, j*8:(j+1)*8] - 128.0
+coeffs = dctn(block, norm="ortho")
+blocks[i, j] = np.floor(coeffs / q_matrix).astype(np.int16)   # remember this line</code></pre>
+
+        <h2><span lang="en">Step 3: P-frames, sending only what moved</span><span lang="fr">Étape 3 : les images P, n'envoyer que ce qui a bougé</span><span lang="ar">الخطوة 3: صور P، إرسال ما تحرّك فقط</span></h2>
+        <p><span lang="en">Two consecutive frames are almost identical. So in each group of 5 frames, only the first is an I-frame; the next four are P-frames, predicted from the frame before. For each 16 × 16 macroblock, the encoder searches the previous frame within ±8 pixels, so 17 × 17 = 289 candidate positions, and keeps the one with the smallest mean squared error. That gives a <strong>motion vector</strong>. What is left, the difference between the block and its prediction, is the <strong>residual</strong>: mostly zeros, coded with the same DCT and quantisation.</span>
+           <span lang="fr">Deux images consécutives sont presque identiques. Donc dans chaque groupe de 5 images, seule la première est une image I ; les quatre suivantes sont des images P, prédites à partir de l'image d'avant. Pour chaque macrobloc de 16 × 16, l'encodeur cherche dans l'image précédente à ±8 pixels, soit 17 × 17 = 289 positions candidates, et garde celle avec la plus petite erreur quadratique moyenne. Ça donne un <strong>vecteur de mouvement</strong>. Ce qui reste, la différence entre le bloc et sa prédiction, c'est le <strong>résidu</strong> : surtout des zéros, codé avec la même DCT et la même quantification.</span><span lang="ar">صورتان متتاليتان متطابقتان تقريباً. لذلك في كل مجموعة من 5 صور، الأولى فقط صورة I؛ والأربع التالية صور P، متوقَّعة من الصورة السابقة. لكل كتلة كبيرة 16 × 16، يبحث المشفّر في الصورة السابقة ضمن ±8 بكسل، أي 17 × 17 = 289 موضعاً مرشحاً، ويحتفظ بالموضع ذي أصغر متوسط مربع للخطأ. وهذا يعطي <strong>متجه حركة</strong>. وما يتبقى، أي الفرق بين الكتلة وتوقّعها، هو <strong>البقايا</strong>: أصفار في الغالب، تُرمَّز بـ DCT والتكميم نفسيهما.</span></p>
+        <p><span lang="en">One detail matters more than it looks: the reference is the <strong>reconstructed</strong> previous frame, not the original. The decoder never sees the original, only what it rebuilt. If the encoder predicted from originals, the small errors of each frame would pile up on the decoder side and the video would drift further from the truth until the next I-frame.</span>
+           <span lang="fr">Un détail compte plus qu'il n'y paraît : la référence est l'image précédente <strong>reconstruite</strong>, pas l'originale. Le décodeur ne voit jamais l'originale, seulement ce qu'il a reconstruit. Si l'encodeur prédisait à partir des originales, les petites erreurs de chaque image s'accumuleraient côté décodeur, et la vidéo dériverait de plus en plus jusqu'à la prochaine image I.</span><span lang="ar">هناك تفصيل أهم مما يبدو: المرجع هو الصورة السابقة <strong>المعاد بناؤها</strong>، لا الأصلية. فالمفكّك لا يرى الأصلية أبداً، بل ما أعاد بناءه فقط. ولو توقّع المشفّر انطلاقاً من الصور الأصلية، لتراكمت الأخطاء الصغيرة لكل صورة عند المفكّك، ولانحرف الفيديو أكثر فأكثر حتى صورة I التالية.</span></p>
+<pre><code>ref     = reconstructed[-1]                 # what the decoder will have, not the original
+encoded = encode_pframe(frame, ref, fq=fq)
+recon   = decode_pframe(encoded, ref)       # decode right away, inside the encoder
+reconstructed.append(recon)                 # becomes the reference for the next frame</code></pre>
+
+        <h2><span lang="en">Step 4: packing the bits</span><span lang="fr">Étape 4 : ranger les bits</span><span lang="ar">الخطوة 4: ترتيب البتات</span></h2>
+        <p><span lang="en">Real MPEG-4 reads each block in zigzag order, run-length codes the long runs of zeros, then uses Huffman or arithmetic coding. To keep the project focused, we serialised everything and compressed it with zlib at level 9. zlib still finds the repeated zeros, which is why quantisation matters so much: <strong>the more zeros it produces, the smaller the file</strong>.</span>
+           <span lang="fr">Le vrai MPEG-4 lit chaque bloc en zigzag, code les longues suites de zéros par plages, puis utilise un codage de Huffman ou arithmétique. Pour garder le projet ciblé, nous avons tout sérialisé et compressé avec zlib au niveau 9. zlib trouve quand même les zéros répétés, et c'est pour ça que la quantification compte autant : <strong>plus elle produit de zéros, plus le fichier est petit</strong>.</span><span lang="ar">يقرأ MPEG-4 الحقيقي كل كتلة بترتيب متعرج، ويرمّز سلاسل الأصفار الطويلة بترميز الأطوال، ثم يستعمل ترميز هوفمان أو الترميز الحسابي. ولإبقاء المشروع مركّزاً، سلسلنا كل شيء وضغطته بـ zlib في المستوى 9. ومع ذلك يجد zlib الأصفار المتكررة، ولهذا يهم التكميم كثيراً: <strong>كلما أنتج أصفاراً أكثر، صغر الملف</strong>.</span></p>
+        <p><span lang="en">With the default settings (Fq = 1, groups of 5 frames), the result was 62.5 KB: <strong>26 times smaller, at 33.4 dB PSNR</strong>. Raising Fq gave more compression and lower quality, which looked exactly like the expected trade-off:</span>
+           <span lang="fr">Avec les réglages par défaut (Fq = 1, groupes de 5 images), le résultat faisait 62,5 Ko : <strong>26 fois plus petit, avec un PSNR de 33,4 dB</strong>. Augmenter Fq donnait plus de compression et moins de qualité, exactement le compromis attendu :</span><span lang="ar">بالإعدادات الافتراضية (Fq = 1، مجموعات من 5 صور)، كانت النتيجة 62.5 كيلوبايت: <strong>أصغر بـ 26 مرة، مع PSNR يساوي 33.4 ديسيبل</strong>. ورفع Fq أعطى ضغطاً أكثر وجودة أقل، وهو بالضبط التوازن المنتظر:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th>Fq</th><th class="num"><span lang="en">Compression</span><span lang="fr">Compression</span><span lang="ar">الضغط</span></th><th class="num">PSNR</th></tr>
+          <tr><td>1</td><td class="num">× 26.1</td><td class="num">33.37 dB</td></tr>
+          <tr><td>2</td><td class="num">× 28.8</td><td class="num">31.23 dB</td></tr>
+          <tr><td>4</td><td class="num">× 31.7</td><td class="num">27.48 dB</td></tr>
+        </table></div>
+
+        <h2><span lang="en">The one-word bug</span><span lang="fr">Le bug d'un seul mot</span><span lang="ar">الخطأ ذو الكلمة الواحدة</span></h2>
+        <p><span lang="en">Rereading the code, one line bothered me: quantisation used <code>np.floor</code>. Floor always rounds down, towards minus infinity. For positive coefficients that is a small loss. For negative ones it is worse: <code>floor(-0.3)</code> is <code>-1</code>, not <code>0</code>. Every small negative coefficient, which should have vanished, became a −1. That means two problems at once:</span>
+           <span lang="fr">En relisant le code, une ligne m'a gêné : la quantification utilisait <code>np.floor</code>. Floor arrondit toujours vers le bas, vers moins l'infini. Pour les coefficients positifs, c'est une petite perte. Pour les négatifs, c'est pire : <code>floor(-0.3)</code> vaut <code>-1</code>, pas <code>0</code>. Chaque petit coefficient négatif, qui aurait dû disparaître, devenait un −1. Ça fait deux problèmes à la fois :</span><span lang="ar">عند إعادة قراءة الشيفرة، أزعجني سطر واحد: كان التكميم يستعمل <code>np.floor</code>. الدالة floor تقرّب دائماً نحو الأسفل، نحو سالب ما لا نهاية. بالنسبة للمعاملات الموجبة، هذه خسارة صغيرة. أما السالبة فالأمر أسوأ: <code>floor(-0.3)</code> تساوي <code>-1</code>، لا <code>0</code>. فكل معامل سالب صغير، كان يجب أن يختفي، صار −1. وهذا يعني مشكلتين في آن واحد:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Fewer zeros</strong>, so zlib has less to compress, and the file is bigger.</span><span lang="fr"><strong>Moins de zéros</strong>, donc zlib a moins à compresser, et le fichier est plus gros.</span><span lang="ar"><strong>أصفار أقل</strong>، فيجد zlib ما يضغطه أقل، ويكبر الملف.</span></li>
+          <li><span lang="en"><strong>A biased error.</strong> With rounding, the error is between −½ and +½ step and averages to zero. With floor, it is always in the same direction, up to a full step, so it adds up instead of cancelling out, and it grows with Fq.</span><span lang="fr"><strong>Une erreur biaisée.</strong> Avec un arrondi, l'erreur est entre −½ et +½ pas et vaut zéro en moyenne. Avec floor, elle va toujours dans le même sens, jusqu'à un pas entier : elle s'additionne au lieu de s'annuler, et elle grandit avec Fq.</span><span lang="ar"><strong>خطأ منحاز.</strong> مع التقريب، يكون الخطأ بين −½ و+½ خطوة ويساوي صفراً في المتوسط. أما مع floor، فهو دائماً في الاتجاه نفسه، حتى خطوة كاملة، فيتراكم بدل أن يتلاشى، ويكبر مع Fq.</span></li>
+        </ul>
+        <p><span lang="en">I replaced <code>np.floor</code> with <code>np.round</code> in both quantisers (I-frames and residuals), and ran the exact same pipeline on the same 20 frames:</span>
+           <span lang="fr">J'ai remplacé <code>np.floor</code> par <code>np.round</code> dans les deux quantificateurs (images I et résidus), et relancé exactement la même chaîne sur les mêmes 20 images :</span><span lang="ar">عوّضت <code>np.floor</code> بـ <code>np.round</code> في دالتي التكميم كلتيهما (صور I والبقايا)، وأعدت تشغيل السلسلة نفسها تماماً على الصور الـ 20 نفسها:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th>Fq</th><th class="num">floor</th><th class="num">round</th></tr>
+          <tr><td>1</td><td class="num">× 26.1 · 33.37 dB</td><td class="num"><strong>× 33.0 · 34.71 dB</strong></td></tr>
+          <tr><td>2</td><td class="num">× 28.8 · 31.23 dB</td><td class="num"><strong>× 40.6 · 34.46 dB</strong></td></tr>
+          <tr><td>4</td><td class="num">× 31.7 · 27.48 dB</td><td class="num"><strong>× 50.1 · 33.86 dB</strong></td></tr>
+        </table></div>
+        <p><span lang="en">Better on both axes, every time. At Fq = 4, the rounded version is 50 times smaller and still looks better than the floor version at Fq = 1. Most of the "trade-off" in our original table was not a trade-off at all: it was the bias of <code>floor</code> growing with the step size.</span>
+           <span lang="fr">Mieux sur les deux axes, à chaque fois. À Fq = 4, la version arrondie est 50 fois plus petite et reste meilleure que la version floor à Fq = 1. L'essentiel du « compromis » de notre tableau d'origine n'en était pas un : c'était le biais de <code>floor</code> qui grandissait avec le pas.</span><span lang="ar">أفضل على المحورين، في كل مرة. عند Fq = 4، النسخة المقرّبة أصغر بـ 50 مرة وتبقى أفضل من نسخة floor عند Fq = 1. ومعظم «التوازن» في جدولنا الأصلي لم يكن توازناً أصلاً: بل كان انحياز <code>floor</code> الذي يكبر مع حجم الخطوة.</span></p>
+        <p><span lang="en">Why did we not see it? Because nothing looked broken. 33 dB is a reasonable score, the frames looked fine, and quality going down when compression goes up is what every textbook predicts. A bug that produces plausible numbers is the hardest kind to find.</span>
+           <span lang="fr">Pourquoi nous ne l'avons pas vu ? Parce que rien n'avait l'air cassé. 33 dB est un score correct, les images avaient l'air bonnes, et une qualité qui baisse quand la compression monte, c'est exactement ce que prédit chaque manuel. Un bug qui produit des chiffres plausibles est le plus difficile à trouver.</span><span lang="ar">لماذا لم نره؟ لأن لا شيء بدا معطوباً. 33 ديسيبل نتيجة معقولة، والصور بدت جيدة، وانخفاض الجودة عند ارتفاع الضغط هو بالضبط ما يتوقعه كل كتاب. والخطأ الذي ينتج أرقاماً معقولة هو الأصعب في الاكتشاف.</span></p>
+
+        <h2><span lang="en">Where the bytes go</span><span lang="fr">Où partent les octets</span><span lang="ar">أين تذهب البايتات</span></h2>
+        <p><span lang="en">Compressing each part of the bitstream separately gives a rough picture of the file (Fq = 1):</span>
+           <span lang="fr">Compresser séparément chaque partie du flux donne une idée approximative du contenu du fichier (Fq = 1) :</span><span lang="ar">ضغط كل جزء من التدفق على حدة يعطي صورة تقريبية عن محتوى الملف (Fq = 1):</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Part</span><span lang="fr">Partie</span><span lang="ar">الجزء</span></th><th class="num"><span lang="en">Share</span><span lang="fr">Part</span><span lang="ar">النسبة</span></th></tr>
+          <tr><td><span lang="en">P-frame luma residuals</span><span lang="fr">Résidus de luminance des images P</span><span lang="ar">بقايا الإضاءة في صور P</span></td><td class="num">41%</td></tr>
+          <tr><td><span lang="en">P-frame colour channels</span><span lang="fr">Canaux de couleur des images P</span><span lang="ar">قنوات الألوان في صور P</span></td><td class="num">36%</td></tr>
+          <tr><td><span lang="en">I-frame luma</span><span lang="fr">Luminance des images I</span><span lang="ar">الإضاءة في صور I</span></td><td class="num">11%</td></tr>
+          <tr><td><span lang="en">I-frame colour channels</span><span lang="fr">Canaux de couleur des images I</span><span lang="ar">قنوات الألوان في صور I</span></td><td class="num">9%</td></tr>
+          <tr><td><span lang="en">Motion vectors</span><span lang="fr">Vecteurs de mouvement</span><span lang="ar">متجهات الحركة</span></td><td class="num">2%</td></tr>
+        </table></div>
+        <p><span lang="en">The surprise is the second line. Motion compensation only runs on the brightness channel; in P-frames, the colour channels are coded from scratch, like an I-frame. Reusing the luma motion vectors, halved, to predict the colour channels too is how real codecs do it, and it would attack more than a third of the file.</span>
+           <span lang="fr">La surprise, c'est la deuxième ligne. La compensation de mouvement ne s'applique qu'à la luminance ; dans les images P, les canaux de couleur sont codés depuis zéro, comme dans une image I. Réutiliser les vecteurs de mouvement de la luminance, divisés par deux, pour prédire aussi la couleur, c'est ce que font les vrais codecs, et ça s'attaquerait à plus d'un tiers du fichier.</span><span lang="ar">المفاجأة في السطر الثاني. تعويض الحركة لا يُطبَّق إلا على قناة الإضاءة؛ وفي صور P، تُرمَّز قنوات الألوان من الصفر، كما في صورة I. وإعادة استعمال متجهات حركة الإضاءة، مقسومة على اثنين، لتوقّع الألوان أيضاً هو ما تفعله المرمّزات الحقيقية، وسيستهدف أكثر من ثلث الملف.</span></p>
+
+        <h2><span lang="en">What we could do next</span><span lang="fr">Ce qu'on pourrait faire ensuite</span><span lang="ar">ما يمكن فعله بعد ذلك</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><strong>Motion-compensate the colour channels</strong> with the luma vectors, as above.</span><span lang="fr"><strong>Compenser le mouvement des canaux de couleur</strong> avec les vecteurs de la luminance, comme ci-dessus.</span><span lang="ar"><strong>تعويض حركة قنوات الألوان</strong> بمتجهات الإضاءة، كما سبق.</span></li>
+          <li><span lang="en"><strong>A faster search.</strong> 289 positions per macroblock is a full search. A three-step or diamond search checks a few dozen positions and usually finds the same vector.</span><span lang="fr"><strong>Une recherche plus rapide.</strong> 289 positions par macrobloc, c'est une recherche exhaustive. Une recherche en trois pas ou en losange teste quelques dizaines de positions et trouve en général le même vecteur.</span><span lang="ar"><strong>بحث أسرع.</strong> 289 موضعاً لكل كتلة كبيرة بحث شامل. والبحث بثلاث خطوات أو بشكل المعيّن يختبر بضع عشرات من المواضع ويجد عادة المتجه نفسه.</span></li>
+          <li><span lang="en"><strong>Real entropy coding:</strong> zigzag order, run-length and Huffman instead of zlib over serialised arrays.</span><span lang="fr"><strong>Un vrai codage entropique :</strong> ordre zigzag, codage par plages et Huffman au lieu de zlib sur des tableaux sérialisés.</span><span lang="ar"><strong>ترميز إنتروبي حقيقي:</strong> ترتيب متعرج، وترميز الأطوال، وهوفمان بدل zlib على مصفوفات مسلسلة.</span></li>
+          <li><span lang="en"><strong>Real footage.</strong> Synthetic shapes on a smooth gradient are an easy case. Camera noise and complex motion would tell much more.</span><span lang="fr"><strong>De vraies vidéos.</strong> Des formes synthétiques sur un dégradé lisse sont un cas facile. Le bruit d'une caméra et des mouvements complexes en diraient beaucoup plus.</span><span lang="ar"><strong>فيديو حقيقي.</strong> الأشكال الاصطناعية على تدرّج ناعم حالة سهلة. وضجيج الكاميرا والحركة المعقدة سيكشفان أكثر بكثير.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">Video compression stacks simple ideas: drop colour detail, move to frequencies, predict from the past, and send only the difference.</span><span lang="fr">La compression vidéo empile des idées simples : jeter le détail de couleur, passer aux fréquences, prédire à partir du passé, et n'envoyer que la différence.</span><span lang="ar">ضغط الفيديو يكدّس أفكاراً بسيطة: التخلص من تفاصيل الألوان، والانتقال إلى الترددات، والتوقّع من الماضي، وإرسال الفرق فقط.</span></li>
+          <li><span lang="en">Always predict from what the decoder will have, never from the original.</span><span lang="fr">Toujours prédire à partir de ce qu'aura le décodeur, jamais à partir de l'original.</span><span lang="ar">توقّع دائماً مما سيملكه المفكّك، لا من الأصل أبداً.</span></li>
+          <li><span lang="en">Rounding is a design decision. <code>floor</code>, <code>round</code> and truncation give very different errors, especially around zero.</span><span lang="fr">L'arrondi est une décision de conception. <code>floor</code>, <code>round</code> et la troncature donnent des erreurs très différentes, surtout autour de zéro.</span><span lang="ar">التقريب قرار تصميمي. <code>floor</code> و<code>round</code> والبتر تعطي أخطاء مختلفة جداً، خاصة حول الصفر.</span></li>
+          <li><span lang="en">When results match your expectations, check them anyway. Plausible numbers can hide a bug.</span><span lang="fr">Quand les résultats correspondent à ce qu'on attend, il faut quand même les vérifier. Des chiffres plausibles peuvent cacher un bug.</span><span lang="ar">عندما تطابق النتائج توقعاتك، تحقق منها رغم ذلك. فالأرقام المعقولة قد تخفي خطأ.</span></li>
+        </ul>
+        <p><span lang="en">The code, the figures and the report (in French) are on <a href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Le code, les figures et le rapport sont sur <a href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">الشيفرة والأشكال والتقرير (بالفرنسية) موجودة على <a href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://github.com/adelmerad/mpeg4-encoder-pipeline" target="_blank" rel="noopener"><span lang="en">Code on GitHub</span><span lang="fr">Code sur GitHub</span><span lang="ar">الشيفرة على GitHub</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
