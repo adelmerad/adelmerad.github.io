@@ -169,10 +169,22 @@ html[lang="ar"] h1.tagline em { font-style: normal; font-weight: 700; }
 .list a:hover { color: var(--accent); }
 .list em { font-style: normal; font-size: 12.5px; white-space: nowrap; }
 
-/* Timeline */
-.timeline li { display: grid; grid-template-columns: 190px 1fr; gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); }
-.timeline li:first-child { padding-top: 0; }
-.when { color: var(--accent); font-size: 13.5px; padding-top: 4px; }
+/* Timeline: a vertical line with one dot per entry */
+.timeline { --date: 170px; --rail: 44px; }
+.timeline li { position: relative; display: grid; grid-template-columns: var(--date) 1fr; column-gap: var(--rail); padding-bottom: 34px; }
+.timeline li:last-child { padding-bottom: 0; }
+.timeline li::before { /* the line */
+  content: ""; position: absolute; top: 12px; bottom: -12px; width: 2px; background: var(--line);
+  inset-inline-start: calc(var(--date) + var(--rail) / 2 - 1px);
+}
+.timeline li:last-child::before { display: none; }
+.timeline li::after { /* the dot */
+  content: ""; position: absolute; top: 5px; width: 14px; height: 14px; border-radius: 50%;
+  inset-inline-start: calc(var(--date) + var(--rail) / 2 - 7px);
+  background: var(--bg); border: 2px solid var(--muted);
+}
+.timeline li:first-child::after { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent); }
+.when { color: var(--accent); font-size: 13.5px; padding-top: 2px; text-align: end; }
 .timeline h3 { font-size: 19px; }
 .timeline p { color: var(--muted); font-size: 15.5px; margin-top: 4px; max-width: 720px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -211,7 +223,10 @@ html[lang="ar"] h1.tagline em { font-style: normal; font-weight: 700; }
   .grid, .skills { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .list li { grid-template-columns: 1fr; gap: 4px; }
-  .timeline li { grid-template-columns: 1fr; gap: 6px; }
+  .timeline li { grid-template-columns: 1fr; row-gap: 4px; padding-inline-start: 34px; }
+  .timeline li::before { inset-inline-start: 6px; }
+  .timeline li::after { inset-inline-start: 0; }
+  .when { text-align: start; }
 }
 @media (max-width: 640px) {
   .nav .nav-inner { padding: 0 8px 0 18px; gap: 12px; height: 54px; }
