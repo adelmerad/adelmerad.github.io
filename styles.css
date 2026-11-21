@@ -94,6 +94,11 @@ ul, ol { list-style: none; }
 .kicker { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; letter-spacing: .5px; }
 .live { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); }
 h1 { font-size: clamp(56px, 11vw, 128px); line-height: .95; letter-spacing: -3px; font-weight: 700; margin: 18px 0 28px; }
+.kicker .name { color: var(--text); font-weight: 600; }
+/* Hero tagline: a sentence instead of the name, with one accented phrase */
+h1.tagline { font-size: clamp(40px, 6.2vw, 78px); line-height: 1.04; letter-spacing: -2px; margin: 18px 0 26px; max-width: 900px; }
+h1.tagline em { font-style: italic; font-weight: 500; color: var(--accent); }
+html[lang="ar"] h1.tagline em { font-style: normal; font-weight: 700; }
 .lead { font-size: clamp(20px, 2.4vw, 26px); line-height: 1.4; max-width: 760px; }
 .sub { color: var(--muted); margin-top: 14px; max-width: 640px; }
 .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
