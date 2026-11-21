@@ -125,6 +125,19 @@ html[lang="ar"] h1.tagline em { font-style: normal; font-weight: 700; }
 .num { font-size: 14px; color: var(--accent); letter-spacing: 0; }
 .h3 { font-size: 20px; margin: 56px 0 18px; }
 
+/* Dark band: a big rounded block that stands out from the page.
+   It redefines the colour tokens, so everything inside switches to the dark palette. */
+.band {
+  --bg: #0b1110; --bg-2: #16211f; --card: #121c1a; --line: #263733;
+  --text: #e7efed; --muted: #8fa5a1; --accent: #2bb3a3; --accent-ink: #04201c; --prod: #e2b33c;
+  width: min(1240px, 100% - 32px); margin: 24px auto; padding: 88px 0;
+  border: 0; border-radius: 40px; color: var(--text);
+  background: #0d1513;
+}
+:root:not([data-theme="light"]) .band { background: #142220; --card: #182826; --line: #2b3e3a; box-shadow: inset 0 0 0 1px #213330; }
+.band + .section { border-top: 0; }
+@media (max-width: 640px) { .band { width: calc(100% - 16px); padding: 56px 0; border-radius: 28px; } }
+
 /* Cards */
 .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .card {
