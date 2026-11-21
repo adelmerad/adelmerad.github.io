@@ -34,6 +34,44 @@ document.getElementById("theme").addEventListener("click", () => {
 if (root.dataset.lang !== "en") document.title = titles[root.dataset.lang] || titles.fr;
 document.getElementById("year").textContent = new Date().getFullYear();
 
+// Mobile menu: a burger button that opens the links under the pill
+const nav = document.querySelector(".nav");
+const navLinks = nav && nav.querySelector(".links");
+if (navLinks) {
+  navLinks.id = "nav-links";
+  const burger = document.createElement("button");
+  burger.type = "button";
+  burger.className = "burger";
+  burger.setAttribute("aria-label", "Menu");
+  burger.setAttribute("aria-controls", "nav-links");
+  burger.setAttribute("aria-expanded", "false");
+  burger.innerHTML = "<span></span>";
+  nav.querySelector(".toggles").append(burger);
+  const setOpen = (open) => {
+    nav.classList.toggle("open", open);
+    burger.setAttribute("aria-expanded", String(open));
+  };
+  burger.addEventListener("click", () => setOpen(!nav.classList.contains("open")));
+  navLinks.addEventListener("click", (e) => { if (e.target.closest("a")) setOpen(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+  document.addEventListener("click", (e) => { if (!nav.contains(e.target)) setOpen(false); });
+}
+
+// Highlight the menu link of the section on screen (home page anchors only)
+const sectionLinks = navLinks ? [...navLinks.querySelectorAll('a[href^="#"]')] : [];
+if (sectionLinks.length && "IntersectionObserver" in window) {
+  const byId = new Map(sectionLinks.map((a) => [a.getAttribute("href").slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      sectionLinks.forEach((a) => a.classList.remove("active"));
+      const link = byId.get(e.target.id);
+      if (link) link.classList.add("active");
+    }
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  byId.forEach((_, id) => { const s = document.getElementById(id); if (s) spy.observe(s); });
+}
+
 // Fade sections in as they enter the viewport
 const targets = document.querySelectorAll(".section, .card, .timeline li");
 if ("IntersectionObserver" in window) {
