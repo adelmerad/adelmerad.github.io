@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The bug my thread animation never showed — Adel Merad</title>
+  <meta name="description" content="My threads and semaphores visualizer showed how to use a lock, but never why. A real experiment in C: two threads, one counter, up to 860,000 lost updates, and a lock that made the program 100 times slower.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-race-condition.html">
+  <meta property="og:title" content="The bug my thread animation never showed">
+  <meta property="og:description" content="Race conditions explained with a real experiment: lost updates, why counter++ is not atomic, and what a lock really costs.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-race-condition.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .post-body table.data { width: 100%; border-collapse: collapse; margin: 6px 0 22px; font-size: 15px; }
+    .post-body table.data th, .post-body table.data td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: start; }
+    .post-body table.data th { font-weight: 600; }
+    .post-body table.data td.num, .post-body table.data th.num { font-family: var(--mono); font-size: 13.5px; }
+    .post-body table.data td.num { direction: ltr; unicode-bidi: isolate; }
+    html[dir="rtl"] .post-body table.data td.num { text-align: right; }
+    .post-body .table-wrap { overflow-x: auto; }
+  </style>
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="The bug my thread animation never showed — Adel Merad" data-title-fr="Le bug que mon animation de threads ne montrait pas — Adel Merad" data-title-ar="الخطأ الذي لم تُظهره رسوم الخيوط المتحركة — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 7 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 7 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 7 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">The bug my thread animation never showed</span>
+          <span lang="fr">Le bug que mon animation de threads ne montrait pas</span><span lang="ar">الخطأ الذي لم تُظهره رسومي المتحركة عن الخيوط</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">I built an animation to explain threads and semaphores. It showed perfectly how to use a lock, and never why you need one. So I ran the experiment in C: two threads, one counter, and up to 860,000 lost updates.</span>
+          <span lang="fr">J'ai construit une animation pour expliquer les threads et les sémaphores. Elle montrait parfaitement comment utiliser un verrou, mais jamais pourquoi on en a besoin. Alors j'ai fait l'expérience en C : deux threads, un compteur, et jusqu'à 860 000 mises à jour perdues.</span><span lang="ar">بنيت رسوماً متحركة لشرح الخيوط والإشارات (semaphores). كانت تُظهر بإتقان كيف نستعمل القفل، لكنها لم تُظهر أبداً لماذا نحتاج إليه. فأجريت التجربة بلغة C: خيطان، وعدّاد واحد، وما يصل إلى 860,000 تحديث ضائع.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en">The <a href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener">Threads and Semaphores Visualizer</a> is a single HTML file with no dependencies. One tab follows <code>pthread_create()</code> and <code>pthread_join()</code> on two timelines. Another shows two threads competing for a critical section: the semaphore goes from 1 to 0, the second thread blocks, then gets in when the first calls <code>sem_post()</code>. Below the animation, a beginner's guide explains each function with C examples.</span>
+           <span lang="fr">Le <a href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener">Threads and Semaphores Visualizer</a> est un seul fichier HTML, sans dépendance. Un onglet suit <code>pthread_create()</code> et <code>pthread_join()</code> sur deux lignes de temps. Un autre montre deux threads qui se disputent une section critique : le sémaphore passe de 1 à 0, le second thread se bloque, puis entre quand le premier appelle <code>sem_post()</code>. Sous l'animation, un guide pour débutants explique chaque fonction avec des exemples en C.</span><span lang="ar"><a href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener">Threads and Semaphores Visualizer</a> ملف HTML واحد بلا أي تبعيات. يتتبّع أحد التبويبات <code>pthread_create()</code> و<code>pthread_join()</code> على خطّين زمنيين. ويُظهر تبويب آخر خيطين يتنافسان على قسم حرج: تنتقل الإشارة من 1 إلى 0، فيُحجب الخيط الثاني، ثم يدخل عندما يستدعي الأول <code>sem_post()</code>. وتحت الرسوم، دليل للمبتدئين يشرح كل دالة بأمثلة بلغة C.</span></p>
+        <p><span lang="en">Rereading it, I noticed what was missing. Every step showed the lock working. Nothing showed what happens without it, which is the only reason locks exist. A student could follow the whole animation and still think the semaphore is a formality.</span>
+           <span lang="fr">En la relisant, j'ai vu ce qui manquait. Chaque étape montrait le verrou qui fonctionne. Rien ne montrait ce qui se passe sans lui, alors que c'est la seule raison d'exister des verrous. Un étudiant pouvait suivre toute l'animation et penser encore que le sémaphore est une formalité.</span><span lang="ar">عند إعادة قراءتها، لاحظت ما كان ناقصاً. كل خطوة كانت تُظهر القفل وهو يعمل. ولا شيء يُظهر ما يحدث من دونه، مع أنه السبب الوحيد لوجود الأقفال. كان بإمكان طالب أن يتابع الرسوم كلها ويظل يظن أن الإشارة مجرد إجراء شكلي.</span></p>
+
+        <h2><span lang="en">The experiment</span><span lang="fr">L'expérience</span><span lang="ar">التجربة</span></h2>
+        <p><span lang="en">Two threads add 1 to the same global counter, one million times each. The answer should be 2,000,000.</span>
+           <span lang="fr">Deux threads ajoutent 1 au même compteur global, un million de fois chacun. Le résultat devrait être 2 000 000.</span><span lang="ar">خيطان يضيفان 1 إلى العدّاد العام نفسه، مليون مرة لكل منهما. يجب أن تكون النتيجة 2,000,000.</span></p>
+<pre><code>long counter = 0;
+
+void* work(void* arg) {
+    for (int i = 0; i &lt; 1000000; i++)
+        counter++;
+    return NULL;
+}
+// main: pthread_create twice, pthread_join twice, print counter</code></pre>
+        <p><span lang="en">Five runs on my laptop, compiled with gcc:</span>
+           <span lang="fr">Cinq exécutions sur mon ordinateur, compilé avec gcc :</span><span lang="ar">خمس عمليات تشغيل على حاسوبي، بعد الترجمة بـ gcc:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Run</span><span lang="fr">Exécution</span><span lang="ar">التشغيل</span></th><th class="num">counter</th><th class="num"><span lang="en">Lost</span><span lang="fr">Perdues</span><span lang="ar">الضائعة</span></th></tr>
+          <tr><td>1</td><td class="num">1,630,462</td><td class="num">369,538</td></tr>
+          <tr><td>2</td><td class="num">1,138,389</td><td class="num">861,611</td></tr>
+          <tr><td>3</td><td class="num">1,823,311</td><td class="num">176,689</td></tr>
+          <tr><td>4</td><td class="num">1,433,699</td><td class="num">566,301</td></tr>
+          <tr><td>5</td><td class="num">1,343,202</td><td class="num">656,798</td></tr>
+        </table></div>
+        <p><span lang="en">Never the right answer, and never the same wrong answer twice. In the worst run, 43% of the additions disappeared. No crash, no warning: just a wrong number.</span>
+           <span lang="fr">Jamais le bon résultat, et jamais deux fois le même mauvais résultat. Dans la pire exécution, 43 % des additions ont disparu. Pas de plantage, pas d'avertissement : juste un nombre faux.</span><span lang="ar">لم تظهر النتيجة الصحيحة أبداً، ولم تتكرر النتيجة الخاطئة نفسها مرتين. في أسوأ تشغيل، اختفت 43% من عمليات الإضافة. لا انهيار ولا تحذير: مجرد رقم خاطئ.</span></p>
+
+        <h2><span lang="en">Why counter++ loses updates</span><span lang="fr">Pourquoi counter++ perd des mises à jour</span><span lang="ar">لماذا يُضيّع <bdi>counter++</bdi> التحديثات</span></h2>
+        <p><span lang="en"><code>counter++</code> looks like one operation, but the processor does it in three: load the value into a register, add 1, store it back. Each thread has its own registers. If the two threads interleave like this, two increments produce only one:</span>
+           <span lang="fr"><code>counter++</code> ressemble à une seule opération, mais le processeur la fait en trois : charger la valeur dans un registre, ajouter 1, la réécrire. Chaque thread a ses propres registres. Si les deux threads s'entrelacent comme ceci, deux incréments n'en donnent qu'un seul :</span><span lang="ar">يبدو <code>counter++</code> عملية واحدة، لكن المعالج ينفّذه في ثلاث: تحميل القيمة في سجلّ، ثم إضافة 1، ثم كتابتها من جديد. ولكل خيط سجلاته الخاصة. فإذا تداخل الخيطان على هذا النحو، أنتجت زيادتان زيادة واحدة فقط:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Thread 1</span><span lang="fr">Thread 1</span><span lang="ar">الخيط 1</span></th><th><span lang="en">Thread 2</span><span lang="fr">Thread 2</span><span lang="ar">الخيط 2</span></th><th class="num">counter</th></tr>
+          <tr><td class="num">load → 5</td><td></td><td class="num">5</td></tr>
+          <tr><td></td><td class="num">load → 5</td><td class="num">5</td></tr>
+          <tr><td class="num">add → 6</td><td></td><td class="num">5</td></tr>
+          <tr><td></td><td class="num">add → 6</td><td class="num">5</td></tr>
+          <tr><td class="num">store 6</td><td></td><td class="num">6</td></tr>
+          <tr><td></td><td class="num">store 6</td><td class="num"><strong>6</strong></td></tr>
+        </table></div>
+        <p><span lang="en">Thread 2 read the value before thread 1 wrote its result, then overwrote it. This is a race condition: the result depends on the order in which the threads happen to run. That is also why it is so hard to catch. With small loops the threads rarely overlap, so the program can pass every test and fail later in production.</span>
+           <span lang="fr">Le thread 2 a lu la valeur avant que le thread 1 écrive son résultat, puis l'a écrasé. C'est une race condition (situation de compétition) : le résultat dépend de l'ordre dans lequel les threads s'exécutent par hasard. C'est aussi pour ça qu'elle est si difficile à attraper. Avec de petites boucles, les threads se chevauchent rarement : le programme peut passer tous les tests et échouer plus tard en production.</span><span lang="ar">قرأ الخيط 2 القيمة قبل أن يكتب الخيط 1 نتيجته، ثم كتب فوقها. هذا ما يسمى حالة السباق، أو <bdi style="white-space:nowrap">race condition</bdi>: تتوقف النتيجة على الترتيب الذي يصادف أن تعمل به الخيوط. ولهذا أيضاً يصعب اكتشافها: مع الحلقات الصغيرة نادراً ما تتداخل الخيوط، فقد ينجح البرنامج في كل الاختبارات ثم يفشل لاحقاً في الإنتاج.</span></p>
+
+        <h2><span lang="en">The fix, and its price</span><span lang="fr">La correction, et son prix</span><span lang="ar">الحل، وثمنه</span></h2>
+        <p><span lang="en">Wrapping <code>counter++</code> in <code>sem_wait()</code> and <code>sem_post()</code> gave 2,000,000 every time. But I also timed it:</span>
+           <span lang="fr">Entourer <code>counter++</code> de <code>sem_wait()</code> et <code>sem_post()</code> a donné 2 000 000 à chaque fois. Mais j'ai aussi mesuré le temps :</span><span lang="ar">إحاطة <code>counter++</code> بـ <code>sem_wait()</code> و<code>sem_post()</code> أعطت 2,000,000 في كل مرة. لكنني قست الزمن أيضاً:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Version</span><span lang="fr">Version</span><span lang="ar">النسخة</span></th><th class="num"><span lang="en">Result</span><span lang="fr">Résultat</span><span lang="ar">النتيجة</span></th><th class="num"><span lang="en">Time</span><span lang="fr">Temps</span><span lang="ar">الزمن</span></th></tr>
+          <tr><td><span lang="en">No lock</span><span lang="fr">Sans verrou</span><span lang="ar">بلا قفل</span></td><td class="num"><span lang="en">wrong</span><span lang="fr">faux</span><span lang="ar">خاطئة</span></td><td class="num">~55 ms</td></tr>
+          <tr><td><span lang="en">Semaphore around each counter++</span><span lang="fr">Sémaphore autour de chaque counter++</span><span lang="ar">إشارة حول كل <bdi>counter++</bdi></span></td><td class="num">2,000,000</td><td class="num">~5.9 s</td></tr>
+          <tr><td><span lang="en">Atomic increment (atomic_fetch_add)</span><span lang="fr">Incrément atomique (atomic_fetch_add)</span><span lang="ar">زيادة ذرّية (atomic_fetch_add)</span></td><td class="num">2,000,000</td><td class="num">~65 ms</td></tr>
+          <tr><td><span lang="en">Count locally, add once under the semaphore</span><span lang="fr">Compter en local, ajouter une fois sous le sémaphore</span><span lang="ar">العدّ محلياً، ثم الإضافة مرة واحدة تحت الإشارة</span></td><td class="num">2,000,000</td><td class="num">~50 ms</td></tr>
+        </table></div>
+        <p><span lang="en">Correct, but about 100 times slower: taking and releasing the semaphore two million times costs far more than the addition it protects, and the two threads spend their time waiting for each other. Two better options. For a single counter, an atomic increment does the load, add and store as one indivisible operation. In general, the best lock is the one you do not take: each thread counts in a local variable, and only the final result goes through the critical section, once per thread.</span>
+           <span lang="fr">Correct, mais environ 100 fois plus lent : prendre et rendre le sémaphore deux millions de fois coûte bien plus que l'addition qu'il protège, et les deux threads passent leur temps à s'attendre. Deux meilleures options. Pour un simple compteur, un incrément atomique fait le chargement, l'addition et l'écriture en une seule opération indivisible. En général, le meilleur verrou est celui qu'on ne prend pas : chaque thread compte dans une variable locale, et seul le résultat final passe par la section critique, une fois par thread.</span><span lang="ar">صحيح، لكنه أبطأ بنحو 100 مرة: أخذ الإشارة وتحريرها مليوني مرة يكلّف أكثر بكثير من عملية الإضافة التي تحميها، ويقضي الخيطان وقتهما في انتظار أحدهما الآخر. وهناك خياران أفضل. لعدّاد بسيط، تنفّذ الزيادة الذرّية التحميل والإضافة والكتابة كعملية واحدة لا تتجزأ. وعموماً، أفضل قفل هو الذي لا تأخذه: يعدّ كل خيط في متغير محلي، ولا تمر عبر القسم الحرج إلا النتيجة النهائية، مرة واحدة لكل خيط.</span></p>
+
+        <h2><span lang="en">What else the animation simplified</span><span lang="fr">Ce que l'animation simplifiait encore</span><span lang="ar">ما الذي بسّطته الرسوم أيضاً</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><b>Who goes next is not guaranteed.</b> The animation showed thread 2 entering right after <code>sem_post()</code>, as if waiting threads formed a queue. POSIX only promises that one waiting thread is allowed to continue; which one, and whether another thread grabs the semaphore first, is not specified.</span><span lang="fr"><b>Qui passe ensuite n'est pas garanti.</b> L'animation montrait le thread 2 qui entre juste après <code>sem_post()</code>, comme si les threads en attente formaient une file. POSIX promet seulement qu'un thread en attente peut continuer ; lequel, et si un autre thread prend le sémaphore avant lui, ce n'est pas précisé.</span><span lang="ar"><b>من يدخل بعد ذلك ليس مضموناً.</b> كانت الرسوم تُظهر الخيط 2 يدخل مباشرة بعد <code>sem_post()</code>، وكأن الخيوط المنتظرة تقف في طابور. لا يَعِد POSIX إلا بأن خيطاً منتظراً واحداً يُسمح له بالمتابعة؛ أما أيّها، وهل يسبقه خيط آخر إلى الإشارة، فغير محدد.</span></li>
+          <li><span lang="en"><b>A semaphore at 1 is not quite a mutex.</b> A mutex has an owner: only the thread that locked it can unlock it. Any thread can post a semaphore, which is exactly what makes semaphores useful for signalling between threads, and a mutex the usual choice for a simple lock.</span><span lang="fr"><b>Un sémaphore à 1 n'est pas tout à fait un mutex.</b> Un mutex a un propriétaire : seul le thread qui l'a verrouillé peut le déverrouiller. N'importe quel thread peut faire <code>sem_post()</code> sur un sémaphore, et c'est justement ce qui rend les sémaphores utiles pour se signaler des choses entre threads, et le mutex le choix habituel pour un simple verrou.</span><span lang="ar"><b>الإشارة بقيمة 1 ليست تماماً كائن mutex.</b> للـ mutex مالك: فقط الخيط الذي قفله يستطيع فتحه. أما الإشارة فيستطيع أي خيط استدعاء <code>sem_post()</code> عليها، وهذا بالضبط ما يجعل الإشارات مفيدة لتبادل الإشعارات بين الخيوط، ويجعل الـ mutex الخيار المعتاد للقفل البسيط.</span></li>
+          <li><span lang="en"><b>Portability.</b> The guide said POSIX threads need WSL on Windows; the MinGW-w64 gcc that ships with Code::Blocks compiled every example above. And it did not mention macOS, where <code>sem_init()</code> is not supported: you need named semaphores (<code>sem_open()</code>) or <code>dispatch_semaphore_t</code>.</span><span lang="fr"><b>La portabilité.</b> Le guide disait que les threads POSIX demandent WSL sous Windows ; le gcc MinGW-w64 fourni avec Code::Blocks a compilé tous les exemples ci-dessus. Et il ne parlait pas de macOS, où <code>sem_init()</code> n'est pas supporté : il faut des sémaphores nommés (<code>sem_open()</code>) ou <code>dispatch_semaphore_t</code>.</span><span lang="ar"><b>قابلية النقل.</b> كان الدليل يقول إن خيوط POSIX تحتاج إلى WSL على ويندوز؛ لكن مترجم gcc من MinGW-w64 المرفق مع Code::Blocks ترجم كل الأمثلة أعلاه. ولم يكن يذكر macOS، حيث <code>sem_init()</code> غير مدعومة: يلزم استعمال الإشارات المسمّاة (<code>sem_open()</code>) أو <code>dispatch_semaphore_t</code>.</span></li>
+        </ul>
+        <p><span lang="en">And one plain bug: the JavaScript gave the thread in the critical section the class <code>in_critical</code>, while the CSS styled <code>in-critical</code>. One character apart, so the card that was supposed to light up never did.</span>
+           <span lang="fr">Et un bug tout simple : le JavaScript donnait au thread en section critique la classe <code>in_critical</code>, alors que le CSS stylait <code>in-critical</code>. Un seul caractère d'écart, donc la carte censée s'allumer ne s'allumait jamais.</span><span lang="ar">وخطأ بسيط أيضاً: كانت شيفرة JavaScript تعطي الخيط الموجود في القسم الحرج الصنف <code>in_critical</code>، بينما كان CSS يُنسّق <code>in-critical</code>. فرق حرف واحد، فلم تُضئ البطاقة التي كان يُفترض أن تُضيء أبداً.</span></p>
+
+        <h2><span lang="en">What I changed</span><span lang="fr">Ce que j'ai changé</span><span lang="ar">ما الذي غيّرته</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">A new <b>Race condition</b> tab that plays the interleaving above step by step, with each thread's register and the shared counter, until one update is lost.</span><span lang="fr">Un nouvel onglet <b>Race condition</b> qui rejoue pas à pas l'entrelacement ci-dessus, avec le registre de chaque thread et le compteur partagé, jusqu'à la mise à jour perdue.</span><span lang="ar">تبويب جديد <b>Race condition</b> يعيد عرض التداخل أعلاه خطوة بخطوة، مع سجل كل خيط والعدّاد المشترك، حتى ضياع التحديث.</span></li>
+          <li><span lang="en">The experiment and the timing table in the guide, plus the corrected notes on wake-up order, mutexes, Windows and macOS.</span><span lang="fr">L'expérience et le tableau des temps dans le guide, avec les remarques corrigées sur l'ordre de réveil, les mutex, Windows et macOS.</span><span lang="ar">التجربة وجدول الأزمنة في الدليل، مع الملاحظات المصححة حول ترتيب الاستيقاظ، والـ mutex، وويندوز وmacOS.</span></li>
+          <li><span lang="en">The CSS class fix, Play restarting from the beginning when pressed on the last step, and step descriptions announced to screen readers.</span><span lang="fr">La correction de la classe CSS, le bouton Play qui recommence depuis le début quand on l'appuie à la dernière étape, et les descriptions d'étapes annoncées aux lecteurs d'écran.</span><span lang="ar">تصحيح صنف CSS، وزر Play الذي يبدأ من جديد عند الضغط عليه في الخطوة الأخيرة، وإعلان وصف الخطوات لقارئات الشاشة.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">To teach a fix, show the bug first. A lock only makes sense once you have seen a number go wrong.</span><span lang="fr">Pour enseigner une correction, montrer d'abord le bug. Un verrou n'a de sens qu'après avoir vu un nombre devenir faux.</span><span lang="ar">لتعليم حلّ ما، أظهر الخطأ أولاً. فالقفل لا يكتسب معناه إلا بعد أن ترى رقماً يصبح خاطئاً.</span></li>
+          <li><span lang="en">A single line of code can be several machine steps. Shared data needs a lock or an atomic operation.</span><span lang="fr">Une seule ligne de code peut correspondre à plusieurs étapes machine. Une donnée partagée a besoin d'un verrou ou d'une opération atomique.</span><span lang="ar">سطر واحد من الشيفرة قد يعني عدة خطوات للآلة. والبيانات المشتركة تحتاج إلى قفل أو عملية ذرّية.</span></li>
+          <li><span lang="en">Correct is not enough: measure. Lock as little and as rarely as possible.</span><span lang="fr">Correct ne suffit pas : il faut mesurer. Verrouiller le moins possible, et le moins souvent possible.</span><span lang="ar">الصحة وحدها لا تكفي: يجب القياس. اقفل بأقل قدر ممكن، وبأقل تكرار ممكن.</span></li>
+          <li><span lang="en">Race conditions do not crash, they lie. Test concurrent code with many iterations, and run it several times.</span><span lang="fr">Les race conditions ne plantent pas, elles mentent. Tester le code concurrent avec beaucoup d'itérations, et le lancer plusieurs fois.</span><span lang="ar">حالات السباق لا تتسبب في الانهيار، بل تكذب. اختبر الشيفرة المتزامنة بعدد كبير من التكرارات، وشغّلها عدة مرات.</span></li>
+        </ul>
+        <p><span lang="en">Try the <a href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener">animation</a>, or read the code and the guide on <a href="https://github.com/adelmerad/thread-animation" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Essayez l'<a href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener">animation</a>, ou lisez le code et le guide sur <a href="https://github.com/adelmerad/thread-animation" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">جرّب <a href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener">الرسوم المتحركة</a>، أو اقرأ الشيفرة والدليل على <a href="https://github.com/adelmerad/thread-animation" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://adelmerad.github.io/thread-animation/" target="_blank" rel="noopener"><span lang="en">Try the animation</span><span lang="fr">Essayer l'animation</span><span lang="ar">جرّب الرسوم المتحركة</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
