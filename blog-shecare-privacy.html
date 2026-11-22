@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When "she has an account" is health data — privacy in SheCare — Adel Merad</title>
+  <meta name="description" content="SheCare is a companion app for women going through breast cancer. In an app like this, even knowing that someone is registered reveals a diagnosis. What the app protected well, and three privacy leaks I found in my own code.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-shecare-privacy.html">
+  <meta property="og:title" content="When &quot;she has an account&quot; is health data">
+  <meta property="og:description" content="Privacy in a breast cancer companion app: login timing, sessions that outlive a password change, and a data export that contained other people.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-shecare-privacy.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash
+    try {
+      const r = document.documentElement;
+      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
+      let l = localStorage.getItem("lang") || "en";
+      const langs = (r.dataset.langs || "en fr").split(" ");
+      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
+      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
+    } catch {}
+  </script>
+</head>
+<body class="case" data-title-en="When &quot;she has an account&quot; is health data — Adel Merad" data-title-fr="Quand « elle a un compte » est une donnée de santé — Adel Merad" data-title-ar="عندما يصبح «لديها حساب» معلومة صحية — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 8 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 8 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">When "she has an account" is health data</span>
+          <span lang="fr">Quand « elle a un compte » est une donnée de santé</span><span lang="ar">عندما يصبح «لديها حساب» معلومة صحية</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">SheCare is a companion app for women going through breast cancer. In an app like this, the data is the diagnosis: even knowing that someone is registered says something about her health. What the app protected well, and three leaks I found when I reread my own code.</span>
+          <span lang="fr">SheCare est une application d'accompagnement pour les femmes atteintes d'un cancer du sein. Dans une appli comme celle-ci, la donnée, c'est le diagnostic : même savoir qu'une personne est inscrite en dit long sur sa santé. Ce que l'appli protégeait bien, et trois fuites que j'ai trouvées en relisant mon propre code.</span><span lang="ar">SheCare تطبيق لمرافقة النساء المصابات بسرطان الثدي. في تطبيق كهذا، البيانات هي التشخيص نفسه: فحتى معرفة أن امرأة مسجّلة فيه تكشف شيئاً عن صحتها. ما كان التطبيق يحميه جيداً، وثلاثة تسريبات وجدتها عندما أعدت قراءة شيفرتي.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en">SheCare started at Startup Weekend Algiers 2025 as a front-end prototype built by our team of three. Later I rebuilt it alone as a complete application: Next.js 14 with Server Actions, PostgreSQL through Prisma, and Auth.js for accounts. A user can track her daily energy, mood and symptoms, write a private journal, share stories with the community, and book a consultation with a specialist.</span>
+           <span lang="fr">SheCare a commencé au Startup Weekend Algiers 2025, comme un prototype d'interface construit par notre équipe de trois. Plus tard, je l'ai reconstruit seul en application complète : Next.js 14 avec des Server Actions, PostgreSQL via Prisma, et Auth.js pour les comptes. Une utilisatrice peut suivre son énergie, son humeur et ses symptômes au quotidien, écrire un journal privé, partager son histoire avec la communauté et réserver une consultation avec un spécialiste.</span><span lang="ar">بدأ SheCare في Startup Weekend Algiers 2025 كنموذج أولي للواجهة بناه فريقنا المكوّن من ثلاثة أشخاص. ثم أعدت بناءه وحدي كتطبيق كامل: Next.js 14 مع Server Actions، وPostgreSQL عبر Prisma، وAuth.js للحسابات. تستطيع المستخدمة متابعة طاقتها ومزاجها وأعراضها يومياً، وكتابة يوميات خاصة، ومشاركة قصتها مع المجتمع، وحجز استشارة مع مختص.</span></p>
+
+        <h2><span lang="en">Who are we protecting her from?</span><span lang="fr">De qui la protège-t-on ?</span><span lang="ar">ممّن نحميها؟</span></h2>
+        <p><span lang="en">When we think about security, we picture an anonymous hacker. For a health app, the realistic risks are closer to home: a colleague who is curious, a partner who picks up her phone, an insurer or an employer, other members of the community. Many women do not tell everyone about their illness, and that choice belongs to them. So the question for every feature is: what could someone learn about her that she did not choose to share?</span>
+           <span lang="fr">Quand on pense sécurité, on imagine un hacker anonyme. Pour une appli de santé, les risques réalistes sont plus proches : une collègue curieuse, un conjoint qui prend son téléphone, un assureur ou un employeur, d'autres membres de la communauté. Beaucoup de femmes ne parlent pas de leur maladie à tout le monde, et ce choix leur appartient. La question à poser pour chaque fonctionnalité est donc : qu'est-ce que quelqu'un pourrait apprendre sur elle qu'elle n'a pas choisi de partager ?</span><span lang="ar">عندما نفكر في الأمن، نتخيل مخترقاً مجهولاً. أما في تطبيق صحي، فالمخاطر الواقعية أقرب: زميلة فضولية، أو شريك يأخذ هاتفها، أو شركة تأمين أو صاحب عمل، أو عضوات أخريات في المجتمع. كثير من النساء لا يخبرن الجميع بمرضهن، وهذا الاختيار يعود إليهن. لذلك فالسؤال أمام كل ميزة هو: ما الذي قد يعرفه شخص ما عنها دون أن تختار هي مشاركته؟</span></p>
+
+        <h2><span lang="en">What the app already did right</span><span lang="fr">Ce que l'appli faisait déjà bien</span><span lang="ar">ما كان التطبيق يفعله جيداً</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><b>Every query is scoped to the user.</b> Deleting a symptom is <code>deleteMany({ where: { id, userId } })</code>, never just the id, so nobody can delete or read another person's records by changing an id in a request.</span><span lang="fr"><b>Chaque requête est limitée à l'utilisatrice.</b> Supprimer un symptôme, c'est <code>deleteMany({ where: { id, userId } })</code>, jamais juste l'id : personne ne peut lire ou supprimer les données d'une autre en changeant un id dans une requête.</span><span lang="ar"><b>كل استعلام مقيَّد بالمستخدمة.</b> حذف عرض ما يتم عبر <code>deleteMany({ where: { id, userId } })</code>، وليس بالمعرّف وحده، فلا يستطيع أحد قراءة أو حذف سجلات غيره بتغيير معرّف في الطلب.</span></li>
+          <li><span lang="en"><b>Hidden names never reach the browser.</b> If a user turns off profile visibility, the server replaces her name with "Community member" before rendering. The page only receives the text to display, not her real name hidden with CSS.</span><span lang="fr"><b>Les noms masqués n'arrivent jamais au navigateur.</b> Si une utilisatrice désactive la visibilité de son profil, le serveur remplace son nom par « Membre de la communauté » avant l'affichage. La page reçoit seulement le texte à afficher, pas son vrai nom caché en CSS.</span><span lang="ar"><b>الأسماء المخفية لا تصل أبداً إلى المتصفح.</b> إذا أوقفت المستخدمة ظهور ملفها، يستبدل الخادم اسمها بـ«عضوة في المجتمع» قبل العرض. فالصفحة تتلقى النص المعروض فقط، لا اسمها الحقيقي مخفياً بـ CSS.</span></li>
+          <li><span lang="en"><b>She owns her data.</b> She can download everything stored about her as JSON, and deleting the account removes all of her records through <code>ON DELETE CASCADE</code>, after asking for her password.</span><span lang="fr"><b>Ses données lui appartiennent.</b> Elle peut télécharger tout ce qui est enregistré sur elle en JSON, et la suppression du compte efface tous ses enregistrements grâce à <code>ON DELETE CASCADE</code>, après lui avoir demandé son mot de passe.</span><span lang="ar"><b>بياناتها ملك لها.</b> تستطيع تنزيل كل ما هو مخزَّن عنها بصيغة JSON، وحذف الحساب يزيل كل سجلاتها عبر <code>ON DELETE CASCADE</code>، بعد طلب كلمة مرورها.</span></li>
+          <li><span lang="en"><b>Validation happens on the server</b> with Zod, and passwords are hashed with bcrypt.</span><span lang="fr"><b>La validation se fait côté serveur</b> avec Zod, et les mots de passe sont hachés avec bcrypt.</span><span lang="ar"><b>التحقق من المدخلات يتم في الخادم</b> باستخدام Zod، وكلمات المرور مُجزَّأة بـ bcrypt.</span></li>
+        </ul>
+        <p><span lang="en">That covers the classic web vulnerabilities. The leaks I found were quieter: places where the app answered a question it should not have answered.</span>
+           <span lang="fr">Ça couvre les failles web classiques. Les fuites que j'ai trouvées étaient plus discrètes : des endroits où l'appli répondait à une question à laquelle elle n'aurait pas dû répondre.</span><span lang="ar">هذا يغطي الثغرات الكلاسيكية في الويب. أما التسريبات التي وجدتها فكانت أهدأ: مواضع كان التطبيق يجيب فيها عن سؤال ما كان ينبغي أن يجيب عنه.</span></p>
+
+        <h2><span lang="en">Leak 1: "is she registered?"</span><span lang="fr">Fuite 1 : « est-ce qu'elle est inscrite ? »</span><span lang="ar">التسريب 1: «هل هي مسجّلة؟»</span></h2>
+        <p><span lang="en">The login code looked correct:</span>
+           <span lang="fr">Le code de connexion avait l'air correct :</span><span lang="ar">كانت شيفرة تسجيل الدخول تبدو صحيحة:</span></p>
+<pre><code>const user = await db.user.findUnique({ where: { email } })
+if (!user) return null                          // answers in a few ms
+
+const valid = await bcrypt.compare(password, user.passwordHash)   // about 230 ms
+if (!valid) return null</code></pre>
+        <p><span lang="en">Both failures show the same message, "Incorrect email or password". But bcrypt is slow on purpose: with cost 12, checking a password took about 230 milliseconds on my laptop. When the email does not exist, the function returns almost immediately. By timing a few login attempts with her email and any password, someone can tell whether she has an account, without ever knowing her password. In most apps that is a minor issue. In SheCare, it tells a colleague that she is probably being treated for breast cancer.</span>
+           <span lang="fr">Les deux échecs affichent le même message, « Email ou mot de passe incorrect ». Mais bcrypt est lent exprès : avec un coût de 12, vérifier un mot de passe prenait environ 230 millisecondes sur mon ordinateur. Quand l'email n'existe pas, la fonction répond presque tout de suite. En chronométrant quelques tentatives de connexion avec son email et n'importe quel mot de passe, quelqu'un peut savoir si elle a un compte, sans jamais connaître son mot de passe. Dans la plupart des applis, c'est un détail. Dans SheCare, ça apprend à une collègue qu'elle est probablement soignée pour un cancer du sein.</span><span lang="ar">كلا الفشلين يعرضان الرسالة نفسها، «البريد أو كلمة المرور غير صحيحة». لكن bcrypt بطيء عن قصد: بكلفة 12، كان التحقق من كلمة المرور يستغرق نحو 230 جزءاً من الألف من الثانية على حاسوبي. وعندما لا يكون البريد موجوداً، تعود الدالة فوراً تقريباً. فبقياس زمن بضع محاولات دخول ببريدها وبأي كلمة مرور، يستطيع شخص ما معرفة ما إذا كان لديها حساب، دون أن يعرف كلمة مرورها أبداً. في أغلب التطبيقات هذه مسألة ثانوية. أما في SheCare، فهي تخبر زميلة بأنها على الأرجح تتلقى علاجاً لسرطان الثدي.</span></p>
+        <p><span lang="en">The fix is to do the same work in both cases, by comparing against a dummy hash when the user does not exist:</span>
+           <span lang="fr">La correction : faire le même travail dans les deux cas, en comparant avec un faux hash quand l'utilisatrice n'existe pas :</span><span lang="ar">الحل هو القيام بالعمل نفسه في الحالتين، بالمقارنة مع تجزئة وهمية عندما لا تكون المستخدمة موجودة:</span></p>
+<pre><code>const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 12)   // computed once
+
+const user = await db.user.findUnique({ where: { email } })
+const valid = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH)
+if (!user || !valid) return null                // same time either way</code></pre>
+        <p><span lang="en">Being honest about the limit: the sign-up form still says "an account with this email already exists", which leaks the same information. The real fix is email verification, where both cases answer "check your inbox". SheCare does not send emails yet, so this one stays on the list, together with rate limiting on the login form.</span>
+           <span lang="fr">Pour être honnête sur la limite : le formulaire d'inscription dit encore « un compte existe déjà avec cet email », ce qui révèle la même information. La vraie solution, c'est la vérification par email, où les deux cas répondent « regardez votre boîte mail ». SheCare n'envoie pas encore d'emails, donc ce point reste sur la liste, avec la limitation du nombre de tentatives de connexion.</span><span lang="ar">وللأمانة بشأن الحدود: ما زال نموذج التسجيل يقول «يوجد حساب بهذا البريد»، وهذا يكشف المعلومة نفسها. الحل الحقيقي هو التحقق عبر البريد الإلكتروني، حيث تجيب الحالتان «تفقّدي بريدك». لا يرسل SheCare رسائل بريدية بعد، لذا تبقى هذه النقطة على القائمة، مع تحديد عدد محاولات تسجيل الدخول.</span></p>
+
+        <h2><span lang="en">Leak 2: sessions that outlive the password</span><span lang="fr">Fuite 2 : des sessions qui survivent au mot de passe</span><span lang="ar">التسريب 2: جلسات تعيش أطول من كلمة المرور</span></h2>
+        <p><span lang="en">Imagine she logged in on a shared tablet, or someone took her phone. She changes her password from her laptop and expects the other device to be locked out. It was not. Auth.js was configured with JWT sessions: the session is a signed cookie, and the server only checks the signature. Nothing in it depended on the password, so the old cookie stayed valid for its full lifetime, 30 days by default. Even after deleting her account, another device kept a valid session for a user who no longer existed.</span>
+           <span lang="fr">Imaginez qu'elle se soit connectée sur une tablette partagée, ou que quelqu'un ait pris son téléphone. Elle change son mot de passe depuis son ordinateur et s'attend à ce que l'autre appareil soit déconnecté. Ce n'était pas le cas. Auth.js était configuré avec des sessions JWT : la session est un cookie signé, et le serveur vérifie seulement la signature. Rien dedans ne dépendait du mot de passe, donc l'ancien cookie restait valable toute sa durée de vie, 30 jours par défaut. Même après la suppression du compte, un autre appareil gardait une session valide pour une utilisatrice qui n'existait plus.</span><span lang="ar">تخيّل أنها سجّلت الدخول على جهاز لوحي مشترك، أو أن أحداً أخذ هاتفها. تغيّر كلمة مرورها من حاسوبها وتتوقع أن يُطرد الجهاز الآخر. لكن ذلك لم يحدث. كان Auth.js مضبوطاً على جلسات JWT: الجلسة ملف تعريف ارتباط موقَّع، والخادم يتحقق من التوقيع فقط. لم يكن فيه شيء مرتبط بكلمة المرور، فبقي الملف القديم صالحاً طوال عمره، 30 يوماً افتراضياً. وحتى بعد حذف حسابها، بقيت لدى جهاز آخر جلسة صالحة لمستخدمة لم تعد موجودة.</span></p>
+        <p><span lang="en">A JWT cannot be revoked by itself, so the server needs one small piece of state to compare against. I added a <code>sessionVersion</code> number to each user, written into the token at login and checked on every request:</span>
+           <span lang="fr">Un JWT ne peut pas être révoqué tout seul, donc le serveur a besoin d'une petite information à laquelle le comparer. J'ai ajouté un numéro <code>sessionVersion</code> à chaque utilisatrice, écrit dans le jeton à la connexion et vérifié à chaque requête :</span><span lang="ar">لا يمكن إبطال JWT بمفرده، لذا يحتاج الخادم إلى معلومة صغيرة يقارن بها. أضفت رقماً <code>sessionVersion</code> لكل مستخدمة، يُكتب في الرمز عند الدخول ويُتحقق منه في كل طلب:</span></p>
+<pre><code>// at login: the token remembers the version it was issued for
+token.sessionVersion = user.sessionVersion
+
+// on every page and action
+const user = await db.user.findUnique({ where: { id: token.id } })
+if (!user || user.sessionVersion !== token.sessionVersion) signOutAndRedirect()
+
+// changing the password ends every other session
+await db.user.update({ where: { id }, data: { passwordHash, sessionVersion: { increment: 1 } } })</code></pre>
+        <p><span lang="en">It costs one small database read per request, and a deleted account now ends all of its sessions immediately.</span>
+           <span lang="fr">Ça coûte une petite lecture en base par requête, et un compte supprimé met maintenant fin à toutes ses sessions immédiatement.</span><span lang="ar">الكلفة قراءة صغيرة من قاعدة البيانات في كل طلب، والحساب المحذوف ينهي الآن كل جلساته فوراً.</span></p>
+
+        <h2><span lang="en">Leak 3: her export contained other people</span><span lang="fr">Fuite 3 : son export contenait d'autres personnes</span><span lang="ar">التسريب 3: تصدير بياناتها كان يحتوي على أشخاص آخرين</span></h2>
+        <p><span lang="en">The "download my data" endpoint included her posts with their comments:</span>
+           <span lang="fr">La route « télécharger mes données » incluait ses posts avec leurs commentaires :</span><span lang="ar">كان مسار «تنزيل بياناتي» يتضمن منشوراتها مع تعليقاتها:</span></p>
+<pre><code>posts: { include: { comments: true } }   // every field of every comment</code></pre>
+        <p><span lang="en">Those comments were written by other women, and <code>comments: true</code> exported every field, including each author's internal id, even for authors who had hidden their profile. An export is "everything about me", not "everything near me". The comments on her posts are still part of her story, so the export keeps their text and date, but no longer says who wrote them:</span>
+           <span lang="fr">Ces commentaires étaient écrits par d'autres femmes, et <code>comments: true</code> exportait tous les champs, y compris l'identifiant interne de chaque autrice, même pour celles qui avaient masqué leur profil. Un export, c'est « tout ce qui me concerne », pas « tout ce qui est autour de moi ». Les commentaires sous ses posts font quand même partie de son histoire, donc l'export garde leur texte et leur date, mais ne dit plus qui les a écrits :</span><span lang="ar">هذه التعليقات كتبتها نساء أخريات، وكان <code>comments: true</code> يصدّر كل الحقول، بما فيها المعرّف الداخلي لكل كاتبة، حتى لمن أخفين ملفاتهن. التصدير يعني «كل ما يخصني»، لا «كل ما حولي». التعليقات تحت منشوراتها تبقى جزءاً من قصتها، لذا يحتفظ التصدير بنصها وتاريخها، لكنه لم يعد يذكر من كتبها:</span></p>
+<pre><code>posts: { include: { comments: { select: { content: true, createdAt: true } } } }</code></pre>
+        <p><span lang="en">The lesson is to choose fields explicitly with <code>select</code> whenever data leaves the server. <code>include: true</code> means "whatever the schema has today, and whatever someone adds tomorrow".</span>
+           <span lang="fr">La leçon : choisir les champs explicitement avec <code>select</code> dès que des données sortent du serveur. <code>include: true</code> veut dire « tout ce que le schéma contient aujourd'hui, et tout ce que quelqu'un ajoutera demain ».</span><span lang="ar">الدرس هو اختيار الحقول صراحةً بـ <code>select</code> كلما خرجت البيانات من الخادم. فـ <code>include: true</code> يعني «كل ما في المخطط اليوم، وكل ما قد يضيفه أحدهم غداً».</span></p>
+
+        <h2><span lang="en">A privacy promise the code did not keep</span><span lang="fr">Une promesse de confidentialité que le code ne tenait pas</span><span lang="ar">وعد بالخصوصية لم تفِ به الشيفرة</span></h2>
+        <p><span lang="en">The README listed "an option to post anonymously" in the community. There was no such option per post: there was a profile-wide visibility setting that hides her name everywhere. For most features, a README that oversells is just embarrassing. For privacy, it is dangerous: someone could share something personal believing it was anonymous. Privacy promises must describe exactly what the code does, so the README now describes the real setting.</span>
+           <span lang="fr">Le README annonçait « une option pour poster anonymement » dans la communauté. Cette option par post n'existait pas : il y avait un réglage de visibilité du profil, qui masque son nom partout. Pour la plupart des fonctionnalités, un README qui en promet trop est juste gênant. Pour la vie privée, c'est dangereux : quelqu'un pourrait partager quelque chose de personnel en croyant être anonyme. Une promesse de confidentialité doit décrire exactement ce que fait le code, donc le README décrit maintenant le vrai réglage.</span><span lang="ar">كان ملف README يذكر «خياراً للنشر دون الكشف عن الهوية» في المجتمع. لم يكن هذا الخيار موجوداً لكل منشور: كان هناك إعداد لظهور الملف الشخصي يخفي اسمها في كل مكان. في أغلب الميزات، يكون README المبالغ فيه محرجاً فقط. أما في الخصوصية، فهو خطير: قد تشارك إحداهن أمراً شخصياً معتقدةً أنها مجهولة. يجب أن يصف وعد الخصوصية بالضبط ما تفعله الشيفرة، لذا أصبح README يصف الإعداد الحقيقي.</span></p>
+
+        <h2><span lang="en">And one bug that was just a bug</span><span lang="fr">Et un bug qui n'était qu'un bug</span><span lang="ar">وخطأ لم يكن إلا خطأً</span></h2>
+        <p><span lang="en">Bookings were safe on the server: a serializable transaction checks overlaps for both the specialist and the patient, so two people cannot take the same slot. But the booking form only greyed out the exact start times already taken. Some consultations last 45 or 60 minutes, so after a one-hour booking at 10:00, the form still offered 10:30, and the user got an error when she picked it. The form now greys out every start time that would overlap an existing appointment, hers included.</span>
+           <span lang="fr">Côté serveur, les réservations étaient sûres : une transaction sérialisable vérifie les chevauchements pour le spécialiste et pour la patiente, donc deux personnes ne peuvent pas prendre le même créneau. Mais le formulaire grisait seulement les heures de début déjà prises. Certaines consultations durent 45 ou 60 minutes : après une réservation d'une heure à 10h00, le formulaire proposait encore 10h30, et l'utilisatrice recevait une erreur en le choisissant. Le formulaire grise maintenant toutes les heures qui chevaucheraient un rendez-vous existant, y compris les siens.</span><span lang="ar">في الخادم، كانت الحجوزات آمنة: معاملة من نوع serializable تتحقق من التداخل للمختص وللمريضة معاً، فلا يمكن لشخصين أخذ الموعد نفسه. لكن نموذج الحجز كان يعطّل فقط أوقات البدء المحجوزة بالضبط. بعض الاستشارات تدوم 45 أو 60 دقيقة، فبعد حجز ساعة عند 10:00 كان النموذج ما زال يعرض 10:30، وتتلقى المستخدمة خطأً عند اختياره. أصبح النموذج الآن يعطّل كل وقت بدء يتداخل مع موعد قائم، بما في ذلك مواعيدها.</span></p>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">In a health app, metadata is health data: an account, a login time, a booking with an oncologist.</span><span lang="fr">Dans une appli de santé, les métadonnées sont des données de santé : un compte, une heure de connexion, un rendez-vous chez un oncologue.</span><span lang="ar">في تطبيق صحي، البيانات الوصفية بيانات صحية: حساب، أو وقت دخول، أو موعد مع طبيب أورام.</span></li>
+          <li><span lang="en">An error message is not the only answer an endpoint gives: response time answers too.</span><span lang="fr">Le message d'erreur n'est pas la seule réponse d'une route : le temps de réponse répond aussi.</span><span lang="ar">رسالة الخطأ ليست الجواب الوحيد للمسار: زمن الاستجابة يجيب أيضاً.</span></li>
+          <li><span lang="en">Changing a password or deleting an account must end every session, which stateless JWTs do not do on their own.</span><span lang="fr">Changer de mot de passe ou supprimer son compte doit mettre fin à toutes les sessions, ce que les JWT sans état ne font pas tout seuls.</span><span lang="ar">تغيير كلمة المرور أو حذف الحساب يجب أن ينهي كل الجلسات، وهذا ما لا تفعله رموز JWT عديمة الحالة وحدها.</span></li>
+          <li><span lang="en">Select fields explicitly when data leaves the server, and make privacy promises match the code exactly.</span><span lang="fr">Choisir les champs explicitement quand des données sortent du serveur, et faire correspondre exactement les promesses de confidentialité au code.</span><span lang="ar">اختر الحقول صراحةً عندما تخرج البيانات من الخادم، واجعل وعود الخصوصية مطابقة للشيفرة تماماً.</span></li>
+        </ul>
+        <p><span lang="en">The code of SheCare (Next.js, Prisma, Auth.js) is on <a href="https://github.com/adelmerad/shecare" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Le code de SheCare (Next.js, Prisma, Auth.js) est sur <a href="https://github.com/adelmerad/shecare" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">شيفرة SheCare ‏(Next.js وPrisma وAuth.js) موجودة على <a href="https://github.com/adelmerad/shecare" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://github.com/adelmerad/shecare" target="_blank" rel="noopener"><span lang="en">Code on GitHub</span><span lang="fr">Code sur GitHub</span><span lang="ar">الشيفرة على GitHub</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
