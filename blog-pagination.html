@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why the last page is slow: cursor pagination in practice — Adel Merad</title>
+  <meta name="description" content="OFFSET pagination gets slower with every page and repeats rows when data changes. Measured on a million rows, then applied to a Django REST and React Query mission log: what the cursor really contains, and what our frontend got wrong.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-pagination.html">
+  <meta property="og:title" content="Why the last page is slow: cursor pagination in practice">
+  <meta property="og:description" content="OFFSET vs cursor on a million rows, what a Django REST cursor contains, and React Query's useInfiniteQuery.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-pagination.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script src="boot.js"></script>
+</head>
+<body class="case" data-title-en="Why the last page is slow — Adel Merad" data-title-fr="Pourquoi la dernière page est lente — Adel Merad" data-title-ar="لماذا تكون الصفحة الأخيرة بطيئة — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 8 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 8 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">Why the last page is slow: cursor pagination in practice</span>
+          <span lang="fr">Pourquoi la dernière page est lente : la pagination par curseur en pratique</span><span lang="ar">لماذا تكون الصفحة الأخيرة بطيئة: الترقيم بالمؤشر عملياً</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">OFFSET pagination gets slower with every page and repeats rows when new data arrives. I measured both problems on a million rows, then looked at how our mission log API and its React frontend handled pagination, including what we got wrong.</span>
+          <span lang="fr">La pagination avec OFFSET ralentit à chaque page et répète des lignes quand de nouvelles données arrivent. J'ai mesuré ces deux problèmes sur un million de lignes, puis regardé comment l'API de notre journal de missions et son frontend React gèrent la pagination, y compris ce que nous avions mal fait.</span><span lang="ar">الترقيم باستعمال OFFSET يصبح أبطأ مع كل صفحة، ويكرّر الأسطر عندما تصل بيانات جديدة. قست هاتين المشكلتين على مليون سطر، ثم نظرت كيف تتعامل واجهة سجل المهام البرمجية وواجهتها الأمامية بـ React مع الترقيم، بما في ذلك ما أخطأنا فيه.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en">Our team of three studied pagination as a data-access strategy, with a working example: the mission log of Rifters, an augmented reality game concept about Algerian history. Every completed mission is stored with its era, place and date, and the log can grow long. A Django REST API serves 300 seeded missions, and a React page loads them as you scroll. I built the frontend.</span>
+           <span lang="fr">Notre équipe de trois a étudié la pagination comme une stratégie d'accès aux données, avec un exemple concret : le journal de missions de Rifters, un concept de jeu en réalité augmentée sur l'histoire de l'Algérie. Chaque mission terminée est enregistrée avec son époque, son lieu et sa date, et le journal peut devenir long. Une API Django REST sert 300 missions générées, et une page React les charge au fil du défilement. J'ai construit le frontend.</span><span lang="ar">درس فريقنا المكوّن من ثلاثة أشخاص الترقيم كاستراتيجية للوصول إلى البيانات، مع مثال عملي: سجل المهام في Rifters، وهو تصور للعبة واقع معزّز عن تاريخ الجزائر. تُخزَّن كل مهمة منجزة مع حقبتها ومكانها وتاريخها، وقد يطول السجل كثيراً. تقدّم واجهة Django REST البرمجية 300 مهمة مولّدة، وتحمّلها صفحة React أثناء التمرير. وأنا من بنى الواجهة الأمامية.</span></p>
+
+        <h2><span lang="en">OFFSET and its two problems</span><span lang="fr">OFFSET et ses deux problèmes</span><span lang="ar">OFFSET ومشكلتاه</span></h2>
+        <p><span lang="en">The usual way to paginate is to skip rows:</span>
+           <span lang="fr">La façon habituelle de paginer, c'est de sauter des lignes :</span><span lang="ar">الطريقة المعتادة للترقيم هي تخطي الأسطر:</span></p>
+<pre><code>SELECT * FROM mission ORDER BY visited_at DESC LIMIT 10 OFFSET 500000;</code></pre>
+        <p><span lang="en">It is simple and allows "go to page 50,000". But the database cannot jump to row 500,000: it walks through the first 500,000 rows and throws them away. And the pages are defined by position, so if a row is added at the top between two requests, everything shifts by one.</span>
+           <span lang="fr">C'est simple, et ça permet « aller à la page 50 000 ». Mais la base de données ne peut pas sauter directement à la ligne 500 000 : elle parcourt les 500 000 premières lignes et les jette. Et les pages sont définies par position : si une ligne est ajoutée en haut entre deux requêtes, tout se décale d'une ligne.</span><span lang="ar">إنها بسيطة، وتسمح بـ«الانتقال إلى الصفحة 50,000». لكن قاعدة البيانات لا تستطيع القفز مباشرة إلى السطر 500,000: فهي تمرّ على الأسطر الـ500,000 الأولى ثم ترميها. كما أن الصفحات معرَّفة بالموضع، فإذا أُضيف سطر في الأعلى بين طلبين، انزاح كل شيء بسطر واحد.</span></p>
+        <p><span lang="en">A cursor (or "keyset") replaces the position with a value: "give me the 10 missions completed before the last one I saw".</span>
+           <span lang="fr">Un curseur (ou « keyset ») remplace la position par une valeur : « donne-moi les 10 missions terminées avant la dernière que j'ai vue ».</span><span lang="ar">أما المؤشر (cursor أو «keyset») فيستبدل الموضع بقيمة: «أعطني المهام العشر التي أُنجزت قبل آخر مهمة رأيتها».</span></p>
+<pre><code>SELECT * FROM mission
+WHERE (visited_at, id) &lt; ('2025-03-14 10:21:07', 418)
+ORDER BY visited_at DESC, id DESC
+LIMIT 10;</code></pre>
+        <p><span lang="en">With an index on <code>(visited_at, id)</code>, the database goes straight to that point in the index and reads 10 entries. The <code>id</code> breaks ties when two missions share the same date.</span>
+           <span lang="fr">Avec un index sur <code>(visited_at, id)</code>, la base de données va directement à ce point de l'index et lit 10 entrées. L'<code>id</code> départage deux missions qui ont la même date.</span><span lang="ar">مع فهرس على <code>(visited_at, id)</code>، تذهب قاعدة البيانات مباشرة إلى تلك النقطة في الفهرس وتقرأ 10 مدخلات. ويفصل <code>id</code> بين مهمتين لهما التاريخ نفسه.</span></p>
+
+        <h2><span lang="en">Measured on a million rows</span><span lang="fr">Mesuré sur un million de lignes</span><span lang="ar">القياس على مليون سطر</span></h2>
+        <p><span lang="en">I filled an SQLite database file with 1,000,000 missions, indexed on <code>(visited_at DESC, id DESC)</code>, and fetched one page of 10 full rows at different depths with both methods (median of 5 runs, on my laptop). Both return exactly the same rows:</span>
+           <span lang="fr">J'ai rempli un fichier SQLite avec 1 000 000 de missions, indexées sur <code>(visited_at DESC, id DESC)</code>, et j'ai lu une page de 10 lignes complètes à différentes profondeurs avec les deux méthodes (médiane de 5 essais, sur mon ordinateur). Les deux renvoient exactement les mêmes lignes :</span><span lang="ar">ملأت ملف قاعدة بيانات SQLite بـ 1,000,000 مهمة، مفهرسة على <code>(visited_at DESC, id DESC)</code>، وجلبت صفحة من 10 أسطر كاملة على أعماق مختلفة بالطريقتين (وسيط 5 محاولات، على حاسوبي). وكلتاهما تُرجعان الأسطر نفسها تماماً:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Rows skipped</span><span lang="fr">Lignes sautées</span><span lang="ar">الأسطر المتخطاة</span></th><th class="num">OFFSET</th><th class="num"><span lang="en">Cursor</span><span lang="fr">Curseur</span><span lang="ar">المؤشر</span></th></tr>
+          <tr><td class="num">0</td><td class="num">0.08 ms</td><td class="num">0.05 ms</td></tr>
+          <tr><td class="num">100,000</td><td class="num">5.96 ms</td><td class="num">0.09 ms</td></tr>
+          <tr><td class="num">500,000</td><td class="num">34.90 ms</td><td class="num">0.15 ms</td></tr>
+          <tr><td class="num">999,990</td><td class="num">59.27 ms</td><td class="num">0.05 ms</td></tr>
+        </table></div>
+        <p><span lang="en">OFFSET grows with the depth: the last page is about 1,000 times slower than with a cursor, which stays flat. The query plans say why: OFFSET is a <code>SCAN</code> of the index, the cursor a <code>SEARCH</code>. Sixty milliseconds looks small, but it is per request, on every request to a deep page, and it keeps growing with the table.</span>
+           <span lang="fr">OFFSET grandit avec la profondeur : la dernière page est environ 1 000 fois plus lente qu'avec un curseur, qui reste constant. Les plans de requête disent pourquoi : OFFSET fait un <code>SCAN</code> de l'index, le curseur un <code>SEARCH</code>. Soixante millisecondes, ça paraît peu, mais c'est par requête, pour chaque requête vers une page profonde, et ça continue de grandir avec la table.</span><span lang="ar">يكبر OFFSET مع العمق: الصفحة الأخيرة أبطأ بنحو 1,000 مرة مقارنة بالمؤشر، الذي يبقى ثابتاً. وتوضح خطط الاستعلام السبب: OFFSET يقوم بـ <code>SCAN</code> للفهرس، والمؤشر بـ <code>SEARCH</code>. ستون جزءاً من الألف من الثانية تبدو قليلة، لكنها لكل طلب، ولكل طلب نحو صفحة عميقة، وتواصل النمو مع الجدول.</span></p>
+
+        <h2><span lang="en">The row that appears twice</span><span lang="fr">La ligne qui apparaît deux fois</span><span lang="ar">السطر الذي يظهر مرتين</span></h2>
+        <p><span lang="en">The second problem is about correctness. With pages of 3, newest first, I loaded page 1, then added a new mission, then loaded page 2:</span>
+           <span lang="fr">Le deuxième problème concerne l'exactitude. Avec des pages de 3, les plus récentes d'abord, j'ai chargé la page 1, puis ajouté une nouvelle mission, puis chargé la page 2 :</span><span lang="ar">المشكلة الثانية تتعلق بالصحة. بصفحات من 3، الأحدث أولاً، حمّلت الصفحة 1، ثم أضفت مهمة جديدة، ثم حمّلت الصفحة 2:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th></th><th class="num"><span lang="en">Missions</span><span lang="fr">Missions</span><span lang="ar">المهام</span></th></tr>
+          <tr><td><span lang="en">Page 1</span><span lang="fr">Page 1</span><span lang="ar">الصفحة 1</span></td><td class="num">1, 2, 3</td></tr>
+          <tr><td><span lang="en">Page 2 with OFFSET 3</span><span lang="fr">Page 2 avec OFFSET 3</span><span lang="ar">الصفحة 2 مع <bdi>OFFSET 3</bdi></span></td><td class="num"><strong>3</strong>, 4, 5</td></tr>
+          <tr><td><span lang="en">Page 2 with a cursor</span><span lang="fr">Page 2 avec un curseur</span><span lang="ar">الصفحة 2 مع المؤشر</span></td><td class="num">4, 5, 6</td></tr>
+        </table></div>
+        <p><span lang="en">The new mission pushed mission 3 to position 4, so OFFSET showed it again. In an infinite scroll, that is a duplicated card; when rows are deleted, it is a card the user never sees. The cursor does not care: "before mission 3" means the same thing whatever happened at the top.</span>
+           <span lang="fr">La nouvelle mission a poussé la mission 3 en position 4, donc OFFSET l'a montrée une deuxième fois. Dans un défilement infini, c'est une carte en double ; quand des lignes sont supprimées, c'est une carte que l'utilisateur ne voit jamais. Le curseur s'en moque : « avant la mission 3 » veut dire la même chose, quoi qu'il se soit passé en haut.</span><span lang="ar">دفعت المهمة الجديدة المهمة 3 إلى الموضع 4، فأظهرها OFFSET مرة ثانية. في التمرير اللانهائي، هذه بطاقة مكررة؛ وعند حذف أسطر، تكون بطاقة لا يراها المستخدم أبداً. أما المؤشر فلا يتأثر: «قبل المهمة 3» تعني الشيء نفسه مهما حدث في الأعلى.</span></p>
+
+        <h2><span lang="en">What our API does</span><span lang="fr">Ce que fait notre API</span><span lang="ar">ما الذي تفعله واجهتنا البرمجية</span></h2>
+        <p><span lang="en">The backend uses Django REST Framework's <code>CursorPagination</code>, ordered by <code>-visited_at</code> with an index on that column. The cursor it returns looks random, but it is only base64:</span>
+           <span lang="fr">Le backend utilise <code>CursorPagination</code> de Django REST Framework, trié par <code>-visited_at</code> avec un index sur cette colonne. Le curseur qu'il renvoie a l'air aléatoire, mais ce n'est que du base64 :</span><span lang="ar">تستعمل الواجهة الخلفية <code>CursorPagination</code> من Django REST Framework، مرتبةً حسب <code>-visited_at</code> مع فهرس على هذا العمود. المؤشر الذي تُرجعه يبدو عشوائياً، لكنه مجرد base64:</span></p>
+<pre><code>next_cursor: cD0yMDI2LTExLTIwKzE3JTNBNTElM0EyOS41NzE1MjYlMkIwMCUzQTAw
+decoded:     p=2026-11-20 17:51:29.571526+00:00
+
+SELECT ... FROM missions_mission
+WHERE visited_at &lt; '2026-11-20 17:51:29.571526'
+ORDER BY visited_at DESC
+LIMIT 4      -- page size 3, plus one row to know if there is a next page</code></pre>
+        <p><span lang="en"><code>p</code> is the position: the date of the last mission on the page. DRF only uses the first ordering field for it; when several rows share that value, it adds an offset to the cursor to skip the ones already shown, capped at 1,000. So the ordering field should be unchanging, indexed and nearly unique. A mission's completion date fits well.</span>
+           <span lang="fr"><code>p</code>, c'est la position : la date de la dernière mission de la page. DRF n'utilise que le premier champ de tri pour ça ; quand plusieurs lignes ont la même valeur, il ajoute un décalage au curseur pour sauter celles déjà affichées, limité à 1 000. Le champ de tri doit donc être immuable, indexé et presque unique. La date de fin d'une mission convient bien.</span><span lang="ar"><code>p</code> هو الموضع: تاريخ آخر مهمة في الصفحة. ولا يستعمل DRF إلا حقل الترتيب الأول لذلك؛ وعندما تتشارك عدة أسطر القيمة نفسها، يضيف إزاحة إلى المؤشر لتخطي ما عُرض منها، بحد أقصى 1,000. لذلك يجب أن يكون حقل الترتيب ثابتاً ومفهرساً وشبه فريد. وتاريخ إنجاز المهمة يناسب ذلك جيداً.</span></p>
+        <p><span lang="en">Base64 is not encryption: anyone can read a DRF cursor. That is fine for a date already shown on screen, but a cursor must never carry anything the user should not see.</span>
+           <span lang="fr">Le base64, ce n'est pas du chiffrement : n'importe qui peut lire un curseur DRF. C'est sans problème pour une date déjà affichée à l'écran, mais un curseur ne doit jamais contenir quelque chose que l'utilisateur ne doit pas voir.</span><span lang="ar">base64 ليس تشفيراً: يستطيع أي شخص قراءة مؤشر DRF. وهذا لا يضر بالنسبة لتاريخ معروض أصلاً على الشاشة، لكن يجب ألا يحمل المؤشر أبداً شيئاً لا ينبغي للمستخدم رؤيته.</span></p>
+
+        <h2><span lang="en">What the frontend got wrong</span><span lang="fr">Ce que le frontend faisait mal</span><span lang="ar">ما أخطأت فيه الواجهة الأمامية</span></h2>
+        <p><span lang="en">The frontend was my part, and rereading it, three things did not match what we claimed:</span>
+           <span lang="fr">Le frontend, c'était ma partie, et en le relisant, trois choses ne correspondaient pas à ce que nous annoncions :</span><span lang="ar">كانت الواجهة الأمامية من نصيبي، وعند إعادة قراءتها، وجدت ثلاثة أشياء لا تطابق ما كنا نعلنه:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><b>React Query was installed, not used.</b> The README listed it, but pages, loading and errors were managed by hand with <code>useState</code> and a ref to avoid double requests.</span><span lang="fr"><b>React Query était installé, mais pas utilisé.</b> Le README l'annonçait, mais les pages, le chargement et les erreurs étaient gérés à la main avec <code>useState</code> et une ref pour éviter les doubles requêtes.</span><span lang="ar"><b>كانت React Query مثبّتة لكن غير مستعملة.</b> كان README يذكرها، لكن الصفحات والتحميل والأخطاء كانت تُدار يدوياً بـ <code>useState</code> ومرجع (ref) لتفادي الطلبات المزدوجة.</span></li>
+          <li><span lang="en"><b>An artificial delay.</b> Each request waited 800 ms before calling the API, most likely left over from testing the loading state. With pages of 3, reading all 300 missions means 100 requests, so at least 80 seconds of pure waiting.</span><span lang="fr"><b>Un délai artificiel.</b> Chaque requête attendait 800 ms avant d'appeler l'API, sans doute un reste des tests de l'état de chargement. Avec des pages de 3, lire les 300 missions, c'est 100 requêtes, donc au moins 80 secondes d'attente pure.</span><span lang="ar"><b>تأخير مصطنع.</b> كان كل طلب ينتظر 800 جزء من الألف من الثانية قبل استدعاء الواجهة البرمجية، وهو على الأرجح بقايا اختبار حالة التحميل. وبصفحات من 3، تعني قراءة المهام الـ300 كلها 100 طلب، أي 80 ثانية على الأقل من الانتظار المحض.</span></li>
+          <li><span lang="en"><b>Virtualization was promised, not built.</b> The README explained that only visible cards are rendered and recycled while scrolling. In reality, after scrolling to the end, all 300 cards were in the page. Pagination limits what you fetch; virtualization limits what you render, and we had only the first.</span><span lang="fr"><b>La virtualisation était promise, pas construite.</b> Le README expliquait que seules les cartes visibles sont affichées et recyclées pendant le défilement. En réalité, après avoir défilé jusqu'au bout, les 300 cartes étaient toutes dans la page. La pagination limite ce qu'on télécharge ; la virtualisation limite ce qu'on affiche, et nous n'avions que la première.</span><span lang="ar"><b>كان التمثيل الافتراضي (virtualization) موعوداً لا منجزاً.</b> كان README يشرح أن البطاقات المرئية وحدها تُعرض ويُعاد استعمالها أثناء التمرير. لكن في الواقع، بعد التمرير حتى النهاية، كانت البطاقات الـ300 كلها في الصفحة. الترقيم يحدّ مما نجلبه؛ والتمثيل الافتراضي يحدّ مما نعرضه، ولم يكن لدينا إلا الأول.</span></li>
+        </ul>
+        <p><span lang="en">The hook now uses <code>useInfiniteQuery</code>, which is built exactly for cursor pagination: each page tells React Query where the next one starts.</span>
+           <span lang="fr">Le hook utilise maintenant <code>useInfiniteQuery</code>, fait exactement pour la pagination par curseur : chaque page indique à React Query où commence la suivante.</span><span lang="ar">أصبح الـ hook يستعمل <code>useInfiniteQuery</code>، المصمَّم تحديداً للترقيم بالمؤشر: كل صفحة تخبر React Query من أين تبدأ الصفحة التالية.</span></p>
+<pre><code>const query = useInfiniteQuery({
+  queryKey: ['missions'],
+  queryFn: ({ pageParam }) =&gt; fetchMissions(pageParam),
+  initialPageParam: null,
+  getNextPageParam: (last) =&gt;
+    last.pagination.has_more ? last.pagination.next_cursor : undefined,
+});
+const missions = query.data?.pages.flatMap((page) =&gt; page.data) ?? [];</code></pre>
+        <p><span lang="en">The 800 ms delay is gone, the README now says that virtualization is not implemented yet, and the seed command no longer crashes on Windows terminals because of an emoji in its output. Scrolling to the end in a browser loads the 300 missions in 100 requests with no duplicates, and React Query sends the first request only once, even under React's strict mode.</span>
+           <span lang="fr">Le délai de 800 ms a disparu, le README dit maintenant que la virtualisation n'est pas encore implémentée, et la commande de seed ne plante plus dans les terminaux Windows à cause d'un emoji dans son affichage. En défilant jusqu'au bout dans un navigateur, les 300 missions arrivent en 100 requêtes, sans doublon, et React Query n'envoie la première requête qu'une seule fois, même avec le mode strict de React.</span><span lang="ar">اختفى تأخير الـ800 جزء من الألف من الثانية، وأصبح README يقول إن التمثيل الافتراضي لم يُنجز بعد، ولم يعد أمر توليد البيانات ينهار في طرفيات ويندوز بسبب رمز تعبيري في مخرجاته. وعند التمرير حتى النهاية في المتصفح، تصل المهام الـ300 في 100 طلب دون تكرار، ولا ترسل React Query الطلب الأول إلا مرة واحدة، حتى مع الوضع الصارم في React.</span></p>
+
+        <h2><span lang="en">What a cursor costs</span><span lang="fr">Ce que coûte un curseur</span><span lang="ar">ما الذي يكلّفه المؤشر</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">No "jump to page 50": you can only go forward or back from where you are. Fine for a feed or a history, not for a search results page with numbered pages.</span><span lang="fr">Pas de « aller à la page 50 » : on ne peut qu'avancer ou reculer depuis là où on est. Très bien pour un fil ou un historique, pas pour des résultats de recherche avec des numéros de page.</span><span lang="ar">لا يوجد «انتقل إلى الصفحة 50»: لا يمكنك إلا التقدّم أو الرجوع من حيث أنت. مناسب لموجز أو سجل، لا لصفحة نتائج بحث بأرقام صفحات.</span></li>
+          <li><span lang="en">The sort order is fixed by the index. Sorting by another column needs its own index and its own cursor.</span><span lang="fr">L'ordre de tri est fixé par l'index. Trier par une autre colonne demande son propre index et son propre curseur.</span><span lang="ar">ترتيب الفرز يحدده الفهرس. والفرز حسب عمود آخر يحتاج إلى فهرس خاص به ومؤشر خاص به.</span></li>
+          <li><span lang="en">Page size still matters: pages of 3 made a good demo, but 100 round trips for 300 items is a lot. Something like 20 to 50 is more usual.</span><span lang="fr">La taille des pages compte toujours : des pages de 3 faisaient une bonne démo, mais 100 allers-retours pour 300 éléments, c'est beaucoup. Entre 20 et 50, c'est plus courant.</span><span lang="ar">حجم الصفحة ما زال مهماً: صفحات من 3 كانت مناسبة للعرض، لكن 100 رحلة ذهاب وإياب لـ300 عنصر كثير. والأكثر شيوعاً شيء بين 20 و50.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">OFFSET reads and discards every skipped row: its cost grows with the page number. A cursor with a matching index costs the same on every page.</span><span lang="fr">OFFSET lit et jette chaque ligne sautée : son coût grandit avec le numéro de page. Un curseur avec l'index qui va bien coûte la même chose à chaque page.</span><span lang="ar">يقرأ OFFSET كل سطر متخطى ثم يرميه: كلفته تكبر مع رقم الصفحة. أما المؤشر مع فهرس مناسب فكلفته نفسها في كل صفحة.</span></li>
+          <li><span lang="en">Positions move when data changes; values do not. For feeds and histories, page by value.</span><span lang="fr">Les positions bougent quand les données changent ; les valeurs, non. Pour les fils et les historiques, paginer par valeur.</span><span lang="ar">المواضع تتحرك عندما تتغير البيانات؛ أما القيم فلا. للموجزات والسجلات، رقّم بالقيمة.</span></li>
+          <li><span lang="en">Order by something unchanging and unique, adding the id as a tie-breaker if needed.</span><span lang="fr">Trier par quelque chose d'immuable et d'unique, en ajoutant l'id pour départager si besoin.</span><span lang="ar">رتّب حسب شيء ثابت وفريد، مع إضافة id لفك التعادل عند الحاجة.</span></li>
+          <li><span lang="en">Pagination and virtualization solve different problems. And a README should describe the code that exists.</span><span lang="fr">La pagination et la virtualisation règlent des problèmes différents. Et un README doit décrire le code qui existe.</span><span lang="ar">الترقيم والتمثيل الافتراضي يحلان مشكلتين مختلفتين. ويجب أن يصف README الشيفرة الموجودة فعلاً.</span></li>
+        </ul>
+        <p><span lang="en">The code (Django REST API and React frontend) is on <a href="https://github.com/adelmerad/Pagination" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Le code (API Django REST et frontend React) est sur <a href="https://github.com/adelmerad/Pagination" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">الشيفرة (واجهة Django REST البرمجية وواجهة React الأمامية) موجودة على <a href="https://github.com/adelmerad/Pagination" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://github.com/adelmerad/Pagination" target="_blank" rel="noopener"><span lang="en">Code on GitHub</span><span lang="fr">Code sur GitHub</span><span lang="ar">الشيفرة على GitHub</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
