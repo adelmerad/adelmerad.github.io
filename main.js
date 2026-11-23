@@ -9,6 +9,28 @@ function save(key, value) {
   try { localStorage.setItem(key, value); } catch {}
 }
 
+// Labels read by screen readers, in the page's language
+const labels = {
+  en: { language: "Language", theme: "Toggle theme", menu: "Menu" },
+  fr: { language: "Langue", theme: "Changer de thème", menu: "Menu" },
+  ar: { language: "اللغة", theme: "تبديل المظهر", menu: "القائمة" },
+};
+// Each language button is named in its own language. Not with a lang attribute:
+// the CSS hides every [lang] element that is not in the current language.
+const langNames = { en: "English", fr: "Français", ar: "العربية" };
+
+function applyLabels(lang) {
+  const l = labels[lang] || labels.en;
+  const set = (sel, text) => document.querySelectorAll(sel).forEach((el) => el.setAttribute("aria-label", text));
+  set(".lang-switch", l.language);
+  set("#theme", l.theme);
+  set(".burger", l.menu);
+  document.querySelectorAll("[data-set-lang]").forEach((btn) => {
+    btn.setAttribute("aria-label", langNames[btn.dataset.setLang]);
+    btn.setAttribute("aria-pressed", String(btn.dataset.setLang === lang));
+  });
+}
+
 // Language switch (EN / FR / AR)
 function setLang(lang) {
   root.dataset.lang = lang;
@@ -16,6 +38,13 @@ function setLang(lang) {
   root.dir = lang === "ar" ? "rtl" : "ltr";
   document.title = titles[lang];
   save("lang", lang);
+  applyLabels(lang);
+  // keep the language in the address bar, so a copied link opens in the same language
+  try {
+    const url = new URL(location.href);
+    url.searchParams.set("lang", lang);
+    history.replaceState(null, "", url);
+  } catch {}
 }
 document.querySelectorAll("[data-set-lang]").forEach((btn) => {
   btn.addEventListener("click", () => setLang(btn.dataset.setLang));
@@ -56,6 +85,8 @@ if (navLinks) {
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
   document.addEventListener("click", (e) => { if (!nav.contains(e.target)) setOpen(false); });
 }
+
+applyLabels(root.dataset.lang);
 
 // Highlight the menu link of the section on screen (home page anchors only)
 const sectionLinks = navLinks ? [...navLinks.querySelectorAll('a[href^="#"]')] : [];

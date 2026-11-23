@@ -351,8 +351,19 @@ html[lang="ar"] body, html[lang="ar"] body * { letter-spacing: 0 !important; }
 html[lang="ar"] body { line-height: 1.75; }
 html[dir="rtl"] .arr { display: inline-block; transform: scaleX(-1); }
 html[dir="rtl"] pre, html[dir="rtl"] code { direction: ltr; unicode-bidi: isolate; }
+/* inline code that wraps keeps its pieces in order: wrap it as one left-to-right box */
+html[dir="rtl"] :not(pre) > code { display: inline-block; max-width: 100%; }
 html[dir="rtl"] pre { text-align: left; }
 
 /* Availability line */
 .status { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); font-size: 13px; color: var(--muted); }
 .status .clock { color: var(--text); }
+
+/* Data tables in articles (numbers stay left-to-right in Arabic) */
+.post-body table.data { width: 100%; border-collapse: collapse; margin: 6px 0 22px; font-size: 15px; }
+.post-body table.data th, .post-body table.data td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: start; }
+.post-body table.data th { font-weight: 600; }
+.post-body table.data td.num, .post-body table.data th.num { font-family: var(--mono); font-size: 13.5px; }
+.post-body table.data td.num { direction: ltr; unicode-bidi: isolate; }
+html[dir="rtl"] .post-body table.data td.num { text-align: right; }
+.post-body .table-wrap { overflow-x: auto; }
