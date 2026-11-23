@@ -22,26 +22,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
-  <script>
-    // Apply saved theme/language before paint to avoid a flash
-    try {
-      const r = document.documentElement;
-      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
-      let l = localStorage.getItem("lang") || "en";
-      const langs = (r.dataset.langs || "en fr").split(" ");
-      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
-      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
-    } catch {}
-  </script>
-  <style>
-    .post-body table.data { width: 100%; border-collapse: collapse; margin: 6px 0 22px; font-size: 15px; }
-    .post-body table.data th, .post-body table.data td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: start; }
-    .post-body table.data th { font-weight: 600; }
-    .post-body table.data td.num, .post-body table.data th.num { font-family: var(--mono); font-size: 13.5px; }
-    .post-body table.data td.num { direction: ltr; unicode-bidi: isolate; }
-    html[dir="rtl"] .post-body table.data td.num { text-align: right; }
-    .post-body .table-wrap { overflow-x: auto; }
-  </style>
+  <script src="boot.js"></script>
 </head>
 <body class="case" data-title-en="Inside a video encoder — Adel Merad" data-title-fr="Dans un encodeur vidéo — Adel Merad" data-title-ar="داخل مشفّر فيديو — Adel Merad">
   <header class="nav">

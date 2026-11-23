@@ -25,17 +25,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
-  <script>
-    // Apply saved theme/language before paint to avoid a flash
-    try {
-      const r = document.documentElement;
-      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
-      let l = localStorage.getItem("lang") || "en";
-      const langs = (r.dataset.langs || "en fr").split(" ");
-      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
-      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
-    } catch {}
-  </script>
+  <script src="boot.js"></script>
 </head>
 <body data-title-ar="Adel Merad — مطوّر Full-Stack">
   <header class="nav">
