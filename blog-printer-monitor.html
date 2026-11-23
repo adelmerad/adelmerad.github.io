@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seven printers out of five: the bug in my monitor simulator — Adel Merad</title>
+  <meta name="description" content="My printer allocation monitor counted free printers but never recorded who held them. One accepted release later, it had 7 printers in use out of 5. How I found it, how often it happened, and two kinds of starvation.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-printer-monitor.html">
+  <meta property="og:title" content="Seven printers out of five: the bug in my monitor simulator">
+  <meta property="og:description" content="A counter is not ownership: a synchronization monitor that handed out printers twice, and two kinds of starvation.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-printer-monitor.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script src="boot.js"></script>
+</head>
+<body class="case" data-title-en="Seven printers out of five — Adel Merad" data-title-fr="Sept imprimantes sur cinq — Adel Merad" data-title-ar="سبع طابعات من أصل خمس — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 7 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 7 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 7 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">Seven printers out of five: the bug in my monitor simulator</span>
+          <span lang="fr">Sept imprimantes sur cinq : le bug de mon simulateur de moniteur</span><span lang="ar">سبع طابعات من أصل خمس: الخطأ في محاكي المراقب</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">My printer allocation monitor knew how many printers were free, but not who held the others. That was enough for one accepted release to leave 7 printers in use out of 5. How I found it, how often it happened, and two kinds of starvation hiding in the same rules.</span>
+          <span lang="fr">Mon moniteur d'allocation d'imprimantes savait combien d'imprimantes étaient libres, mais pas qui détenait les autres. Ça a suffi pour qu'une seule libération acceptée laisse 7 imprimantes utilisées sur 5. Comment je l'ai trouvé, à quelle fréquence ça arrivait, et deux formes de famine cachées dans les mêmes règles.</span><span lang="ar">كان مراقب تخصيص الطابعات الذي بنيته يعرف عدد الطابعات الحرة، لكنه لا يعرف من يملك البقية. وكان ذلك كافياً لكي يترك تحرير واحد مقبول 7 طابعات قيد الاستعمال من أصل 5. كيف وجدت الخطأ، وكم مرة كان يحدث، ونوعان من المجاعة مختبئان في القواعد نفسها.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en">The <a href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener">Printer Allocation Monitor</a> simulates a classic operating systems exercise: a monitor shares N printers between processes, and system processes have priority over user processes. A monitor is a module whose procedures run one at a time, with queues where processes wait. Here there are two procedures:</span>
+           <span lang="fr">Le <a href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener">Printer Allocation Monitor</a> simule un exercice classique de systèmes d'exploitation : un moniteur partage N imprimantes entre des processus, et les processus système ont la priorité sur les processus utilisateur. Un moniteur, c'est un module dont les procédures s'exécutent une à la fois, avec des files où les processus attendent. Ici il y a deux procédures :</span><span lang="ar"><a href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener">Printer Allocation Monitor</a> يحاكي تمريناً كلاسيكياً في أنظمة التشغيل: مراقب (monitor) يوزّع N طابعة بين العمليات، ولعمليات النظام الأولوية على عمليات المستخدم. المراقب وحدة تُنفَّذ إجراءاتها واحداً تلو الآخر، مع طوابير تنتظر فيها العمليات. وهنا يوجد إجراءان:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><b><code>Request(K, type)</code></b>: if K printers are free, the process gets them. Otherwise a user process waits in its queue. A system process takes the free printers right away and waits only for the rest.</span><span lang="fr"><b><code>Request(K, type)</code></b> : si K imprimantes sont libres, le processus les obtient. Sinon, un processus utilisateur attend dans sa file. Un processus système prend tout de suite les imprimantes libres et n'attend que le reste.</span><span lang="ar"><b><code>Request(K, type)</code></b>: إذا كانت K طابعة حرة، تحصل عليها العملية. وإلا تنتظر عملية المستخدم في طابورها. أما عملية النظام فتأخذ الطابعات الحرة فوراً ولا تنتظر إلا الباقي.</span></li>
+          <li><span lang="en"><b><code>Release(m)</code></b>: m printers come back. They go first to the system process at the head of its queue, then to user processes, in order.</span><span lang="fr"><b><code>Release(m)</code></b> : m imprimantes reviennent. Elles vont d'abord au processus système en tête de sa file, puis aux processus utilisateur, dans l'ordre.</span><span lang="ar"><b><code>Release(m)</code></b>: تعود m طابعة. تذهب أولاً إلى عملية النظام في رأس طابورها، ثم إلى عمليات المستخدم بالترتيب.</span></li>
+        </ul>
+        <p><span lang="en">The simulator animates each step, with a printer pool, the two queues, statistics, a starvation warning and an auto mode that fires random requests and releases.</span>
+           <span lang="fr">Le simulateur anime chaque étape, avec le parc d'imprimantes, les deux files, des statistiques, une alerte de famine et un mode auto qui lance des demandes et des libérations au hasard.</span><span lang="ar">يحرّك المحاكي كل خطوة، مع مجموعة الطابعات والطابورين والإحصائيات وتنبيه المجاعة، ووضع تلقائي يطلق طلبات وتحريرات عشوائية.</span></p>
+
+        <h2><span lang="en">Holding and waiting, without deadlock</span><span lang="fr">Garder et attendre, sans interblocage</span><span lang="ar">الاحتفاظ والانتظار، دون جمود</span></h2>
+        <p><span lang="en">A system process that keeps some printers while it waits for more is "hold and wait", one of the four conditions for a deadlock. It works here because only one process accumulates at a time: the head of the system queue. Every printer that comes back goes to it first, and no request asks for more than N, so as long as running processes eventually release, the head always completes and the next one takes its place.</span>
+           <span lang="fr">Un processus système qui garde des imprimantes pendant qu'il en attend d'autres, c'est le « hold and wait » (garder et attendre), l'une des quatre conditions d'un interblocage. Ça marche ici parce qu'un seul processus accumule à la fois : la tête de la file système. Chaque imprimante qui revient va d'abord à lui, et aucune demande ne dépasse N : tant que les processus en cours finissent par libérer, la tête finit toujours par être servie et le suivant prend sa place.</span><span lang="ar">عملية نظام تحتفظ ببعض الطابعات بينما تنتظر المزيد هي حالة «hold and wait» (الاحتفاظ والانتظار)، وهي أحد الشروط الأربعة للجمود (deadlock). لكنها تعمل هنا لأن عملية واحدة فقط تجمع الطابعات في كل مرة: رأس طابور النظام. كل طابعة تعود تذهب إليها أولاً، ولا يطلب أي طلب أكثر من N، فما دامت العمليات الجارية تحرّر طابعاتها في النهاية، تكتمل حاجة الرأس دائماً ويأخذ التالي مكانه.</span></p>
+        <p><span lang="en">Those partly served printers are the interesting part. They are not free, but no running process holds them either: they are reserved for a process that is still blocked.</span>
+           <span lang="fr">Ces imprimantes à moitié attribuées sont la partie intéressante. Elles ne sont pas libres, mais aucun processus en cours ne les détient non plus : elles sont réservées pour un processus encore bloqué.</span><span lang="ar">هذه الطابعات المخصصة جزئياً هي الجزء المثير للاهتمام. فهي ليست حرة، لكن لا تملكها أي عملية جارية أيضاً: إنها محجوزة لعملية ما زالت محجوبة.</span></p>
+
+        <h2><span lang="en">The bug: 7 printers out of 5</span><span lang="fr">Le bug : 7 imprimantes sur 5</span><span lang="ar">الخطأ: 7 طابعات من أصل 5</span></h2>
+        <p><span lang="en">The simulator stored one number, <code>Available</code>, and refused a release only if it asked for more than <code>N - Available</code>, the printers "in use". But that count includes the reserved ones. With 5 printers:</span>
+           <span lang="fr">Le simulateur stockait un seul nombre, <code>Available</code>, et refusait une libération seulement si elle demandait plus que <code>N - Available</code>, les imprimantes « utilisées ». Mais ce total inclut les réservées. Avec 5 imprimantes :</span><span lang="ar">كان المحاكي يخزّن رقماً واحداً، <code>Available</code>، ولا يرفض التحرير إلا إذا طلب أكثر من <code>N - Available</code>، أي الطابعات «المستعملة». لكن هذا العدد يشمل الطابعات المحجوزة. مع 5 طابعات:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Action</span><span lang="fr">Action</span><span lang="ar">الإجراء</span></th><th class="num">Available</th><th><span lang="en">Who really holds printers</span><span lang="fr">Qui détient vraiment des imprimantes</span><span lang="ar">من يملك الطابعات فعلاً</span></th></tr>
+          <tr><td><span lang="en">Sys-1 requests 3</span><span lang="fr">Sys-1 demande 3</span><span lang="ar">Sys-1 يطلب 3</span></td><td class="num">2</td><td class="num">Sys-1: 3</td></tr>
+          <tr><td><span lang="en">Sys-2 requests 3: takes 2, waits for 1</span><span lang="fr">Sys-2 demande 3 : prend 2, attend 1</span><span lang="ar">Sys-2 يطلب 3: يأخذ 2 وينتظر 1</span></td><td class="num">0</td><td class="num">Sys-1: 3<br>Sys-2: 2 (blocked)</td></tr>
+          <tr><td><span lang="en">Release 5: accepted, since <bdi dir="ltr">5 ≤ 5 − 0</bdi></span><span lang="fr">Release 5 : accepté, car <bdi dir="ltr">5 ≤ 5 − 0</bdi></span><span lang="ar"><bdi>Release 5</bdi>: مقبول، لأن <bdi dir="ltr">5 ≤ 5 − 0</bdi></span></td><td class="num">4</td><td class="num">Sys-2: 3</td></tr>
+          <tr><td><span lang="en">Usr-1 requests 4: granted</span><span lang="fr">Usr-1 demande 4 : accordé</span><span lang="ar">Usr-1 يطلب 4: مقبول</span></td><td class="num">0</td><td class="num"><strong>Sys-2: 3<br>Usr-1: 4<br>= 7</strong></td></tr>
+        </table></div>
+        <p><span lang="en">Sys-1 only ever held 3 printers. The release of 5 also gave back the 2 printers reserved for Sys-2, which kept them. From then on, the monitor believed 4 printers were free when only 2 were, and handed out the same printers twice. Every number on screen looked plausible; nothing crashed.</span>
+           <span lang="fr">Sys-1 n'a jamais détenu que 3 imprimantes. La libération de 5 a aussi rendu les 2 imprimantes réservées pour Sys-2, qui les a gardées. À partir de là, le moniteur croyait que 4 imprimantes étaient libres alors qu'il n'y en avait que 2, et il a distribué deux fois les mêmes imprimantes. Chaque nombre à l'écran avait l'air plausible ; rien n'a planté.</span><span lang="ar">لم يملك Sys-1 قط إلا 3 طابعات. لكن تحرير 5 أعاد أيضاً الطابعتين المحجوزتين لـ Sys-2، الذي احتفظ بهما. ومنذ تلك اللحظة، صار المراقب يظن أن 4 طابعات حرة بينما الحرة اثنتان فقط، ووزّع الطابعات نفسها مرتين. كل رقم على الشاشة كان يبدو معقولاً؛ ولم ينهَر شيء.</span></p>
+
+        <h2><span lang="en">How often?</span><span lang="fr">À quelle fréquence ?</span><span lang="ar">كم مرة؟</span></h2>
+        <p><span lang="en">You might think nobody would type "release 5" at that exact moment. But the auto mode did it for you: it picked a random release between 1 and <code>N - Available</code>. I replayed the auto mode's rules in a script that also tracked who held what. Out of 1,000 runs of 100 steps with 5 printers, <b>984 (98.4%)</b> released reserved printers at some point, and the median run did it by step 21.</span>
+           <span lang="fr">On pourrait penser que personne ne taperait « release 5 » pile à ce moment. Mais le mode auto le faisait à votre place : il choisissait une libération au hasard entre 1 et <code>N - Available</code>. J'ai rejoué les règles du mode auto dans un script qui suivait aussi qui détenait quoi. Sur 1 000 simulations de 100 étapes avec 5 imprimantes, <b>984 (98,4 %)</b> ont libéré des imprimantes réservées à un moment, et la moitié l'avaient déjà fait à l'étape 21.</span><span lang="ar">قد تظن أن لا أحد سيكتب «<bdi>release 5</bdi>» في تلك اللحظة بالذات. لكن الوضع التلقائي كان يفعل ذلك نيابةً عنك: كان يختار تحريراً عشوائياً بين 1 و<code>N - Available</code>. أعدت تشغيل قواعد الوضع التلقائي في سكربت يتتبع أيضاً من يملك ماذا. من أصل 1,000 محاكاة من 100 خطوة مع 5 طابعات، حرّرت <b>984 محاكاة (98.4%)</b> طابعات محجوزة في لحظة ما، ونصفها فعل ذلك قبل الخطوة 21.</span></p>
+
+        <h2><span lang="en">A counter is not ownership</span><span lang="fr">Un compteur n'est pas une propriété</span><span lang="ar">العدّاد ليس ملكية</span></h2>
+        <p><span lang="en">The root cause is a modelling mistake: the state said how many printers were free, but not who held the others. Any check built on that number could only ask "is this plausible?", never "is this yours?". The fix is to record the missing information. Each blocked system process now stores how many printers it already holds, and only printers held by running processes can be released:</span>
+           <span lang="fr">La cause profonde est une erreur de modélisation : l'état disait combien d'imprimantes étaient libres, mais pas qui détenait les autres. Toute vérification basée sur ce nombre pouvait seulement demander « est-ce plausible ? », jamais « est-ce à toi ? ». La correction consiste à enregistrer l'information manquante. Chaque processus système bloqué stocke maintenant combien d'imprimantes il détient déjà, et seules les imprimantes détenues par des processus en cours peuvent être libérées :</span><span lang="ar">السبب الحقيقي خطأ في النمذجة: كانت الحالة تقول كم طابعة حرة، لكنها لا تقول من يملك البقية. فأي فحص مبني على ذلك الرقم لا يستطيع إلا أن يسأل «هل هذا معقول؟»، وليس «هل هذا لك؟». والحل هو تسجيل المعلومة الناقصة. أصبحت كل عملية نظام محجوبة تخزّن عدد الطابعات التي تملكها مسبقاً، ولا يمكن تحرير إلا الطابعات التي تملكها عمليات جارية:</span></p>
+<pre><code>const reserved   = () =&gt; sysQueue.reduce((sum, e) =&gt; sum + e.held, 0);
+const releasable = () =&gt; N - available - reserved();
+
+if (m &gt; releasable()) refuse(`running processes hold only ${releasable()}`);</code></pre>
+        <p><span lang="en">The same scenario now stops at the third line: "running processes hold only 3 (2 more are reserved for Sys-2, which is still blocked)". Reserved printers are shown in amber, between free and in use, and the auto mode only releases what running processes hold. After 500 auto steps, the counters never disagreed with reality.</span>
+           <span lang="fr">Le même scénario s'arrête maintenant à la troisième ligne : « running processes hold only 3 (2 more are reserved for Sys-2, which is still blocked) ». Les imprimantes réservées sont affichées en ambre, entre libres et utilisées, et le mode auto ne libère que ce que détiennent les processus en cours. Après 500 étapes en mode auto, les compteurs n'ont jamais contredit la réalité.</span><span lang="ar">أصبح السيناريو نفسه يتوقف عند السطر الثالث: «<bdi>running processes hold only 3 (2 more are reserved for Sys-2, which is still blocked)</bdi>». وتظهر الطابعات المحجوزة باللون الكهرماني، بين الحرة والمستعملة، ولا يحرّر الوضع التلقائي إلا ما تملكه العمليات الجارية. وبعد 500 خطوة تلقائية، لم تتعارض العدادات مع الواقع ولو مرة.</span></p>
+
+        <h2><span lang="en">Two kinds of starvation</span><span lang="fr">Deux formes de famine</span><span lang="ar">نوعان من المجاعة</span></h2>
+        <p><span lang="en">Starvation is when a process waits forever even though the system keeps working. The simulator already warned about the obvious kind: while system requests keep arriving, user processes are never served, because system processes have priority.</span>
+           <span lang="fr">La famine, c'est quand un processus attend pour toujours alors que le système continue de tourner. Le simulateur signalait déjà la forme évidente : tant que des demandes système arrivent, les processus utilisateur ne sont jamais servis, parce que les processus système ont la priorité.</span><span lang="ar">المجاعة هي أن تنتظر عملية إلى الأبد بينما يواصل النظام عمله. كان المحاكي ينبّه أصلاً إلى النوع الواضح: ما دامت طلبات النظام تصل، لا تُخدم عمليات المستخدم أبداً، لأن لعمليات النظام الأولوية.</span></p>
+        <p><span lang="en">Rereading the rules, I found a second, quieter kind among user processes themselves. When printers come back, user processes are served strictly in order: if the head needs 4 and only 3 are free, everyone behind it waits too. But a new user request that fits in the free printers is served at once, ahead of all of them. So a small request that arrives late beats a small request that arrived early, and a large request can be overtaken again and again. In my replay of the auto mode, this happened in <b>968 of the 1,000 runs</b>.</span>
+           <span lang="fr">En relisant les règles, j'ai trouvé une deuxième forme, plus discrète, entre les processus utilisateur eux-mêmes. Quand des imprimantes reviennent, les processus utilisateur sont servis strictement dans l'ordre : si la tête en veut 4 et qu'il n'y en a que 3 de libres, tous ceux derrière attendent aussi. Mais une nouvelle demande utilisateur qui tient dans les imprimantes libres est servie tout de suite, devant tout le monde. Donc une petite demande arrivée tard passe avant une petite demande arrivée tôt, et une grosse demande peut être doublée encore et encore. Dans ma reproduction du mode auto, c'est arrivé dans <b>968 simulations sur 1 000</b>.</span><span lang="ar">عند إعادة قراءة القواعد، وجدت نوعاً ثانياً أهدأ بين عمليات المستخدم نفسها. عندما تعود الطابعات، تُخدم عمليات المستخدم بالترتيب الصارم: إذا احتاج الرأس 4 ولم تتوفر إلا 3، انتظر كل من خلفه أيضاً. لكن طلب مستخدم جديداً يتسع له عدد الطابعات الحرة يُخدم فوراً، قبل الجميع. فالطلب الصغير الذي يصل متأخراً يسبق طلباً صغيراً وصل مبكراً، والطلب الكبير قد يُتجاوز مرة بعد مرة. وفي إعادة تشغيلي للوضع التلقائي، حدث ذلك في <b>968 محاكاة من أصل 1,000</b>.</span></p>
+        <p><span lang="en">The exercise's rules allow it, so the simulator keeps the behaviour, but it now reports it: "User queue overtaken by 1 newer request(s): risk of starvation". Fixing it would be a design choice, for example serving new user requests only when nobody is waiting, which is fairer but leaves printers idle more often.</span>
+           <span lang="fr">Les règles de l'exercice le permettent, donc le simulateur garde ce comportement, mais il le signale maintenant : « User queue overtaken by 1 newer request(s): risk of starvation ». Le corriger serait un choix de conception, par exemple ne servir les nouvelles demandes utilisateur que si personne n'attend : c'est plus juste, mais les imprimantes restent plus souvent inutilisées.</span><span lang="ar">قواعد التمرين تسمح بذلك، لذلك يحتفظ المحاكي بهذا السلوك، لكنه أصبح ينبّه إليه: «<bdi>User queue overtaken by 1 newer request(s): risk of starvation</bdi>». أما إصلاحه فهو خيار تصميمي، مثل عدم خدمة طلبات المستخدم الجديدة إلا إذا لم يكن أحد ينتظر: هذا أعدل، لكن الطابعات تبقى غير مستعملة أكثر.</span></p>
+
+        <h2><span lang="en">One small thing</span><span lang="fr">Un petit détail</span><span lang="ar">تفصيل صغير</span></h2>
+        <p><span lang="en">The light/dark theme was saved with <code>localStorage</code> without a <code>try</code>. In browsers where storage is blocked, that call throws, and since it ran during start-up, the whole simulator could fail to load. Storage errors are now ignored: the theme is simply not remembered.</span>
+           <span lang="fr">Le thème clair/sombre était enregistré avec <code>localStorage</code> sans <code>try</code>. Dans les navigateurs où le stockage est bloqué, cet appel lève une erreur, et comme il s'exécutait au démarrage, tout le simulateur pouvait ne pas se charger. Les erreurs de stockage sont maintenant ignorées : le thème n'est simplement pas mémorisé.</span><span lang="ar">كان المظهر الفاتح/الداكن يُحفظ بـ <code>localStorage</code> دون <code>try</code>. وفي المتصفحات التي يكون فيها التخزين محظوراً، يرمي هذا الاستدعاء خطأً، ولأنه كان يُنفَّذ عند البدء، قد يفشل تحميل المحاكي كله. أصبحت أخطاء التخزين تُتجاهل الآن: ببساطة لا يُحفظ المظهر.</span></p>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">A counter is not ownership. If the state cannot say who holds a resource, no check can stop it from being given out twice.</span><span lang="fr">Un compteur n'est pas une propriété. Si l'état ne peut pas dire qui détient une ressource, aucune vérification ne peut empêcher qu'elle soit distribuée deux fois.</span><span lang="ar">العدّاد ليس ملكية. إذا لم تستطع الحالة أن تقول من يملك المورد، فلا يمكن لأي فحص أن يمنع توزيعه مرتين.</span></li>
+          <li><span lang="en">Write the invariant down and check it continuously: free + reserved + held by running processes = N.</span><span lang="fr">Écrire l'invariant et le vérifier en continu : libres + réservées + détenues par les processus en cours = N.</span><span lang="ar">اكتب الثابت (invariant) وتحقق منه باستمرار: الحرة + المحجوزة + التي تملكها العمليات الجارية = N.</span></li>
+          <li><span lang="en">Random simulation finds what hand-written scenarios miss: the demo scenario never triggered this bug, the auto mode did almost every time.</span><span lang="fr">La simulation aléatoire trouve ce que les scénarios écrits à la main ratent : le scénario de démo ne déclenchait jamais ce bug, le mode auto presque à chaque fois.</span><span lang="ar">المحاكاة العشوائية تجد ما تفوّته السيناريوهات المكتوبة يدوياً: سيناريو العرض لم يُطلق هذا الخطأ أبداً، أما الوضع التلقائي فأطلقه في كل مرة تقريباً.</span></li>
+          <li><span lang="en">Priority and "serve what fits now" both trade fairness for throughput. Make that choice on purpose, and make starvation visible.</span><span lang="fr">La priorité et le « servir ce qui tient maintenant » échangent tous les deux de l'équité contre du rendement. Faire ce choix exprès, et rendre la famine visible.</span><span lang="ar">الأولوية و«خدمة ما يتسع الآن» كلاهما يقايض العدالة بالإنتاجية. اتخذ هذا القرار عن قصد، واجعل المجاعة مرئية.</span></li>
+        </ul>
+        <p><span lang="en">Try the <a href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener">simulator</a>, or read the code on <a href="https://github.com/adelmerad/printer-allocation-monitor" target="_blank" rel="noopener">GitHub</a>. It follows the <a href="blog-race-condition.html">race condition article</a>: after the lost update, the process that waits forever.</span>
+           <span lang="fr">Essayez le <a href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener">simulateur</a>, ou lisez le code sur <a href="https://github.com/adelmerad/printer-allocation-monitor" target="_blank" rel="noopener">GitHub</a>. Cet article fait suite à celui sur la <a href="blog-race-condition.html">race condition</a> : après la mise à jour perdue, le processus qui attend pour toujours.</span><span lang="ar">جرّب <a href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener">المحاكي</a>، أو اقرأ الشيفرة على <a href="https://github.com/adelmerad/printer-allocation-monitor" target="_blank" rel="noopener">GitHub</a>. يأتي هذا المقال بعد مقال <a href="blog-race-condition.html">حالة السباق</a>: بعد التحديث الضائع، العملية التي تنتظر إلى الأبد.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://adelmerad.github.io/printer-allocation-monitor/" target="_blank" rel="noopener"><span lang="en">Try the simulator</span><span lang="fr">Essayer le simulateur</span><span lang="ar">جرّب المحاكي</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
