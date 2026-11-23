@@ -22,17 +22,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
-  <script>
-    // Apply saved theme/language before paint to avoid a flash
-    try {
-      const r = document.documentElement;
-      const t = localStorage.getItem("theme"); if (t) r.dataset.theme = t;
-      let l = localStorage.getItem("lang") || "en";
-      const langs = (r.dataset.langs || "en fr").split(" ");
-      if (!langs.includes(l)) l = l === "ar" ? "fr" : "en";
-      r.dataset.lang = l; r.lang = l; r.dir = l === "ar" ? "rtl" : "ltr";
-    } catch {}
-  </script>
+  <script src="boot.js"></script>
 </head>
 <body class="case" data-title-en="Blog — Adel Merad" data-title-fr="Blog — Adel Merad" data-title-ar="المدونة — Adel Merad">
   <header class="nav">
@@ -61,6 +51,14 @@
 
     <section class="case-section">
       <ul class="posts">
+        <li>
+          <a class="post-card" href="blog-three-languages.html">
+            <span class="mono muted"><span lang="en">November 2026 · 8 min read · Web · Internationalisation</span><span lang="fr">Novembre 2026 · 8 min de lecture · Web · Internationalisation</span><span lang="ar">نوفمبر 2026 · 8 دقائق قراءة · الويب · تعدد اللغات</span></span>
+            <h2><span lang="en">One page, three languages: a trilingual site without a framework</span><span lang="fr">Une page, trois langues : un site trilingue sans framework</span><span lang="ar">صفحة واحدة بثلاث لغات: موقع ثلاثي اللغة دون إطار عمل</span></h2>
+            <p><span lang="en">How this site shows English, French and Arabic with one CSS rule, the right-to-left and bidirectional text traps, and what this approach costs.</span><span lang="fr">Comment ce site affiche l'anglais, le français et l'arabe avec une seule règle CSS, les pièges de la droite-à-gauche et du texte bidirectionnel, et ce que cette approche coûte.</span><span lang="ar">كيف يعرض هذا الموقع الإنجليزية والفرنسية والعربية بقاعدة CSS واحدة، وفخاخ الكتابة من اليمين إلى اليسار والنص ثنائي الاتجاه، وما تكلّفه هذه الطريقة.</span></p>
+            <span class="read"><span lang="en">Read the article</span><span lang="fr">Lire l'article</span><span lang="ar">اقرأ المقال</span> <span class="arr">→</span></span>
+          </a>
+        </li>
         <li>
           <a class="post-card" href="blog-race-condition.html">
             <span class="mono muted"><span lang="en">November 2026 · 7 min read · Systems · C</span><span lang="fr">Novembre 2026 · 7 min de lecture · Systèmes · C</span><span lang="ar">نوفمبر 2026 · 7 دقائق قراءة · أنظمة · C</span></span>

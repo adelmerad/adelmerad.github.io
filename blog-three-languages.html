@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One page, three languages: a trilingual site without a framework — Adel Merad</title>
+  <meta name="description" content="How this site shows English, French and Arabic with no framework and no build step: every text three times, one CSS rule, a script that runs before paint, right-to-left layout, and the bidirectional text traps I hit along the way.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-three-languages.html">
+  <meta property="og:title" content="One page, three languages: a trilingual site without a framework">
+  <meta property="og:description" content="English, French and Arabic on a static site: one CSS rule, right-to-left layout, bidirectional text traps, and what this approach costs.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-three-languages.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script src="boot.js"></script>
+</head>
+<body class="case" data-title-en="One page, three languages — Adel Merad" data-title-fr="Une page, trois langues — Adel Merad" data-title-ar="صفحة واحدة بثلاث لغات — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 8 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 8 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 8 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">One page, three languages: a trilingual site without a framework</span>
+          <span lang="fr">Une page, trois langues : un site trilingue sans framework</span><span lang="ar">صفحة واحدة بثلاث لغات: موقع ثلاثي اللغة دون إطار عمل</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">The site you are reading speaks English, French and Arabic, with no framework, no build step and no translation library. Here is how it works, the right-to-left traps I fell into, and what this approach really costs.</span>
+          <span lang="fr">Le site que vous lisez parle anglais, français et arabe, sans framework, sans étape de build et sans bibliothèque de traduction. Voici comment il fonctionne, les pièges de l'écriture de droite à gauche dans lesquels je suis tombé, et ce que cette approche coûte vraiment.</span><span lang="ar">الموقع الذي تقرؤه يتحدث الإنجليزية والفرنسية والعربية، دون إطار عمل ودون مرحلة بناء ودون مكتبة ترجمة. إليك كيف يعمل، وفخاخ الكتابة من اليمين إلى اليسار التي وقعت فيها، وما تكلّفه هذه الطريقة فعلاً.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+
+        <h2><span lang="en">Why three languages</span><span lang="fr">Pourquoi trois langues</span><span lang="ar">لماذا ثلاث لغات</span></h2>
+        <p><span lang="en">In Algeria, a recruiter may read English, a local company often works in French, and Arabic is the language many people read most naturally. I wanted the same portfolio to work for all of them. The site is plain HTML, CSS and a little JavaScript on GitHub Pages: 22 pages, and more than 900 pieces of text, each written three times.</span>
+           <span lang="fr">En Algérie, un recruteur peut lire l'anglais, une entreprise locale travaille souvent en français, et l'arabe est la langue que beaucoup lisent le plus naturellement. Je voulais que le même portfolio marche pour tous. Le site est du HTML, du CSS et un peu de JavaScript sur GitHub Pages : 22 pages, et plus de 900 textes, chacun écrit trois fois.</span><span lang="ar">في الجزائر، قد يقرأ مسؤول التوظيف بالإنجليزية، وكثيراً ما تعمل الشركات المحلية بالفرنسية، والعربية هي اللغة التي يقرؤها كثيرون بشكل أكثر طبيعية. أردت أن يناسب ملف الأعمال نفسه الجميع. الموقع مكتوب بـ HTML وCSS وقليل من JavaScript على GitHub Pages: 22 صفحة، وأكثر من 900 نص، كل منها مكتوب ثلاث مرات.</span></p>
+
+        <h2><span lang="en">The trick: everything is there, CSS shows one</span><span lang="fr">L'astuce : tout est là, le CSS en montre une</span><span lang="ar">الفكرة: كل شيء موجود، وCSS يُظهر لغة واحدة</span></h2>
+        <p><span lang="en">Every text is written three times, side by side, each in a <code>span</code> with a <code>lang</code> attribute:</span>
+           <span lang="fr">Chaque texte est écrit trois fois, côte à côte, chacun dans un <code>span</code> avec un attribut <code>lang</code> :</span><span lang="ar">كل نص مكتوب ثلاث مرات، جنباً إلى جنب، كل نسخة في <code>span</code> بخاصية <code>lang</code>:</span></p>
+<pre><code>&lt;h2&gt;
+  &lt;span lang="en"&gt;Projects&lt;/span&gt;
+  &lt;span lang="fr"&gt;Projets&lt;/span&gt;
+  &lt;span lang="ar"&gt;المشاريع&lt;/span&gt;
+&lt;/h2&gt;</code></pre>
+        <p><span lang="en">The <code>html</code> element carries the chosen language, and one CSS rule hides the two others:</span>
+           <span lang="fr">L'élément <code>html</code> porte la langue choisie, et une seule règle CSS cache les deux autres :</span><span lang="ar">يحمل عنصر <code>html</code> اللغة المختارة، وقاعدة CSS واحدة تُخفي اللغتين الأخريين:</span></p>
+<pre><code>html[data-lang="en"] body [lang="fr"], html[data-lang="en"] body [lang="ar"],
+html[data-lang="fr"] body [lang="en"], html[data-lang="fr"] body [lang="ar"],
+html[data-lang="ar"] body [lang="en"], html[data-lang="ar"] body [lang="fr"] {
+  display: none !important;
+}</code></pre>
+        <p><span lang="en">Switching language is just changing that attribute: no page reload, no text to fetch, nothing to re-render. And the <code>lang</code> attribute is not only a CSS hook. It tells screen readers which voice to use, and it lets the browser pick the right font: the font list falls back to IBM Plex Sans Arabic for Arabic letters.</span>
+           <span lang="fr">Changer de langue, c'est juste changer cet attribut : pas de rechargement, pas de texte à télécharger, rien à réafficher. Et l'attribut <code>lang</code> n'est pas qu'un repère pour le CSS. Il indique aux lecteurs d'écran quelle voix utiliser, et il permet au navigateur de choisir la bonne police : la liste de polices se rabat sur IBM Plex Sans Arabic pour les lettres arabes.</span><span lang="ar">تغيير اللغة هو مجرد تغيير هذه الخاصية: لا إعادة تحميل للصفحة، ولا نص يجب جلبه، ولا شيء يُعاد رسمه. وخاصية <code>lang</code> ليست مجرد علامة لـ CSS. فهي تخبر قارئات الشاشة بالصوت الذي يجب استعماله، وتسمح للمتصفح باختيار الخط المناسب: إذ تنتقل قائمة الخطوط إلى IBM Plex Sans Arabic للحروف العربية.</span></p>
+
+        <h2><span lang="en">No flash of the wrong language</span><span lang="fr">Pas de flash de la mauvaise langue</span><span lang="ar">لا وميض للغة الخطأ</span></h2>
+        <p><span lang="en">The visitor's choice is saved in <code>localStorage</code>. If it were applied by the main script at the end of the page, an Arabic reader would first see the English page, then watch it jump to the right. So a tiny script in the <code>&lt;head&gt;</code> runs before anything is painted and sets the language, the direction and the theme. Its reads are wrapped in <code>try</code>, because storage can throw in private windows: the page must still work, in English.</span>
+           <span lang="fr">Le choix du visiteur est enregistré dans <code>localStorage</code>. S'il était appliqué par le script principal à la fin de la page, un lecteur arabophone verrait d'abord la page en anglais, puis la verrait basculer vers la droite. Donc un tout petit script dans le <code>&lt;head&gt;</code> s'exécute avant tout affichage et fixe la langue, la direction et le thème. Ses lectures sont dans un <code>try</code>, car le stockage peut lever une erreur en navigation privée : la page doit quand même marcher, en anglais.</span><span lang="ar">يُحفظ اختيار الزائر في <code>localStorage</code>. ولو طُبّق بالسكربت الرئيسي في آخر الصفحة، لرأى القارئ العربي الصفحة بالإنجليزية أولاً، ثم رآها تنقلب نحو اليمين. لذلك يعمل سكربت صغير جداً في <code>&lt;head&gt;</code> قبل رسم أي شيء، فيضبط اللغة والاتجاه والمظهر. وقراءاته محاطة بـ <code>try</code>، لأن التخزين قد يرمي خطأً في التصفح الخاص: يجب أن تعمل الصفحة رغم ذلك، بالإنجليزية.</span></p>
+
+        <h2><span lang="en">Right to left</span><span lang="fr">De droite à gauche</span><span lang="ar">من اليمين إلى اليسار</span></h2>
+        <p><span lang="en">Setting <code>dir="rtl"</code> on the page flips most of the layout for free: text alignment, the order of flex and grid items. The rest needs care:</span>
+           <span lang="fr">Mettre <code>dir="rtl"</code> sur la page inverse gratuitement la plus grande partie de la mise en page : l'alignement du texte, l'ordre des éléments flex et grid. Le reste demande de l'attention :</span><span lang="ar">وضع <code>dir="rtl"</code> على الصفحة يقلب معظم التخطيط مجاناً: محاذاة النص، وترتيب عناصر flex وgrid. أما الباقي فيحتاج إلى عناية:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><b>Logical properties.</b> <code>padding-left</code> stays on the left in Arabic. <code>padding-inline-start</code> and <code>inset-inline-start</code> follow the reading direction, so on a phone the timeline's line and dots move to the right side on their own.</span><span lang="fr"><b>Les propriétés logiques.</b> <code>padding-left</code> reste à gauche en arabe. <code>padding-inline-start</code> et <code>inset-inline-start</code> suivent le sens de lecture : sur téléphone, la ligne et les points de la frise passent tout seuls à droite.</span><span lang="ar"><b>الخصائص المنطقية.</b> تبقى <code>padding-left</code> على اليسار في العربية. أما <code>padding-inline-start</code> و<code>inset-inline-start</code> فتتبعان اتجاه القراءة، فعلى الهاتف ينتقل خط المسار الزمني ونقاطه إلى اليمين تلقائياً.</span></li>
+          <li><span lang="en"><b>Arrows.</b> "Read the article →" must point left in Arabic, so arrows are mirrored with <code>transform: scaleX(-1)</code>.</span><span lang="fr"><b>Les flèches.</b> « Lire l'article → » doit pointer vers la gauche en arabe, donc les flèches sont retournées avec <code>transform: scaleX(-1)</code>.</span><span lang="ar"><b>الأسهم.</b> يجب أن يشير سهم «اقرأ المقال» إلى اليسار في العربية، لذلك تُعكس الأسهم بـ <code>transform: scaleX(-1)</code>.</span></li>
+          <li><span lang="en"><b>Code stays left to right.</b> Code blocks keep <code>direction: ltr</code> even inside an Arabic page.</span><span lang="fr"><b>Le code reste de gauche à droite.</b> Les blocs de code gardent <code>direction: ltr</code>, même dans une page en arabe.</span><span lang="ar"><b>تبقى الشيفرة من اليسار إلى اليمين.</b> تحتفظ كتل الشيفرة بـ <code>direction: ltr</code> حتى داخل صفحة عربية.</span></li>
+          <li><span lang="en"><b>Typography.</b> Arabic letters join each other, and <code>letter-spacing</code> breaks those joins, so it is set to 0 in Arabic. Arabic has no italics either: the tagline's highlighted words are bold instead.</span><span lang="fr"><b>La typographie.</b> Les lettres arabes sont liées entre elles, et <code>letter-spacing</code> casse ces liaisons : il est donc mis à 0 en arabe. L'arabe n'a pas non plus d'italique : les mots mis en valeur dans la phrase d'accroche sont en gras à la place.</span><span lang="ar"><b>الطباعة.</b> الحروف العربية متصلة ببعضها، و<code>letter-spacing</code> يكسر هذا الاتصال، لذلك يُضبط على 0 في العربية. كما لا توجد كتابة مائلة في العربية: الكلمات البارزة في العبارة الرئيسية تُكتب بخط عريض بدلاً من ذلك.</span></li>
+        </ul>
+
+        <h2><span lang="en">The bidirectional text traps</span><span lang="fr">Les pièges du texte bidirectionnel</span><span lang="ar">فخاخ النص ثنائي الاتجاه</span></h2>
+        <p><span lang="en">The hardest bugs came from mixing Arabic with Latin text and numbers. Browsers use the Unicode bidirectional algorithm: letters have a direction, but spaces, punctuation, <code>+</code> and parentheses are "neutral" and take the direction of the text around them. Three real examples from my articles:</span>
+           <span lang="fr">Les bugs les plus difficiles venaient du mélange de l'arabe avec du texte latin et des nombres. Les navigateurs utilisent l'algorithme bidirectionnel Unicode : les lettres ont une direction, mais les espaces, la ponctuation, le <code>+</code> et les parenthèses sont « neutres » et prennent la direction du texte qui les entoure. Trois exemples réels tirés de mes articles :</span><span lang="ar">جاءت أصعب الأخطاء من خلط العربية بنص لاتيني وأرقام. تستعمل المتصفحات خوارزمية Unicode ثنائية الاتجاه: للحروف اتجاه، أما المسافات وعلامات الترقيم و<code>+</code> والأقواس فهي «محايدة» وتأخذ اتجاه النص المحيط بها. ثلاثة أمثلة حقيقية من مقالاتي:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><b><bdi>counter++</bdi> became <bdi>++counter</bdi></b> in an Arabic heading. The two <code>+</code> signs at the end of the Latin word were neutral, so they followed the Arabic direction and jumped to the other side. Wrapping the word in <code>&lt;bdi&gt;</code> isolates it and keeps its own direction.</span><span lang="fr"><b><bdi>counter++</bdi> devenait <bdi>++counter</bdi></b> dans un titre en arabe. Les deux <code>+</code> à la fin du mot latin étaient neutres : ils suivaient la direction arabe et sautaient de l'autre côté. Entourer le mot d'un <code>&lt;bdi&gt;</code> l'isole et lui garde sa propre direction.</span><span lang="ar"><b>صار <bdi>counter++</bdi> يظهر <bdi>++counter</bdi></b> في عنوان عربي. كانت علامتا <code>+</code> في آخر الكلمة اللاتينية محايدتين، فاتبعتا الاتجاه العربي وقفزتا إلى الجهة الأخرى. إحاطة الكلمة بـ <code>&lt;bdi&gt;</code> تعزلها وتحفظ اتجاهها الخاص.</span></li>
+          <li><span lang="en"><b>Numbers in tables came out reversed.</b> In a results table, cells mixing numbers and units were reordered in Arabic. Number cells now use <code>direction: ltr; unicode-bidi: isolate</code>, right-aligned so the column still reads naturally.</span><span lang="fr"><b>Les nombres des tableaux sortaient à l'envers.</b> Dans un tableau de résultats, les cellules qui mélangeaient nombres et unités étaient réordonnées en arabe. Les cellules de nombres utilisent maintenant <code>direction: ltr; unicode-bidi: isolate</code>, alignées à droite pour que la colonne se lise toujours naturellement.</span><span lang="ar"><b>ظهرت الأرقام في الجداول معكوسة.</b> في جدول نتائج، كانت الخلايا التي تخلط الأرقام بالوحدات يُعاد ترتيبها في العربية. أصبحت خلايا الأرقام تستعمل <code>direction: ltr; unicode-bidi: isolate</code>، مع محاذاة إلى اليمين كي يُقرأ العمود بشكل طبيعي.</span></li>
+          <li><span lang="en"><b>Parentheses around an English term broke at the end of a line.</b> When "(race condition)" was split across two lines in Arabic, the parentheses ended up on the wrong sides. I rephrased the sentence without parentheses and kept the term on one line with <code>white-space: nowrap</code>.</span><span lang="fr"><b>Des parenthèses autour d'un terme anglais se cassaient en fin de ligne.</b> Quand « (race condition) » était coupé sur deux lignes en arabe, les parenthèses se retrouvaient du mauvais côté. J'ai reformulé la phrase sans parenthèses et gardé le terme sur une seule ligne avec <code>white-space: nowrap</code>.</span><span lang="ar"><b>انكسرت أقواس حول مصطلح إنجليزي في آخر السطر.</b> عندما انقسم «race condition» بين قوسين على سطرين في العربية، انتهت الأقواس في الجهات الخطأ. أعدت صياغة الجملة دون أقواس، وأبقيت المصطلح على سطر واحد بـ <code>white-space: nowrap</code>.</span></li>
+        </ul>
+        <p><span lang="en">And while I was writing this very article, it happened again: on a phone, in Arabic, the inline code <code>white-space: nowrap</code> wrapped into "white-" and ".space", in the wrong order. Inline code inside Arabic text is now laid out as one small left-to-right box, so when it has to wrap, its lines stay in order.</span>
+           <span lang="fr">Et pendant que j'écrivais cet article, c'est encore arrivé : sur téléphone, en arabe, le code <code>white-space: nowrap</code> s'est coupé en « white- » et « .space », dans le mauvais ordre. Le code en ligne dans un texte arabe est maintenant affiché comme une petite boîte de gauche à droite : quand il doit passer à la ligne, ses lignes restent dans l'ordre.</span><span lang="ar">وبينما كنت أكتب هذا المقال نفسه، حدث ذلك مجدداً: على الهاتف وبالعربية، انقسمت الشيفرة <code>white-space: nowrap</code> إلى «<bdi>white-</bdi>» و«<bdi>.space</bdi>» بترتيب خاطئ. أصبحت الشيفرة المضمّنة داخل النص العربي تُعرض الآن كصندوق صغير من اليسار إلى اليمين، فإذا اضطرت إلى الانتقال إلى سطر جديد بقيت أسطرها مرتبة.</span></p>
+        <p><span lang="en">None of these show up in English or French. The only way I found them was to look at every article in Arabic, on a phone-sized screen, where lines break the most.</span>
+           <span lang="fr">Aucun de ces bugs n'apparaît en anglais ou en français. La seule façon de les trouver a été de regarder chaque article en arabe, sur un écran de la taille d'un téléphone, là où les lignes se coupent le plus.</span><span lang="ar">لا يظهر أيّ من هذه الأخطاء بالإنجليزية أو الفرنسية. والطريقة الوحيدة التي وجدتها لاكتشافها هي مراجعة كل مقال بالعربية، على شاشة بحجم الهاتف، حيث تنكسر الأسطر أكثر.</span></p>
+
+        <h2><span lang="en">A trap of my own making</span><span lang="fr">Un piège que je me suis tendu moi-même</span><span lang="ar">فخ صنعته بنفسي</span></h2>
+        <p><span lang="en">The Arabic button in the language switch shows the letter "ع". A screen reader announces it as a lone letter, so it needs a proper name. The obvious fix would be <code>lang="ar"</code> on the button... and the CSS rule above would then hide the Arabic button whenever the page is in English or French, exactly when you need it. The button gets an <code>aria-label</code> instead.</span>
+           <span lang="fr">Le bouton arabe du sélecteur de langue affiche la lettre « ع ». Un lecteur d'écran l'annonce comme une lettre isolée, donc il lui faut un vrai nom. La correction évidente serait <code>lang="ar"</code> sur le bouton… et la règle CSS ci-dessus cacherait alors le bouton arabe dès que la page est en anglais ou en français, c'est-à-dire justement quand on en a besoin. Le bouton reçoit un <code>aria-label</code> à la place.</span><span lang="ar">يعرض زر العربية في محدد اللغة الحرف «ع». تنطقه قارئات الشاشة كحرف منفرد، لذلك يحتاج إلى اسم حقيقي. الحل البديهي هو وضع <code>lang="ar"</code> على الزر... لكن قاعدة CSS السابقة ستُخفي عندها زر العربية كلما كانت الصفحة بالإنجليزية أو الفرنسية، أي بالضبط عندما نحتاج إليه. لذلك يحصل الزر على <code>aria-label</code> بدلاً من ذلك.</span></p>
+
+        <h2><span lang="en">What this approach costs</span><span lang="fr">Ce que coûte cette approche</span><span lang="ar">ما تكلّفه هذه الطريقة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><b>Weight.</b> Every visitor downloads all three languages. For the home page, that is 9.8 KB compressed instead of about 5.3 KB for English alone. Acceptable for a portfolio, not for a site with thousands of pages.</span><span lang="fr"><b>Le poids.</b> Chaque visiteur télécharge les trois langues. Pour la page d'accueil, ça fait 9,8 Ko compressés au lieu d'environ 5,3 Ko pour l'anglais seul. Acceptable pour un portfolio, pas pour un site de milliers de pages.</span><span lang="ar"><b>الحجم.</b> يحمّل كل زائر اللغات الثلاث. بالنسبة للصفحة الرئيسية، هذا يعني 9.8 كيلوبايت مضغوطة بدل نحو 5.3 كيلوبايت للإنجليزية وحدها. مقبول لملف أعمال، لا لموقع من آلاف الصفحات.</span></li>
+          <li><span lang="en"><b>Search engines.</b> Google renders the page with no saved preference, so it sees the English version; the French and Arabic text is hidden and has little chance of appearing in search results. For the medical imaging center's website I did the opposite: each page exists twice, at its own URL, linked with <code>hreflang</code>, precisely so that the Arabic page can be found by someone searching in Arabic. A portfolio is found through links more than through search, so here I chose simplicity.</span><span lang="fr"><b>Les moteurs de recherche.</b> Google affiche la page sans préférence enregistrée, donc il voit la version anglaise ; le texte français et arabe est caché et a peu de chances d'apparaître dans les résultats. Pour le site du centre d'imagerie médicale, j'ai fait l'inverse : chaque page existe deux fois, à sa propre adresse, reliées par <code>hreflang</code>, justement pour qu'on trouve la page arabe en cherchant en arabe. Un portfolio se trouve plus par des liens que par la recherche, donc ici j'ai choisi la simplicité.</span><span lang="ar"><b>محركات البحث.</b> يعرض Google الصفحة دون أي تفضيل محفوظ، فيرى النسخة الإنجليزية؛ أما النص الفرنسي والعربي فمخفي وفرصته ضعيفة في الظهور في نتائج البحث. في موقع مركز التصوير الطبي فعلت العكس: كل صفحة موجودة مرتين، بعنوان خاص بها، مربوطتين بـ <code>hreflang</code>، تحديداً كي يجد من يبحث بالعربية الصفحة العربية. أما ملف الأعمال فيُعثر عليه عبر الروابط أكثر من البحث، لذلك اخترت هنا البساطة.</span></li>
+          <li><span lang="en"><b>Shared links.</b> The language lived only in the visitor's browser, so a link I sent to an Arabic-speaking friend opened in whatever language their browser had saved, usually English.</span><span lang="fr"><b>Les liens partagés.</b> La langue n'existait que dans le navigateur du visiteur : un lien que j'envoyais à un ami arabophone s'ouvrait dans la langue enregistrée par son navigateur, en général l'anglais.</span><span lang="ar"><b>الروابط المشتركة.</b> كانت اللغة محفوظة في متصفح الزائر فقط، فكان الرابط الذي أرسله إلى صديق يتحدث العربية يُفتح باللغة المحفوظة في متصفحه، وغالباً الإنجليزية.</span></li>
+        </ul>
+
+        <h2><span lang="en">What I changed after this review</span><span lang="fr">Ce que j'ai changé après cette relecture</span><span lang="ar">ما الذي غيّرته بعد هذه المراجعة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en"><b>Links can carry a language.</b> <code>?lang=ar</code> opens any page in Arabic and remembers it, and switching language updates the address bar, so a copied link opens in the language you were reading. Unknown values are ignored.</span><span lang="fr"><b>Les liens peuvent porter une langue.</b> <code>?lang=ar</code> ouvre n'importe quelle page en arabe et s'en souvient, et changer de langue met à jour la barre d'adresse : un lien copié s'ouvre dans la langue que vous lisiez. Les valeurs inconnues sont ignorées.</span><span lang="ar"><b>يمكن للروابط أن تحمل لغة.</b> يفتح <code>?lang=ar</code> أي صفحة بالعربية ويحفظها، وتغيير اللغة يحدّث شريط العنوان، فيُفتح الرابط المنسوخ باللغة التي كنت تقرأ بها. والقيم غير المعروفة تُتجاهل.</span></li>
+          <li><span lang="en"><b>One script instead of 21 copies.</b> The early script was pasted in every page. It now lives in one file, <code>boot.js</code>, still loaded in the <code>&lt;head&gt;</code> before paint.</span><span lang="fr"><b>Un script au lieu de 21 copies.</b> Le script de démarrage était collé dans chaque page. Il est maintenant dans un seul fichier, <code>boot.js</code>, toujours chargé dans le <code>&lt;head&gt;</code> avant l'affichage.</span><span lang="ar"><b>سكربت واحد بدل 21 نسخة.</b> كان سكربت البداية ملصقاً في كل صفحة. أصبح الآن في ملف واحد، <code>boot.js</code>، ويُحمَّل دائماً في <code>&lt;head&gt;</code> قبل الرسم.</span></li>
+          <li><span lang="en"><b>Labels for screen readers follow the language.</b> The theme, menu and language buttons were labelled in English on every page; they now follow the current language, each language button is named in its own language, and the selected one is marked with <code>aria-pressed</code>.</span><span lang="fr"><b>Les libellés pour lecteurs d'écran suivent la langue.</b> Les boutons du thème, du menu et des langues étaient nommés en anglais sur toutes les pages ; ils suivent maintenant la langue courante, chaque bouton de langue est nommé dans sa propre langue, et celui qui est choisi est marqué avec <code>aria-pressed</code>.</span><span lang="ar"><b>تسميات قارئات الشاشة تتبع اللغة.</b> كانت أزرار المظهر والقائمة واللغات مسمّاة بالإنجليزية في كل الصفحات؛ أصبحت الآن تتبع اللغة الحالية، وكل زر لغة مسمّى بلغته، والزر المختار مُعلَّم بـ <code>aria-pressed</code>.</span></li>
+          <li><span lang="en"><b>Shared styles.</b> The table styles that keep numbers left to right were copied into two articles; they now live in the main stylesheet. Inline code in Arabic wraps as one box. And the 404 page, which GitHub Pages can serve at any depth, loads the new script with an absolute path.</span><span lang="fr"><b>Des styles partagés.</b> Les styles de tableau qui gardent les nombres de gauche à droite étaient copiés dans deux articles ; ils sont maintenant dans la feuille de style principale. Le code en ligne en arabe se replie en un seul bloc. Et la page 404, que GitHub Pages peut servir à n'importe quelle profondeur, charge le nouveau script avec un chemin absolu.</span><span lang="ar"><b>أنماط مشتركة.</b> كانت أنماط الجداول التي تُبقي الأرقام من اليسار إلى اليمين منسوخة في مقالين؛ أصبحت الآن في ملف الأنماط الرئيسي. وأصبحت الشيفرة المضمّنة في العربية تنتقل إلى السطر كصندوق واحد. كما أن صفحة 404، التي قد يعرضها GitHub Pages على أي عمق، تحمّل السكربت الجديد بمسار مطلق.</span></li>
+        </ul>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">For a small site, all languages in the page plus one CSS rule is simple and fast. It does not scale to large sites or to search in every language.</span><span lang="fr">Pour un petit site, toutes les langues dans la page plus une règle CSS, c'est simple et rapide. Ça ne passe pas à l'échelle pour de gros sites, ni pour être trouvé en recherche dans chaque langue.</span><span lang="ar">لموقع صغير، وضع كل اللغات في الصفحة مع قاعدة CSS واحدة أمر بسيط وسريع. لكنه لا يصلح للمواقع الكبيرة، ولا للظهور في البحث بكل لغة.</span></li>
+          <li><span lang="en">Apply the language before the first paint, and never let storage errors break the page.</span><span lang="fr">Appliquer la langue avant le premier affichage, et ne jamais laisser une erreur de stockage casser la page.</span><span lang="ar">طبّق اللغة قبل أول رسم، ولا تدع أخطاء التخزين تكسر الصفحة أبداً.</span></li>
+          <li><span lang="en">For right to left, use logical properties and isolate every piece of Latin text, code or number with <code>&lt;bdi&gt;</code> or <code>unicode-bidi: isolate</code>.</span><span lang="fr">Pour la droite-à-gauche, utiliser les propriétés logiques et isoler chaque morceau de texte latin, de code ou de nombre avec <code>&lt;bdi&gt;</code> ou <code>unicode-bidi: isolate</code>.</span><span lang="ar">للكتابة من اليمين إلى اليسار، استعمل الخصائص المنطقية واعزل كل جزء من نص لاتيني أو شيفرة أو رقم بـ <code>&lt;bdi&gt;</code> أو <code>unicode-bidi: isolate</code>.</span></li>
+          <li><span lang="en">Test in the hardest language, on the smallest screen.</span><span lang="fr">Tester dans la langue la plus difficile, sur le plus petit écran.</span><span lang="ar">اختبر باللغة الأصعب، على أصغر شاشة.</span></li>
+        </ul>
+        <p><span lang="en">The source of this site is on <a href="https://github.com/adelmerad/adelmerad.github.io" target="_blank" rel="noopener">GitHub</a>. Try it: switch to <a href="?lang=ar">Arabic</a>, then copy the address and open it in another browser.</span>
+           <span lang="fr">Le code de ce site est sur <a href="https://github.com/adelmerad/adelmerad.github.io" target="_blank" rel="noopener">GitHub</a>. Essayez : passez en <a href="?lang=ar">arabe</a>, puis copiez l'adresse et ouvrez-la dans un autre navigateur.</span><span lang="ar">شيفرة هذا الموقع موجودة على <a href="https://github.com/adelmerad/adelmerad.github.io" target="_blank" rel="noopener">GitHub</a>. جرّب: انتقل إلى <a href="?lang=en">الإنجليزية</a>، ثم انسخ العنوان وافتحه في متصفح آخر.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://github.com/adelmerad/adelmerad.github.io" target="_blank" rel="noopener"><span lang="en">Code on GitHub</span><span lang="fr">Code sur GitHub</span><span lang="ar">الشيفرة على GitHub</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
