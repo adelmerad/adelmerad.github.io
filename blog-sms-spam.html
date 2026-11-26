@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The demo said spam: three bugs in a 98% accurate classifier — Adel Merad</title>
+  <meta name="description" content="My SMS spam detector scored 98% and classified every demo message correctly. A review still found three bugs: predictions skipped the preprocessing, the ROC AUC was computed on labels, and a class balancing step did nothing.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-sms-spam.html">
+  <meta property="og:title" content="The demo said spam: three bugs in a 98% accurate classifier">
+  <meta property="og:description" content="Training/serving skew, a ROC AUC computed on labels, and a balancing step that changed nothing, in a small scikit-learn project.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-sms-spam.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script src="boot.js"></script>
+</head>
+<body class="case" data-title-en="The demo said spam — Adel Merad" data-title-fr="La démo disait spam — Adel Merad" data-title-ar="قال العرض إنها رسالة مزعجة — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 6 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 6 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 6 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">The demo said spam: three bugs in a 98% accurate classifier</span>
+          <span lang="fr">La démo disait spam : trois bugs dans un classifieur précis à 98 %</span><span lang="ar">قال العرض إنها رسالة مزعجة: ثلاثة أخطاء في مصنِّف بدقة 98%</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">My SMS spam detector reached 98% accuracy, and every demo message landed in the right box. Reviewing it again, I found three bugs that none of those numbers showed: the predictions skipped the preprocessing, the ROC AUC was computed on the wrong input, and a class balancing step changed nothing. Then I checked whether the conclusion of the project still held.</span>
+          <span lang="fr">Mon détecteur de spam SMS atteignait 98 % de précision, et chaque message de démo tombait dans la bonne case. En le relisant, j'ai trouvé trois bugs qu'aucun de ces chiffres ne montrait : les prédictions sautaient le prétraitement, le ROC AUC était calculé sur la mauvaise entrée, et une étape d'équilibrage des classes ne changeait rien. Ensuite, j'ai vérifié si la conclusion du projet tenait toujours.</span><span lang="ar">بلغت دقة كاشف الرسائل المزعجة (spam) الذي بنيته 98%، وكانت كل رسالة تجريبية تقع في الخانة الصحيحة. وعندما راجعته من جديد، وجدت ثلاثة أخطاء لم يكشفها أي من تلك الأرقام: كانت التنبؤات تتخطى المعالجة المسبقة، وكان مقياس ROC AUC يُحسب على مدخلات خاطئة، وكانت خطوة لموازنة الفئات لا تغيّر شيئاً. ثم تحققت مما إذا كانت خلاصة المشروع ما زالت صحيحة.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en">The <a href="https://github.com/adelmerad/SMS-Spam-Detector" target="_blank" rel="noopener">SMS Spam Detector</a> started as a classmate's notebook, which I extended with the evaluation and the saved models. It uses a public dataset of 5,572 English SMS messages labelled spam or ham (legitimate). The workflow is classic:</span>
+           <span lang="fr">Le <a href="https://github.com/adelmerad/SMS-Spam-Detector" target="_blank" rel="noopener">SMS Spam Detector</a> est parti du notebook d'une camarade de promo, que j'ai complété avec l'évaluation et les modèles sauvegardés. Il utilise un jeu de données public de 5 572 SMS en anglais, étiquetés spam ou ham (légitime). Le déroulé est classique :</span><span lang="ar">بدأ <a href="https://github.com/adelmerad/SMS-Spam-Detector" target="_blank" rel="noopener">SMS Spam Detector</a> كدفتر (notebook) لزميلة في الدفعة، وأكملته بالتقييم والنماذج المحفوظة. يستعمل مجموعة بيانات عامة من 5,572 رسالة قصيرة بالإنجليزية، مصنّفة إلى spam (مزعجة) أو ham (مشروعة). ومراحل العمل كلاسيكية:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><b>Cleaning:</b> 403 duplicate messages removed before the train/test split, so the same text cannot appear on both sides. 5,169 messages remain, 653 of them spam.</span><span lang="fr"><b>Nettoyage :</b> 403 messages en double supprimés avant la séparation entraînement/test, pour que le même texte ne puisse pas se trouver des deux côtés. Il reste 5 169 messages, dont 653 spams.</span><span lang="ar"><b>التنظيف:</b> حذف 403 رسائل مكررة قبل الفصل بين بيانات التدريب والاختبار، حتى لا يظهر النص نفسه في الجهتين. تبقى 5,169 رسالة، منها 653 رسالة مزعجة.</span></li>
+          <li><span lang="en"><b>Preprocessing:</b> lowercase, tokenize, keep alphanumeric tokens, remove English stop words, stem with NLTK's Porter stemmer.</span><span lang="fr"><b>Prétraitement :</b> minuscules, découpage en mots, conservation des mots alphanumériques, suppression des mots vides anglais, racinisation avec le Porter stemmer de NLTK.</span><span lang="ar"><b>المعالجة المسبقة:</b> تحويل إلى أحرف صغيرة، وتقطيع إلى كلمات، والإبقاء على الكلمات الأبجدية الرقمية، وحذف كلمات التوقف الإنجليزية، واستخراج الجذع بخوارزمية Porter من NLTK.</span></li>
+          <li><span lang="en"><b>Two models:</b> Logistic Regression on TF-IDF features, and Multinomial Naive Bayes on word counts.</span><span lang="fr"><b>Deux modèles :</b> une régression logistique sur des vecteurs TF-IDF, et un Naive Bayes multinomial sur des comptages de mots.</span><span lang="ar"><b>نموذجان:</b> انحدار لوجستي على متجهات TF-IDF، وNaive Bayes متعدد الحدود على عدد مرات ظهور الكلمات.</span></li>
+        </ul>
+        <p><span lang="en">On the 1,034 test messages, Naive Bayes won: 98.0% accuracy against 97.0%, with 7 false alarms against 20.</span>
+           <span lang="fr">Sur les 1 034 messages de test, Naive Bayes l'emportait : 98,0 % de précision contre 97,0 %, avec 7 fausses alertes contre 20.</span><span lang="ar">على رسائل الاختبار البالغة 1,034، تفوّق Naive Bayes: دقة 98.0% مقابل 97.0%، مع 7 إنذارات خاطئة مقابل 20.</span></p>
+
+        <h2><span lang="en">Bug 1: the predictions skipped the preprocessing</span><span lang="fr">Bug 1 : les prédictions sautaient le prétraitement</span><span lang="ar">الخطأ 1: التنبؤات كانت تتخطى المعالجة المسبقة</span></h2>
+        <p><span lang="en">The models learned from preprocessed text. Here is what a message becomes:</span>
+           <span lang="fr">Les modèles ont appris sur du texte prétraité. Voici ce que devient un message :</span><span lang="ar">تعلّم النموذجان من نص خضع للمعالجة المسبقة. وهذا ما تصبح عليه رسالة ما:</span></p>
+<pre><code>transform("Congratulations! You've WON a $1,000 gift card.")
+# 'congratul gift card'</code></pre>
+        <p><span lang="en">But the testing cells of the notebook, and the usage example in the README, gave raw messages straight to the vectorizer. The vocabulary contains <code>congratul</code>, not <code>congratulations</code>, so every word whose stem differs from its raw form was simply ignored. Nothing failed: the vectorizer returns a valid vector for any text, and all four demo messages were still classified correctly, because obvious spam stays obvious with half its words.</span>
+           <span lang="fr">Mais les cellules de test du notebook, et l'exemple d'utilisation du README, donnaient les messages bruts directement au vectoriseur. Le vocabulaire contient <code>congratul</code>, pas <code>congratulations</code>, donc chaque mot dont la racine diffère de sa forme brute était tout simplement ignoré. Rien n'échouait : le vectoriseur renvoie un vecteur valide pour n'importe quel texte, et les quatre messages de démo restaient bien classés, parce qu'un spam évident reste évident avec la moitié de ses mots.</span><span lang="ar">لكن خلايا الاختبار في الدفتر، ومثال الاستعمال في ملف README، كانت تمرر الرسائل الخام مباشرة إلى المحوِّل إلى متجهات (vectorizer). المفردات تحتوي على <code>congratul</code> وليس <code>congratulations</code>، فكانت كل كلمة يختلف جذعها عن شكلها الخام تُتجاهل ببساطة. لم يفشل شيء: يُرجع المحوِّل متجهاً صالحاً لأي نص، وبقيت الرسائل التجريبية الأربع مصنّفة تصنيفاً صحيحاً، لأن الرسالة المزعجة الواضحة تبقى واضحة حتى بنصف كلماتها.</span></p>
+        <p><span lang="en">The test set tells a different story. Using the saved models the way the README showed:</span>
+           <span lang="fr">Le jeu de test raconte une autre histoire. En utilisant les modèles sauvegardés comme le montrait le README :</span><span lang="ar">لكن بيانات الاختبار تروي قصة مختلفة. عند استعمال النماذج المحفوظة كما كان يوضح ملف README:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Saved model</span><span lang="fr">Modèle sauvegardé</span><span lang="ar">النموذج المحفوظ</span></th><th><span lang="en">Input</span><span lang="fr">Entrée</span><span lang="ar">المدخلات</span></th><th class="num"><span lang="en">Spam caught</span><span lang="fr">Spams détectés</span><span lang="ar">الرسائل المزعجة المكتشفة</span></th><th class="num"><span lang="en">Spam F1</span><span lang="fr">F1 spam</span><span lang="ar">F1 للمزعجة</span></th></tr>
+          <tr><td>Naive Bayes</td><td><span lang="en">preprocessed</span><span lang="fr">prétraitée</span><span lang="ar">معالَجة</span></td><td class="num">131 / 145</td><td class="num">0.926</td></tr>
+          <tr><td>Naive Bayes</td><td><span lang="en">raw</span><span lang="fr">brute</span><span lang="ar">خام</span></td><td class="num">123 / 145</td><td class="num">0.888</td></tr>
+          <tr><td><span lang="en">Logistic Regression</span><span lang="fr">Régression logistique</span><span lang="ar">الانحدار اللوجستي</span></td><td><span lang="en">preprocessed</span><span lang="fr">prétraitée</span><span lang="ar">معالَجة</span></td><td class="num">134 / 145</td><td class="num">0.896</td></tr>
+          <tr><td><span lang="en">Logistic Regression</span><span lang="fr">Régression logistique</span><span lang="ar">الانحدار اللوجستي</span></td><td><span lang="en">raw</span><span lang="fr">brute</span><span lang="ar">خام</span></td><td class="num">130 / 145</td><td class="num">0.872</td></tr>
+        </table></div>
+        <p><span lang="en">This is called training/serving skew: the model in use does not see the same kind of data it was trained on. The fix is structural rather than a reminder. The preprocessing now lives in one function, <code>transform()</code> in <code>predict.py</code>; the notebook imports it for training, and <code>predict()</code> applies it before every prediction, so the two cannot drift apart again.</span>
+           <span lang="fr">On appelle ça le training/serving skew : le modèle en service ne voit pas le même genre de données que celles de son entraînement. La correction est structurelle plutôt qu'un simple rappel. Le prétraitement vit maintenant dans une seule fonction, <code>transform()</code> dans <code>predict.py</code> ; le notebook l'importe pour l'entraînement, et <code>predict()</code> l'applique avant chaque prédiction, donc les deux ne peuvent plus diverger.</span><span lang="ar">يُسمّى هذا training/serving skew، أي الاختلاف بين التدريب والاستعمال: النموذج المستعمل لا يرى نوع البيانات نفسه الذي تدرّب عليه. والحل بنيوي وليس مجرد تذكير. أصبحت المعالجة المسبقة في دالة واحدة، <code>transform()</code> في <code>predict.py</code>؛ يستوردها الدفتر للتدريب، وتطبّقها <code>predict()</code> قبل كل تنبؤ، فلا يمكن أن يفترقا مجدداً.</span></p>
+        <p><span lang="en">The example above also shows a curiosity: "won" disappears. NLTK's English stop word list contains "won" (from "won't"), as well as "now", "you" and "your", all common in spam. "Won" appears in 9.3% of spam messages and 0.4% of the others, yet keeping it barely moves the cross-validated F1 (0.920 to 0.921): other words carry the same signal.</span>
+           <span lang="fr">L'exemple ci-dessus montre aussi une curiosité : « won » disparaît. La liste de mots vides anglais de NLTK contient « won » (de « won't »), ainsi que « now », « you » et « your », tous fréquents dans les spams. « Won » apparaît dans 9,3 % des spams et 0,4 % des autres messages, pourtant le garder ne change presque pas le F1 en validation croisée (de 0,920 à 0,921) : d'autres mots portent le même signal.</span><span lang="ar">ويُظهر المثال أعلاه أيضاً أمراً طريفاً: كلمة «won» (ربحت) تختفي. فقائمة كلمات التوقف الإنجليزية في NLTK تحتوي على «won» (من «won't»)، وكذلك «now» و«you» و«your»، وكلها شائعة في الرسائل المزعجة. تظهر «won» في 9.3% من الرسائل المزعجة و0.4% من غيرها، ومع ذلك فإن الإبقاء عليها لا يكاد يغيّر قيمة F1 في التحقق المتقاطع (من 0.920 إلى 0.921): كلمات أخرى تحمل الإشارة نفسها.</span></p>
+
+        <h2><span lang="en">Bug 2: a ROC AUC computed on labels</span><span lang="fr">Bug 2 : un ROC AUC calculé sur des étiquettes</span><span lang="ar">الخطأ 2: ROC AUC محسوب على التصنيفات</span></h2>
+        <p><span lang="en">The ROC curve measures how well a model <em>ranks</em> messages: it moves the decision threshold from one end to the other and plots what is caught against what is wrongly flagged. That needs a score for each message. The notebook passed the final 0/1 predictions instead:</span>
+           <span lang="fr">La courbe ROC mesure à quel point un modèle <em>classe</em> bien les messages par ordre de suspicion : elle déplace le seuil de décision d'un bout à l'autre et trace ce qui est détecté contre ce qui est signalé à tort. Il faut pour ça un score par message. Le notebook passait à la place les prédictions finales 0/1 :</span><span lang="ar">يقيس منحنى ROC مدى جودة <em>ترتيب</em> النموذج للرسائل: فهو يحرّك عتبة القرار من طرف إلى آخر ويرسم ما يُكتشف مقابل ما يُنبَّه عليه خطأً. ويتطلب ذلك درجة لكل رسالة. لكن الدفتر كان يمرّر التنبؤات النهائية 0/1 بدلاً منها:</span></p>
+<pre><code>roc_auc_score(y_test, model.predict(x_test))          # before: 0.951 and 0.948
+
+spam_scores = model.predict_proba(x_test)[:, list(model.classes_).index(0)]
+roc_auc_score(y_test == 0, spam_scores)                # after: 0.988 and 0.973</code></pre>
+        <p><span lang="en">With hard labels, the "curve" has a single point, and the AUC is just the average of the recall on each class (balanced accuracy). The corrected values change the picture: Logistic Regression <em>ranks</em> messages better than Naive Bayes (0.988 against 0.973). Naive Bayes wins at the default threshold of 0.5, but with a tuned threshold, the comparison could go the other way.</span>
+           <span lang="fr">Avec des étiquettes, la « courbe » n'a qu'un seul point, et l'AUC n'est que la moyenne du rappel de chaque classe (l'exactitude équilibrée). Les valeurs corrigées changent la lecture : la régression logistique <em>classe</em> mieux les messages que Naive Bayes (0,988 contre 0,973). Naive Bayes gagne au seuil par défaut de 0,5, mais avec un seuil ajusté, la comparaison pourrait s'inverser.</span><span lang="ar">مع التصنيفات النهائية، لا يحتوي «المنحنى» إلا على نقطة واحدة، ويصبح AUC مجرد متوسط الاستدعاء (recall) لكل فئة، أي الدقة المتوازنة. والقيم المصحَّحة تغيّر القراءة: الانحدار اللوجستي <em>يرتّب</em> الرسائل أفضل من Naive Bayes ‏(0.988 مقابل 0.973). يفوز Naive Bayes عند العتبة الافتراضية 0.5، لكن مع عتبة معدّلة، قد تنقلب المقارنة.</span></p>
+
+        <h2><span lang="en">Bug 3: a balancing step that changed nothing</span><span lang="fr">Bug 3 : un équilibrage qui ne changeait rien</span><span lang="ar">الخطأ 3: موازنة لا تغيّر شيئاً</span></h2>
+        <p><span lang="en">Spam is only 13% of the data, so the README said both models used class balancing. For Logistic Regression it was true: <code>class_weight="balanced"</code> gives more weight to the rare class. For Naive Bayes, the notebook passed the observed class frequencies as <code>class_prior</code>. But that is exactly what <code>MultinomialNB</code> learns by default. I trained both versions: they disagree on <b>0 of the 1,034</b> test messages. The parameter is gone, and the README now says what each model really does.</span>
+           <span lang="fr">Le spam ne représente que 13 % des données, donc le README disait que les deux modèles équilibraient les classes. Pour la régression logistique, c'était vrai : <code>class_weight="balanced"</code> donne plus de poids à la classe rare. Pour Naive Bayes, le notebook passait les fréquences observées des classes en <code>class_prior</code>. Or c'est exactement ce que <code>MultinomialNB</code> apprend par défaut. J'ai entraîné les deux versions : elles divergent sur <b>0 des 1 034</b> messages de test. Le paramètre est supprimé, et le README dit maintenant ce que fait vraiment chaque modèle.</span><span lang="ar">لا تمثّل الرسائل المزعجة إلا 13% من البيانات، لذلك كان ملف README يقول إن النموذجين يوازنان بين الفئات. بالنسبة للانحدار اللوجستي كان ذلك صحيحاً: <code>class_weight="balanced"</code> يعطي وزناً أكبر للفئة النادرة. أما في Naive Bayes، فكان الدفتر يمرّر الترددات الملاحظة للفئات في <code>class_prior</code>. وهذا بالضبط ما يتعلمه <code>MultinomialNB</code> افتراضياً. درّبت النسختين: تختلفان في <b>0 من أصل 1,034</b> رسالة اختبار. حُذف المعامل، وأصبح README يقول ما يفعله كل نموذج فعلاً.</span></p>
+
+        <h2><span lang="en">Does the conclusion still hold?</span><span lang="fr">La conclusion tient-elle toujours ?</span><span lang="ar">هل ما زالت الخلاصة صحيحة؟</span></h2>
+        <p><span lang="en">The test set holds only 145 spam messages, so "Naive Bayes wins" rested on a handful of messages from one random split. I added repeated stratified 5-fold cross-validation to the notebook: 50 different splits, each keeping the spam ratio. Naive Bayes reaches a spam F1 of <b>0.920 ± 0.019</b> against <b>0.891 ± 0.017</b>, and wins in <b>49 of the 50 folds</b>. This time the conclusion survives the check.</span>
+           <span lang="fr">Le jeu de test ne contient que 145 spams, donc « Naive Bayes gagne » reposait sur une poignée de messages issus d'une seule séparation aléatoire. J'ai ajouté au notebook une validation croisée stratifiée à 5 plis répétée : 50 séparations différentes, chacune gardant la proportion de spams. Naive Bayes atteint un F1 spam de <b>0,920 ± 0,019</b> contre <b>0,891 ± 0,017</b>, et gagne dans <b>49 plis sur 50</b>. Cette fois, la conclusion résiste à la vérification.</span><span lang="ar">لا تحتوي بيانات الاختبار إلا على 145 رسالة مزعجة، فكانت عبارة «Naive Bayes يفوز» تستند إلى عدد قليل من الرسائل من تقسيم عشوائي واحد. أضفت إلى الدفتر تحققاً متقاطعاً طبقياً بخمس طيّات مكرراً: 50 تقسيماً مختلفاً، يحافظ كل منها على نسبة الرسائل المزعجة. يبلغ Naive Bayes قيمة F1 للمزعجة <b><bdi dir="ltr">0.920 ± 0.019</bdi></b> مقابل <b><bdi dir="ltr">0.891 ± 0.017</bdi></b>، ويفوز في <b>49 طيّة من أصل 50</b>. هذه المرة، صمدت الخلاصة أمام التحقق.</span></p>
+        <p><span lang="en">One last detail: preprocessing the 5,169 messages took 51 seconds, because <code>stopwords.words("english")</code> rebuilt the list for every single word. Building a set once brings it down to 1 second, with identical output.</span>
+           <span lang="fr">Un dernier détail : prétraiter les 5 169 messages prenait 51 secondes, parce que <code>stopwords.words("english")</code> reconstruisait la liste pour chaque mot. Construire un ensemble (set) une seule fois descend à 1 seconde, avec un résultat identique.</span><span lang="ar">تفصيل أخير: كانت معالجة الرسائل البالغة 5,169 تستغرق 51 ثانية، لأن <code>stopwords.words("english")</code> كانت تعيد بناء القائمة لكل كلمة. وبناء مجموعة (set) مرة واحدة يخفّض المدة إلى ثانية واحدة، بنتيجة مطابقة.</span></p>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">A model is its preprocessing plus its weights. Save or share them together, or predictions quietly get worse.</span><span lang="fr">Un modèle, c'est son prétraitement plus ses poids. Les sauvegarder ou les partager ensemble, sinon les prédictions se dégradent en silence.</span><span lang="ar">النموذج هو معالجته المسبقة مع أوزانه. احفظهما أو شاركهما معاً، وإلا ساءت التنبؤات بصمت.</span></li>
+          <li><span lang="en">A few demo messages prove nothing. Run the real usage path on the test set.</span><span lang="fr">Quelques messages de démo ne prouvent rien. Faire passer le vrai chemin d'utilisation sur le jeu de test.</span><span lang="ar">بضع رسائل تجريبية لا تثبت شيئاً. مرّر مسار الاستعمال الحقيقي على بيانات الاختبار.</span></li>
+          <li><span lang="en">Give metrics the input they expect: ROC AUC needs scores, not labels.</span><span lang="fr">Donner aux métriques l'entrée qu'elles attendent : le ROC AUC a besoin de scores, pas d'étiquettes.</span><span lang="ar">أعطِ المقاييس المدخلات التي تتوقعها: ROC AUC يحتاج إلى درجات، لا إلى تصنيفات.</span></li>
+          <li><span lang="en">Check that a parameter does something: train with and without it and compare the predictions.</span><span lang="fr">Vérifier qu'un paramètre sert à quelque chose : entraîner avec et sans, et comparer les prédictions.</span><span lang="ar">تحقق من أن المعامل يفعل شيئاً: درّب النموذج معه ومن دونه وقارن التنبؤات.</span></li>
+          <li><span lang="en">With 145 positive examples, one split is an anecdote. Cross-validation turns it into evidence.</span><span lang="fr">Avec 145 exemples positifs, une seule séparation est une anecdote. La validation croisée en fait une preuve.</span><span lang="ar">مع 145 مثالاً إيجابياً، التقسيم الواحد مجرد حكاية. والتحقق المتقاطع يحوّلها إلى دليل.</span></li>
+        </ul>
+        <p><span lang="en">The notebook, the saved models and <code>predict.py</code> are on <a href="https://github.com/adelmerad/SMS-Spam-Detector" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Le notebook, les modèles sauvegardés et <code>predict.py</code> sont sur <a href="https://github.com/adelmerad/SMS-Spam-Detector" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">الدفتر والنماذج المحفوظة و<code>predict.py</code> موجودة على <a href="https://github.com/adelmerad/SMS-Spam-Detector" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://github.com/adelmerad/SMS-Spam-Detector" target="_blank" rel="noopener"><span lang="en">See the code</span><span lang="fr">Voir le code</span><span lang="ar">اطّلع على الشيفرة</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
