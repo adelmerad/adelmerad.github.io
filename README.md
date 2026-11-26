@@ -4,7 +4,7 @@ Personal website of Adel Merad, full-stack developer and Software Engineering Ma
 
 - **Three languages:** English, French and Arabic (right to left), switched without reloading the page
 - **Shareable language links:** add `?lang=en`, `?lang=fr` or `?lang=ar` to any page, e.g. [adelmerad.github.io/?lang=fr](https://adelmerad.github.io/?lang=fr)
-- **Case studies** of projects in production, and a **[blog](https://adelmerad.github.io/blog.html)** with 15 technical articles
+- **Case studies** of projects in production, and a **[blog](https://adelmerad.github.io/blog.html)** with 17 technical articles
 - Dark and light themes, following the system on the first visit
 - Plain HTML, CSS and JavaScript: no framework, no build step, hosted on GitHub Pages
 
