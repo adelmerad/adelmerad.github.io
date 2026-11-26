@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-langs="en fr ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>260 days of slack is a bug: recomputing my MS Project plan — Adel Merad</title>
+  <meta name="description" content="I recomputed the critical path of my Microsoft Project schedule with a short Python script. The numbers matched, and the exercise found three problems the tool never flagged: a missing link, a team at 300%, and a calendar without religious holidays.">
+  <link rel="canonical" href="https://adelmerad.github.io/blog-project-planning.html">
+  <meta property="og:title" content="260 days of slack is a bug: recomputing my MS Project plan">
+  <meta property="og:description" content="The critical path by hand, and three problems Microsoft Project did not stop me from making.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://adelmerad.github.io/blog-project-planning.html">
+  <meta property="og:image" content="https://adelmerad.github.io/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1110">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script src="boot.js"></script>
+</head>
+<body class="case" data-title-en="260 days of slack is a bug — Adel Merad" data-title-fr="260 jours de marge, c'est un bug — Adel Merad" data-title-ar="260 يوماً من الهامش خطأ — Adel Merad">
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./">AM<span class="dot">.</span></a>
+      <nav class="links">
+        <a href="blog.html"><span lang="en">Blog</span><span lang="fr">Blog</span><span lang="ar">المدونة</span></a>
+        <a href="./#work"><span lang="en">Projects</span><span lang="fr">Projets</span><span lang="ar">المشاريع</span></a>
+      </nav>
+      <div class="toggles">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="fr">FR</button><button type="button" data-set-lang="ar" class="ar-only">ع</button></div>
+        <button id="theme" class="pill icon" aria-label="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="post">
+      <header class="post-head">
+        <p class="kicker mono"><span class="live"></span>
+          <span lang="en">Blog · November 2026 · 6 min read</span>
+          <span lang="fr">Blog · Novembre 2026 · 6 min de lecture</span><span lang="ar">المدونة · نوفمبر 2026 · 6 دقائق قراءة</span>
+        </p>
+        <h1 class="post-title">
+          <span lang="en">260 days of slack is a bug: recomputing my MS Project plan</span>
+          <span lang="fr">260 jours de marge, c'est un bug : je recalcule mon planning MS Project</span><span lang="ar">260 يوماً من الهامش خطأ: إعادة حساب مخطط MS Project</span>
+        </h1>
+        <p class="lead">
+          <span lang="en">Microsoft Project computed a critical path for my course project, and I trusted it. Then I recomputed it with a short Python script. The numbers matched to the day, and the exercise still found three problems the tool never stopped me from making: a task linked to nothing, a team planned at 300%, and a calendar that forgets half of Algeria's public holidays.</span>
+          <span lang="fr">Microsoft Project a calculé le chemin critique de mon projet de cours, et je lui ai fait confiance. Puis je l'ai recalculé avec un court script Python. Les chiffres correspondaient au jour près, et l'exercice a quand même trouvé trois problèmes que l'outil ne m'a jamais empêché de faire : une tâche reliée à rien, une équipe planifiée à 300 %, et un calendrier qui oublie la moitié des jours fériés algériens.</span><span lang="ar">حسب Microsoft Project المسار الحرج لمشروعي الدراسي، ووثقت به. ثم أعدت حسابه بسكربت Python قصير. تطابقت الأرقام حتى اليوم الواحد، ومع ذلك وجد التمرين ثلاث مشكلات لم تمنعني الأداة من ارتكابها: مهمة غير مرتبطة بأي شيء، وفريق مخطط له بنسبة 300%، وتقويم ينسى نصف العطل الرسمية في الجزائر.</span>
+        </p>
+      </header>
+
+      <div class="post-body">
+
+        <h2><span lang="en">The project</span><span lang="fr">Le projet</span><span lang="ar">المشروع</span></h2>
+        <p><span lang="en">For the Project Management course of my Master's at USTHB, I planned a software project, "version zero", in <a href="https://github.com/adelmerad/software-project-planning" target="_blank" rel="noopener">Microsoft Project</a>: 6 phases, 25 tasks and milestones, 6 teams (planning, engineering office, purchasing, quality, logistics, methods), and an Algerian calendar where the week runs from Sunday to Thursday. Microsoft Project gives 380 working days, from 3 January 2027 to 22 June 2028, and 1,040 person-days of work.</span>
+           <span lang="fr">Pour le cours de gestion de projet de mon Master à l'USTHB, j'ai planifié un projet logiciel, la « version zéro », dans <a href="https://github.com/adelmerad/software-project-planning" target="_blank" rel="noopener">Microsoft Project</a> : 6 phases, 25 tâches et jalons, 6 équipes (planning, bureau d'études, achats, qualité, logistique, méthodes), et un calendrier algérien où la semaine va du dimanche au jeudi. Microsoft Project donne 380 jours ouvrés, du 3 janvier 2027 au 22 juin 2028, et 1 040 jours-personne de travail.</span><span lang="ar">في مقياس تسيير المشاريع ضمن الماستر في جامعة USTHB، خططت لمشروع برمجي اسمه «النسخة صفر» في <a href="https://github.com/adelmerad/software-project-planning" target="_blank" rel="noopener">Microsoft Project</a>: 6 مراحل، و25 مهمة ومعلماً، و6 فرق (التخطيط، مكتب الدراسات، المشتريات، الجودة، اللوجستيك، الطرائق)، وتقويم جزائري يمتد فيه الأسبوع من الأحد إلى الخميس. يعطي Microsoft Project مدة 380 يوم عمل، من 3 جانفي 2027 إلى 22 جوان 2028، و1,040 يوم-شخص من العمل.</span></p>
+        <p><span lang="en">The tool draws the Gantt chart, colours the critical tasks in red and reports the slack of the others. It is easy to accept all of that as correct. So I exported the plan with <a href="https://www.mpxj.org" target="_blank" rel="noopener">MPXJ</a>, an open-source library that reads <code>.mpp</code> files, and recomputed everything myself.</span>
+           <span lang="fr">L'outil dessine le diagramme de Gantt, colore les tâches critiques en rouge et affiche la marge des autres. C'est facile d'accepter tout ça comme juste. J'ai donc exporté le planning avec <a href="https://www.mpxj.org" target="_blank" rel="noopener">MPXJ</a>, une bibliothèque open source qui lit les fichiers <code>.mpp</code>, et j'ai tout recalculé moi-même.</span><span lang="ar">ترسم الأداة مخطط Gantt، وتلوّن المهام الحرجة بالأحمر، وتعرض هامش المهام الأخرى. ومن السهل قبول كل ذلك على أنه صحيح. لذلك صدّرت المخطط باستعمال <a href="https://www.mpxj.org" target="_blank" rel="noopener">MPXJ</a>، وهي مكتبة مفتوحة المصدر تقرأ ملفات <code>.mpp</code>، وأعدت حساب كل شيء بنفسي.</span></p>
+
+        <h2><span lang="en">The critical path in two passes</span><span lang="fr">Le chemin critique en deux passes</span><span lang="ar">المسار الحرج في مرورين</span></h2>
+        <p><span lang="en">The critical path method (CPM, the computation behind a PERT network) needs only durations and dependencies. A <b>forward pass</b> gives each task its earliest start: the moment all its predecessors allow it. A <b>backward pass</b>, from the end of the project, gives its latest start: the last moment it can begin without delaying the end. The difference is the <b>slack</b>, and the tasks with zero slack form the critical path.</span>
+           <span lang="fr">La méthode du chemin critique (CPM, le calcul derrière un réseau PERT) n'a besoin que des durées et des dépendances. Une <b>passe avant</b> donne à chaque tâche son début au plus tôt : le moment où tous ses prédécesseurs le permettent. Une <b>passe arrière</b>, depuis la fin du projet, donne son début au plus tard : le dernier moment où elle peut commencer sans retarder la fin. La différence, c'est la <b>marge</b>, et les tâches à marge nulle forment le chemin critique.</span><span lang="ar">طريقة المسار الحرج (CPM، وهي الحساب الذي يقوم عليه مخطط PERT) لا تحتاج إلا إلى المدد والتبعيات. يعطي <b>المرور الأمامي</b> لكل مهمة أبكر بداية لها: اللحظة التي تسمح بها كل المهام السابقة. ويعطي <b>المرور الخلفي</b>، انطلاقاً من نهاية المشروع، أبعد بداية لها: آخر لحظة يمكن أن تبدأ فيها دون تأخير النهاية. والفرق بينهما هو <b>الهامش</b>، والمهام ذات الهامش المعدوم تشكّل المسار الحرج.</span></p>
+        <p><span lang="en">Most links are finish-to-start (FS): B starts when A ends. One is start-to-start (SS): the feasibility study starts at the same time as tools setup. The core of the script, after a topological sort of the tasks:</span>
+           <span lang="fr">La plupart des liens sont fin-début (FS) : B commence quand A finit. Un seul est début-début (SS) : l'étude de faisabilité commence en même temps que l'installation des outils. Le cœur du script, après un tri topologique des tâches :</span><span lang="ar">معظم الروابط من نوع نهاية-بداية (FS): تبدأ B عندما تنتهي A. ورابط واحد من نوع بداية-بداية (SS): تبدأ دراسة الجدوى في الوقت نفسه مع تثبيت الأدوات. وهذا قلب السكربت، بعد ترتيب المهام ترتيباً طوبولوجياً:</span></p>
+<pre><code>for u in order:                       # forward pass
+    es[u] = max([ef[a] if k == "FS" else es[a] for a, k in pred[u]], default=0)
+    ef[u] = es[u] + dur[u]
+end = max(ef.values())
+
+for u in reversed(order):             # backward pass
+    lf[u] = min([ls[b] if k == "FS" else ls[b] + dur[u] for b, k in succ[u]], default=end)
+    ls[u] = lf[u] - dur[u]
+
+slack = {u: ls[u] - es[u] for u in order}</code></pre>
+        <p><span lang="en">The result, in working days from the start of the project, for a few tasks:</span>
+           <span lang="fr">Le résultat, en jours ouvrés depuis le début du projet, pour quelques tâches :</span><span lang="ar">النتيجة، بأيام العمل منذ بداية المشروع، لبعض المهام:</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Task</span><span lang="fr">Tâche</span><span lang="ar">المهمة</span></th><th class="num"><span lang="en">Earliest start</span><span lang="fr">Début au plus tôt</span><span lang="ar">أبكر بداية</span></th><th class="num"><span lang="en">Earliest finish</span><span lang="fr">Fin au plus tôt</span><span lang="ar">أبكر نهاية</span></th><th class="num"><span lang="en">Slack</span><span lang="fr">Marge</span><span lang="ar">الهامش</span></th></tr>
+          <tr><td><span lang="en">2.1 Requirements analysis</span><span lang="fr">2.1 Analyse des besoins</span><span lang="ar">2.1 تحليل الاحتياجات</span></td><td class="num">0</td><td class="num">60</td><td class="num">0</td></tr>
+          <tr><td><span lang="en">1.5 Final execution schedule</span><span lang="fr">1.5 Planning d'exécution final</span><span lang="ar">1.5 مخطط التنفيذ النهائي</span></td><td class="num">80</td><td class="num">120</td><td class="num"><strong>260</strong></td></tr>
+          <tr><td><span lang="en">2.3 Detailed module design</span><span lang="fr">2.3 Conception détaillée des modules</span><span lang="ar">2.3 التصميم المفصل للوحدات</span></td><td class="num">120</td><td class="num">200</td><td class="num">0</td></tr>
+          <tr><td><span lang="en">2.4 Database design</span><span lang="fr">2.4 Conception de la base de données</span><span lang="ar">2.4 تصميم قاعدة البيانات</span></td><td class="num">120</td><td class="num">200</td><td class="num">0</td></tr>
+          <tr><td><span lang="en">4.1 Technical risks (SS)</span><span lang="fr">4.1 Risques techniques (SS)</span><span lang="ar">4.1 المخاطر التقنية (SS)</span></td><td class="num">240</td><td class="num">260</td><td class="num">0</td></tr>
+          <tr><td><span lang="en">6.2 Quality report</span><span lang="fr">6.2 Rapport qualité</span><span lang="ar">6.2 تقرير الجودة</span></td><td class="num">360</td><td class="num">380</td><td class="num">0</td></tr>
+        </table></div>
+        <p><span lang="en">All 25 tasks and milestones match Microsoft Project: same 380 days, same slack, same critical tasks. So the computation was right. The problems were in what I had given it.</span>
+           <span lang="fr">Les 25 tâches et jalons correspondent à Microsoft Project : mêmes 380 jours, mêmes marges, mêmes tâches critiques. Le calcul était donc juste. Les problèmes étaient dans ce que je lui avais donné.</span><span lang="ar">تتطابق المهام والمعالم الخمس والعشرون كلها مع Microsoft Project: نفس 380 يوماً، ونفس الهوامش، ونفس المهام الحرجة. إذن كان الحساب صحيحاً. أما المشكلات فكانت فيما أعطيته للأداة.</span></p>
+
+        <h2><span lang="en">Problem 1: 260 days of slack is a missing link</span><span lang="fr">Problème 1 : 260 jours de marge, c'est un lien manquant</span><span lang="ar">المشكلة 1: هامش 260 يوماً رابط مفقود</span></h2>
+        <p><span lang="en">The whole planning phase has 260 days of slack. That sounds comfortable, but read literally, it means the final execution schedule could be delivered in June 2028, a few days before the project ends, after everything it was supposed to schedule has already happened.</span>
+           <span lang="fr">Toute la phase de planification a 260 jours de marge. Ça a l'air confortable, mais pris à la lettre, ça veut dire que le planning d'exécution final pourrait être livré en juin 2028, quelques jours avant la fin du projet, après que tout ce qu'il devait planifier a déjà eu lieu.</span><span lang="ar">لمرحلة التخطيط كلها هامش 260 يوماً. يبدو ذلك مريحاً، لكن إذا قرأناه حرفياً، فهو يعني أن مخطط التنفيذ النهائي يمكن تسليمه في جوان 2028، قبل نهاية المشروع بأيام قليلة، أي بعد أن يكون كل ما كان يُفترض أن يخطط له قد حدث.</span></p>
+        <p><span lang="en">The cause: the milestone "final execution schedule delivered" has only one successor, the end of the project. Nothing that follows actually needs it, so the method concludes it can slip as far as the end. Slack is not freedom here; it is a dependency I forgot to draw. The fix is to link the milestone to the first execution task, 3.1 (choosing the tools). The project still lasts 380 days, but the planning slack drops from 260 to <b>120 days</b>, which is the real margin: the schedule must be ready before execution starts, in December 2027.</span>
+           <span lang="fr">La cause : le jalon « planning d'exécution final livré » n'a qu'un seul successeur, la fin du projet. Rien de ce qui suit n'en a réellement besoin, donc la méthode conclut qu'il peut glisser jusqu'à la fin. Ici, la marge n'est pas une liberté : c'est une dépendance que j'ai oublié de dessiner. La correction consiste à relier le jalon à la première tâche d'exécution, 3.1 (le choix des outils). Le projet dure toujours 380 jours, mais la marge de la planification passe de 260 à <b>120 jours</b>, la vraie marge : le planning doit être prêt avant le début de l'exécution, en décembre 2027.</span><span lang="ar">السبب: للمعلم «تسليم مخطط التنفيذ النهائي» لاحق واحد فقط، هو نهاية المشروع. لا شيء مما يأتي بعده يحتاجه فعلاً، فتستنتج الطريقة أنه يمكن أن ينزلق حتى النهاية. الهامش هنا ليس حرية، بل تبعية نسيت رسمها. والحل هو ربط المعلم بأول مهمة تنفيذ، وهي 3.1 (اختيار الأدوات). يبقى المشروع 380 يوماً، لكن هامش التخطيط ينخفض من 260 إلى <b>120 يوماً</b>، وهو الهامش الحقيقي: يجب أن يكون المخطط جاهزاً قبل بدء التنفيذ، في ديسمبر 2027.</span></p>
+
+        <h2><span lang="en">Problem 2: a team at 300%</span><span lang="fr">Problème 2 : une équipe à 300 %</span><span lang="ar">المشكلة 2: فريق بنسبة 300%</span></h2>
+        <p><span lang="en">The engineering office has two people, so a capacity of 200%. Detailed module design (2.3) needs both of them, and database design (2.4) needs one more, at the same time, for 80 days. That is 300% for a team that has 200%.</span>
+           <span lang="fr">Le bureau d'études compte deux personnes, donc une capacité de 200 %. La conception détaillée des modules (2.3) les occupe toutes les deux, et la conception de la base de données (2.4) en demande une de plus, en même temps, pendant 80 jours. Ça fait 300 % pour une équipe qui a 200 %.</span><span lang="ar">يضم مكتب الدراسات شخصين، أي قدرة 200%. يحتاج التصميم المفصل للوحدات (2.3) إلى كليهما، ويحتاج تصميم قاعدة البيانات (2.4) إلى شخص ثالث، في الوقت نفسه، لمدة 80 يوماً. أي 300% لفريق قدرته 200%.</span></p>
+        <p><span lang="en">Microsoft Project flags overallocated resources, but it does not move the dates: the critical path method assumes unlimited resources. Both tasks are critical, so there is no slack to absorb the conflict. There are two honest answers:</span>
+           <span lang="fr">Microsoft Project signale les ressources surutilisées, mais ne déplace pas les dates : la méthode du chemin critique suppose des ressources illimitées. Les deux tâches sont critiques, donc aucune marge ne peut absorber le conflit. Il y a deux réponses honnêtes :</span><span lang="ar">ينبّه Microsoft Project إلى الموارد المحمّلة فوق طاقتها، لكنه لا يغيّر التواريخ: فطريقة المسار الحرج تفترض موارد غير محدودة. والمهمتان حرجتان، فلا يوجد هامش يمتص هذا التعارض. وهناك جوابان صادقان:</span></p>
+        <ul class="bullets">
+          <li><span lang="en"><b>Level the resource:</b> do database design after module design. The project grows from 380 to <b>460 working days</b>.</span><span lang="fr"><b>Niveler la ressource :</b> faire la conception de la base de données après celle des modules. Le projet passe de 380 à <b>460 jours ouvrés</b>.</span><span lang="ar"><b>تسوية المورد:</b> إنجاز تصميم قاعدة البيانات بعد تصميم الوحدات. فتصبح مدة المشروع <b>460 يوم عمل</b> بدل 380.</span></li>
+          <li><span lang="en"><b>Add a third person</b> to the engineering office for those 80 days. The dates stay the same, and the workload is unchanged, since that work was already counted; what changes is who must be available.</span><span lang="fr"><b>Ajouter une troisième personne</b> au bureau d'études pendant ces 80 jours. Les dates ne bougent pas, et la charge non plus, puisque ce travail était déjà compté ; ce qui change, c'est qui doit être disponible.</span><span lang="ar"><b>إضافة شخص ثالث</b> إلى مكتب الدراسات خلال تلك الأيام الثمانين. تبقى التواريخ كما هي، ولا يتغير حجم العمل، لأن ذلك العمل كان محسوباً مسبقاً؛ ما يتغير هو من يجب أن يكون متاحاً.</span></li>
+        </ul>
+
+        <h2><span lang="en">Problem 3: half of the public holidays are missing</span><span lang="fr">Problème 3 : la moitié des jours fériés manquent</span><span lang="ar">المشكلة 3: نصف العطل الرسمية مفقود</span></h2>
+        <p><span lang="en">I built an Algerian calendar with the fixed holidays: 1 January, Yennayer (12 January), 1 May, 5 July and 1 November. The religious holidays were missing: Eid al-Fitr, Eid al-Adha, Awal Muharram, Achoura and the Mawlid. They follow the lunar calendar, so they move about 11 days earlier every year, and a calendar copied from one year to the next gets them wrong.</span>
+           <span lang="fr">J'avais construit un calendrier algérien avec les jours fériés fixes : 1er janvier, Yennayer (12 janvier), 1er mai, 5 juillet et 1er novembre. Les fêtes religieuses manquaient : l'Aïd el-Fitr, l'Aïd el-Adha, Awal Mouharram, Achoura et le Mawlid. Elles suivent le calendrier lunaire, donc elles avancent d'environ 11 jours chaque année, et un calendrier recopié d'une année sur l'autre les place mal.</span><span lang="ar">بنيت تقويماً جزائرياً بالعطل الثابتة: 1 جانفي، ويناير (12 جانفي)، و1 ماي، و5 جويلية، و1 نوفمبر. لكن الأعياد الدينية كانت غائبة: عيد الفطر، وعيد الأضحى، وأول محرم، وعاشوراء، والمولد النبوي. وهي تتبع التقويم القمري، فتتقدم بنحو 11 يوماً كل سنة، والتقويم المنسوخ من سنة إلى أخرى يضعها في غير مكانها.</span></p>
+        <p><span lang="en">With estimated dates (the exact day depends on the moon sighting), <b>10 of them fall on working days</b> between January 2027 and June 2028. Adding them moves the end of the project from 22 June 2028 to <b>9 July 2028</b>. Combined with the resource levelling of problem 2, the end moves to <b>29 October 2028</b>, more than four months later than the plan says.</span>
+           <span lang="fr">Avec des dates estimées (le jour exact dépend de l'observation de la lune), <b>10 d'entre elles tombent un jour ouvré</b> entre janvier 2027 et juin 2028. Les ajouter repousse la fin du projet du 22 juin 2028 au <b>9 juillet 2028</b>. Combiné au nivellement du problème 2, la fin passe au <b>29 octobre 2028</b>, plus de quatre mois après la date du planning.</span><span lang="ar">باستعمال تواريخ تقديرية (فاليوم الدقيق يتوقف على رؤية الهلال)، <b>تقع 10 منها في أيام عمل</b> بين جانفي 2027 وجوان 2028. وإضافتها تؤخر نهاية المشروع من 22 جوان 2028 إلى <b>9 جويلية 2028</b>. ومع تسوية الموارد في المشكلة 2، تصبح النهاية <b>29 أكتوبر 2028</b>، أي بعد التاريخ الذي يعلنه المخطط بأكثر من أربعة أشهر.</span></p>
+        <div class="table-wrap"><table class="data">
+          <tr><th><span lang="en">Version of the plan</span><span lang="fr">Version du planning</span><span lang="ar">نسخة المخطط</span></th><th class="num"><span lang="en">Working days</span><span lang="fr">Jours ouvrés</span><span lang="ar">أيام العمل</span></th><th class="num"><span lang="en">End</span><span lang="fr">Fin</span><span lang="ar">النهاية</span></th></tr>
+          <tr><td><span lang="en">As submitted</span><span lang="fr">Tel que rendu</span><span lang="ar">كما سُلّم</span></td><td class="num">380</td><td class="num"><span lang="en">22 Jun 2028</span><span lang="fr">22 juin 2028</span><span lang="ar">22 جوان 2028</span></td></tr>
+          <tr><td><span lang="en">With the religious holidays</span><span lang="fr">Avec les fêtes religieuses</span><span lang="ar">مع الأعياد الدينية</span></td><td class="num">380</td><td class="num"><span lang="en">9 Jul 2028</span><span lang="fr">9 juil. 2028</span><span lang="ar">9 جويلية 2028</span></td></tr>
+          <tr><td><span lang="en">Holidays + third designer</span><span lang="fr">Fêtes + troisième concepteur</span><span lang="ar">الأعياد + مصمم ثالث</span></td><td class="num">380</td><td class="num"><span lang="en">9 Jul 2028</span><span lang="fr">9 juil. 2028</span><span lang="ar">9 جويلية 2028</span></td></tr>
+          <tr><td><span lang="en">Holidays + levelling</span><span lang="fr">Fêtes + nivellement</span><span lang="ar">الأعياد + التسوية</span></td><td class="num">460</td><td class="num"><span lang="en">29 Oct 2028</span><span lang="fr">29 oct. 2028</span><span lang="ar">29 أكتوبر 2028</span></td></tr>
+        </table></div>
+
+        <h2><span lang="en">Takeaways</span><span lang="fr">À retenir</span><span lang="ar">الخلاصة</span></h2>
+        <ul class="bullets">
+          <li><span lang="en">Recomputing a plan is cheap and worth it. Here the arithmetic was right, but doing it forced me to read every link and every number.</span><span lang="fr">Recalculer un planning coûte peu et en vaut la peine. Ici le calcul était juste, mais le refaire m'a obligé à lire chaque lien et chaque nombre.</span><span lang="ar">إعادة حساب المخطط قليلة التكلفة وتستحق العناء. كان الحساب هنا صحيحاً، لكن إعادته أجبرتني على قراءة كل رابط وكل رقم.</span></li>
+          <li><span lang="en">Very large slack is a warning sign. Every task should have a successor that actually needs its result.</span><span lang="fr">Une marge énorme est un signal d'alerte. Chaque tâche devrait avoir un successeur qui a vraiment besoin de son résultat.</span><span lang="ar">الهامش الكبير جداً إشارة تحذير. يجب أن يكون لكل مهمة لاحق يحتاج فعلاً إلى نتيجتها.</span></li>
+          <li><span lang="en">A critical path assumes unlimited people. Check resource loads separately, and decide between time and staff on purpose.</span><span lang="fr">Un chemin critique suppose des effectifs illimités. Vérifier la charge des ressources à part, et choisir exprès entre le temps et le personnel.</span><span lang="ar">المسار الحرج يفترض عدداً غير محدود من الأشخاص. تحقق من حمل الموارد على حدة، واختر عن قصد بين الوقت وعدد الأشخاص.</span></li>
+          <li><span lang="en">The calendar is part of the plan. A local calendar needs the local holidays, including the ones that move every year.</span><span lang="fr">Le calendrier fait partie du planning. Un calendrier local a besoin des jours fériés locaux, y compris ceux qui bougent chaque année.</span><span lang="ar">التقويم جزء من المخطط. والتقويم المحلي يحتاج إلى العطل المحلية، بما فيها تلك التي تتغير كل سنة.</span></li>
+        </ul>
+        <p><span lang="en">The plan, the Gantt chart and the review are on <a href="https://github.com/adelmerad/software-project-planning" target="_blank" rel="noopener">GitHub</a>.</span>
+           <span lang="fr">Le planning, le diagramme de Gantt et la revue sont sur <a href="https://github.com/adelmerad/software-project-planning" target="_blank" rel="noopener">GitHub</a>.</span><span lang="ar">المخطط ومخطط Gantt والمراجعة موجودة على <a href="https://github.com/adelmerad/software-project-planning" target="_blank" rel="noopener">GitHub</a>.</span></p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="blog.html"><span lang="en">← All articles</span><span lang="fr">← Tous les articles</span><span lang="ar">→ كل المقالات</span></a>
+        <a class="btn ghost" href="https://github.com/adelmerad/software-project-planning" target="_blank" rel="noopener"><span lang="en">See the plan</span><span lang="fr">Voir le planning</span><span lang="ar">اطّلع على المخطط</span> <span class="arr">→</span></a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="wrap foot mono muted">
+    <span>© <span id="year">2026</span> Adel Merad</span>
+    <a href="./">adelmerad.github.io</a>
+  </footer>
+
+  <script src="main.js"></script>
+  <script data-goatcounter="https://adelmerad.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
